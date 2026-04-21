@@ -360,9 +360,9 @@ tr:last-child td{border-bottom:none}
         </div>
         <div class="form-group anim-field2">
           <div class="form-row"><label>Senha</label><span class="forgot">Esqueci minha senha</span></div>
-          <div style="position:relative">
-            <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin(document.getElementById('btn-login'))" style="padding-right:42px"/>
-            <button type="button" onclick="togglePass('login-pass','eye-login')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;display:flex;align-items:center">
+          <div style="position:relative;display:flex;align-items:center">
+            <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin(document.getElementById('btn-login'))" style="width:100%;padding-right:44px"/>
+            <button type="button" onclick="togglePass('login-pass','eye-login')" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;padding:4px;color:#9ca3af;line-height:0">
               <svg id="eye-login" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
@@ -382,7 +382,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <!-- TELA CADASTRO -->
-<div id="cadastro-screen" style="display:none;position:fixed;inset:0;background:#f4f6f9;z-index:100;overflow-y:auto">
+<div id="cadastro-screen" style="display:none;position:fixed;inset:0;background:#f4f6f9;z-index:100;overflow-y:auto;flex-direction:column">
   <div class="login-topbar">
     <div class="logo">
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" fill="#1a6fc4" opacity=".15"/><path d="M8 18l4-4 4 4 4-8" stroke="#1a6fc4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -395,7 +395,7 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="login-body">
     <div class="login-card">
-      <div class="login-left" style="animation:slideLeft .6s cubic-bezier(.22,1,.36,1) both">
+      <div class="login-left">
         <div>
           <div style="width:46px;height:46px;background:rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center">
             <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" fill="rgba(255,255,255,.25)"/><path d="M8 18l4-4 4 4 4-8" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -408,50 +408,50 @@ tr:last-child td{border-bottom:none}
           <div style="background:rgba(255,255,255,.18);border-radius:14px;padding:14px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,.15)"><div style="font-size:18px;margin-bottom:6px">🔒</div>100% Seguro</div>
         </div>
       </div>
-      <div class="login-right" style="animation:slideRight .6s cubic-bezier(.22,1,.36,1) .1s both">
+      <div class="login-right">
         <h2 style="font-size:22px;font-weight:700;margin-bottom:4px">Criar conta</h2>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Preencha seus dados para começar.</p>
-        <div id="cadastro-error" style="display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--red)">
+        <div id="cad-err" style="display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#dc2626">
           <svg width="14" height="14" fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-          <span id="cadastro-error-msg">Erro ao criar conta.</span>
+          <span id="cad-err-msg">Erro.</span>
         </div>
-        <div id="cadastro-success" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#15803d">
+        <div id="cad-ok" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#15803d">
           <svg width="14" height="14" fill="none" stroke="#15803d" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Conta criada! Verifique seu e-mail para confirmar o cadastro.</span>
+          <span id="cad-ok-msg">Conta criada!</span>
         </div>
-        <div class="form-group">
+        <div style="margin-bottom:14px">
           <label style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Nome completo</label>
-          <input type="text" id="cad-nome" placeholder="Seu nome completo" autocomplete="name"/>
+          <input type="text" id="cad-nome" placeholder="Seu nome completo" autocomplete="name" style="width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;background:#f9fafb;outline:none"/>
         </div>
-        <div class="form-group">
+        <div style="margin-bottom:14px">
           <label style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">E-mail</label>
-          <input type="email" id="cad-email" placeholder="nome@exemplo.com" autocomplete="email"/>
+          <input type="email" id="cad-email" placeholder="nome@exemplo.com" autocomplete="email" style="width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;background:#f9fafb;outline:none"/>
         </div>
-        <div class="form-group">
+        <div style="margin-bottom:14px">
           <label style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Senha</label>
-          <div style="position:relative">
-            <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" style="padding-right:42px"/>
-            <button type="button" onclick="togglePass('cad-senha','eye-cad')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;display:flex;align-items:center">
+          <div style="position:relative;display:flex;align-items:center">
+            <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:11px 44px 11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;background:#f9fafb;outline:none"/>
+            <button type="button" onclick="togglePass('cad-senha','eye-cad')" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;padding:4px;color:#9ca3af;line-height:0">
               <svg id="eye-cad" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
-        <div class="form-group">
+        <div style="margin-bottom:20px">
           <label style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:6px">Confirmar senha</label>
-          <div style="position:relative">
-            <input type="password" id="cad-confirma" placeholder="Repita a senha" style="padding-right:42px"/>
-            <button type="button" onclick="togglePass('cad-confirma','eye-cad2')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;display:flex;align-items:center">
+          <div style="position:relative;display:flex;align-items:center">
+            <input type="password" id="cad-confirma" placeholder="Repita a senha" style="width:100%;padding:11px 44px 11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;background:#f9fafb;outline:none"/>
+            <button type="button" onclick="togglePass('cad-confirma','eye-cad2')" style="position:absolute;right:12px;background:none;border:none;cursor:pointer;padding:4px;color:#9ca3af;line-height:0">
               <svg id="eye-cad2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
-        <button class="btn-login" id="btn-cadastrar" onclick="doCadastro(this)">
+        <button id="btn-cadastrar" onclick="doCadastro(this)" style="width:100%;padding:14px;background:linear-gradient(90deg,#1565c0,#1e88e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden">
           <span id="cad-text">Criar minha conta</span>
           <svg id="cad-arrow" width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          <div class="spinner-sm" id="cad-spinner"></div>
+          <div id="cad-spinner" style="display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></div>
         </button>
         <div style="margin-top:14px;text-align:center">
-          <p style="color:var(--text-muted);font-size:13px">Já tem conta? <span onclick="showLogin()" style="color:var(--blue);font-weight:600;cursor:pointer">Fazer login</span></p>
+          <p style="color:#6b7280;font-size:13px">Já tem conta? <span onclick="showLogin()" style="color:#1a6fc4;font-weight:600;cursor:pointer">Fazer login</span></p>
         </div>
       </div>
     </div>
@@ -501,13 +501,14 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function togglePass(inputId,eyeId){
   const inp=document.getElementById(inputId);
+  if(!inp)return;
   const eye=document.getElementById(eyeId);
-  if(inp.type==='password'){
-    inp.type='text';
-    eye.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-  }else{
-    inp.type='password';
-    eye.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  const isHidden=inp.type==='password';
+  inp.type=isHidden?'text':'password';
+  if(eye){
+    eye.innerHTML=isHidden
+      ?'<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      :'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
 }
 
@@ -564,15 +565,13 @@ async function doCadastro(btn){
       role:'user',
       plan:'Free',
       status:'Ativo'
-    });
+    },{onConflict:'id'});
+    suc.style.display='flex';
+    suc.querySelector('span').textContent='✅ Conta criada com sucesso! Você já pode fazer login.';
+  }else{
+    suc.style.display='flex';
+    suc.querySelector('span').textContent='✅ Verifique seu e-mail para confirmar o cadastro.';
   }
-
-  suc.style.display='flex';
-  document.getElementById('cad-nome').value='';
-  document.getElementById('cad-email').value='';
-  document.getElementById('cad-senha').value='';
-  document.getElementById('cad-confirma').value='';
-  setTimeout(()=>showLogin(),3000);
 }
 
 document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('active');}
