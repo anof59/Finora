@@ -724,6 +724,8 @@ async function loadTabelas(){
     <div class="page-header"><h1>Relatórios</h1><p>Histórico completo de todas as suas transações.</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn-export" onclick="exportCSV()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>CSV</button>
+      <button class="btn-export" style="color:#1d6f42;border-color:#1d6f42" onclick="exportExcel()"><svg width="13" height="13" fill="none" stroke="#1d6f42" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Excel</button>
+      <button class="btn-export" style="color:#2b579a;border-color:#2b579a" onclick="exportWord()"><svg width="13" height="13" fill="none" stroke="#2b579a" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Word</button>
       <button class="btn-primary" style="background:#e53e3e" onclick="exportPDF()"><svg width="13" height="13" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>PDF</button>
     </div>
   </div>
@@ -742,6 +744,69 @@ async function loadTabelas(){
 }
 
 function filterTx(q){document.querySelectorAll('#tx-table tbody tr').forEach(tr=>{tr.style.display=!q||tr.dataset.search?.includes(q.toLowerCase())?'':'none';});}
+
+function exportExcel(){
+  const txs=window._txData||[];
+  const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
+  const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
+  const header=['Data','Descrição','Categoria','Tipo','Valor'];
+  const rows=txs.map(t=>[fmtDate(t.date),t.description,t.category||'Geral',t.type==='income'?'Entrada':'Saída',parseFloat(t.amount).toFixed(2)]);
+  const summary=[['','','','',''],['RESUMO','','','',''],['Total Entradas','','','',inc.toFixed(2)],['Total Saídas','','','',exp.toFixed(2)],['Saldo','','','',(inc-exp).toFixed(2)]];
+  const all=[header,...rows,...summary];
+  const ws=all.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join('\t')).join('\n');
+  const blob=new Blob(['\ufeff'+ws],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='finora-relatorio.xls';a.click();
+  showToast('✅ Excel exportado!');
+}
+
+function exportWord(){
+  const txs=window._txData||[];
+  const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
+  const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
+  const rows=txs.map(t=>`
+    <tr style="border-bottom:1px solid #eee">
+      <td style="padding:6px 10px;font-size:12px;color:#666">${fmtDate(t.date)}</td>
+      <td style="padding:6px 10px;font-size:12px;font-weight:600">${t.description}</td>
+      <td style="padding:6px 10px;font-size:12px">${t.category||'Geral'}</td>
+      <td style="padding:6px 10px;font-size:12px;color:${t.type==='income'?'#16a34a':'#dc2626'};font-weight:700">${t.type==='income'?'Entrada':'Saída'}</td>
+      <td style="padding:6px 10px;font-size:12px;font-weight:700;color:${t.type==='income'?'#16a34a':'#dc2626'};text-align:right">${t.type==='income'?'+':'-'}${fmt(t.amount)}</td>
+    </tr>`).join('');
+  const html=`
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="UTF-8"><title>Finora - Relatório</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:40px;color:#1a1a2e}
+      h1{color:#1a6fc4;font-size:24px;margin-bottom:4px}
+      .subtitle{color:#6b7280;font-size:13px;margin-bottom:24px}
+      .summary{display:table;width:100%;margin-bottom:24px;border-collapse:collapse}
+      .sum-row{display:table-row}
+      .sum-cell{display:table-cell;padding:10px 16px;border:1px solid #e5e7eb;font-size:13px}
+      table{width:100%;border-collapse:collapse;margin-top:8px}
+      th{background:#1a6fc4;color:white;padding:10px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+      tr:nth-child(even){background:#f9fafb}
+      .footer{margin-top:32px;font-size:11px;color:#9ca3af;text-align:center}
+    </style></head>
+    <body>
+      <h1>Finora — Relatório Financeiro</h1>
+      <p class="subtitle">Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+      <table style="width:100%;margin-bottom:24px;border-collapse:collapse">
+        <tr>
+          <td style="padding:14px;border:1px solid #e5e7eb;background:#f0fdf4"><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700">Total Entradas</div><div style="font-size:20px;font-weight:800;color:#16a34a">${fmt(inc)}</div></td>
+          <td style="padding:14px;border:1px solid #e5e7eb;background:#fef2f2"><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700">Total Saídas</div><div style="font-size:20px;font-weight:800;color:#dc2626">${fmt(exp)}</div></td>
+          <td style="padding:14px;border:1px solid #e5e7eb;background:#eff6ff"><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700">Saldo Final</div><div style="font-size:20px;font-weight:800;color:${inc-exp>=0?'#16a34a':'#dc2626'}">${fmt(inc-exp)}</div></td>
+          <td style="padding:14px;border:1px solid #e5e7eb;background:#f9fafb"><div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:700">Transações</div><div style="font-size:20px;font-weight:800;color:#1a1a2e">${txs.length}</div></td>
+        </tr>
+      </table>
+      <table>
+        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="footer">Finora — Controle Financeiro Inteligente • iaanof.shop</p>
+    </body></html>`;
+  const blob=new Blob([html],{type:'application/msword;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='finora-relatorio.doc';a.click();
+  showToast('✅ Word exportado!');
+}
 
 function exportCSV(){
   const txs=window._txData||[];
