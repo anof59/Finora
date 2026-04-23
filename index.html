@@ -355,6 +355,25 @@ tr:hover td{background:#fafafa}
   </div>
 </div>
 
+<!-- MODAL ADICIONAR VALOR À META -->
+<div class="mo" id="mo-add-meta">
+  <div class="md">
+    <div class="mh"></div>
+    <div class="md-h"><h3 id="mo-add-meta-tit">Adicionar valor</h3><button class="mc" onclick="closeM('mo-add-meta')">✕</button></div>
+    <div class="md-b">
+      <div id="mo-add-meta-prog" style="margin-bottom:16px"></div>
+      <div class="mf"><label>Valor a adicionar (R$)</label><input id="add-meta-val" type="number" step="0.01" min="0.01" placeholder="0,00"/></div>
+      <div style="background:var(--blue-lt);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--blue);margin-top:4px">
+        ℹ️ Este valor atualiza apenas o progresso da meta, sem afetar seu saldo ou transações.
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="bc" onclick="closeM('mo-add-meta')">Cancelar</button>
+      <button class="bs2 g" id="btn-sv-add-meta" onclick="saveAddMeta()"><div class="ss" id="sp-add-meta"></div>Adicionar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL INVEST -->
 <div class="mo" id="mo-inv">
   <div class="md">
@@ -597,6 +616,7 @@ const IC={
   bar:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
   cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
   set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
+  ai:'<path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="18" cy="6" r="3" fill="currentColor"/>',
   sh:'<path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7z"/>',
   us:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
   dl:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
@@ -604,9 +624,10 @@ const IC={
 const icon=k=>`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">${IC[k]||''}</svg>`;
 
 // NAVS
-const uNav=[{s:'Menu',items:[{id:'dashboard',l:'Dashboard',i:'grid'},{id:'transacoes',l:'Transações',i:'card'},{id:'metas',l:'Metas',i:'target'},{id:'investimentos',l:'Investimentos',i:'trend'},{id:'relatorios',l:'Relatórios',i:'bar'},{id:'planejamento',l:'Planejamento',i:'cal'},{id:'config-u',l:'Configurações',i:'set'}]}];
+const uNav=[{s:'Menu',items:[{id:'dashboard',l:'Dashboard',i:'grid'},{id:'transacoes',l:'Transações',i:'card'},{id:'metas',l:'Metas',i:'target'},{id:'investimentos',l:'Investimentos',i:'trend'},{id:'relatorios',l:'Relatórios',i:'bar'},{id:'planejamento',l:'Planejamento',i:'cal'},{id:'assistente',l:'Assistente IA',i:'ai'},{id:'config-u',l:'Configurações',i:'set'}]}];
 const aN=[{s:'Admin',items:[{id:'adm-dash',l:'Dashboard',i:'grid'},{id:'adm-users',l:'Usuários',i:'us'},{id:'adm-plans',l:'Planos & Assinaturas',i:'card'},{id:'adm-fin',l:'Financeiro',i:'dl'},{id:'adm-rep',l:'Relatórios',i:'bar'},{id:'adm-cfg',l:'Configurações',i:'set'}]}];
-const TITLES={dashboard:'Dashboard',transacoes:'Transações',metas:'Metas & Objetivos',investimentos:'Investimentos',relatorios:'Relatórios',planejamento:'Planejamento','config-u':'Configurações','adm-dash':'Dashboard Admin','adm-users':'Usuários','adm-plans':'Planos & Assinaturas','adm-fin':'Financeiro','adm-rep':'Relatórios','adm-cfg':'Configurações'};
+const TITLES={dashboard:'Dashboard',transacoes:'Transações',metas:'Metas & Objetivos',investimentos:'Investimentos',relatorios:'Relatórios',  assistente:'Assistente IA',
+  planejamento:'Planejamento','config-u':'Configurações','adm-dash':'Dashboard Admin','adm-users':'Usuários','adm-plans':'Planos & Assinaturas','adm-fin':'Financeiro','adm-rep':'Relatórios','adm-cfg':'Configurações'};
 
 function launchApp(){
   const isAdm=CP?.role==='admin';
@@ -633,7 +654,7 @@ function nav2(id,el){
   charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];
   document.getElementById('tb-tit').textContent=TITLES[id]||id;
   document.getElementById('mc').innerHTML='<div class="ls"><div class="spl"></div><span class="lt">Carregando...</span></div>';
-  const pgs={dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,relatorios:pRel,planejamento:pPlan,'config-u':pCfgU,'adm-dash':pAdmDash,'adm-users':pAdmUsers,'adm-plans':pAdmPlans,'adm-fin':pAdmFin,'adm-rep':pAdmRep,'adm-cfg':pAdmCfg};
+  const pgs={dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,relatorios:pRel,planejamento:pPlan,'config-u':pCfgU,assistente:pAssistente,'adm-dash':pAdmDash,'adm-users':pAdmUsers,'adm-plans':pAdmPlans,'adm-fin':pAdmFin,'adm-rep':pAdmRep,'adm-cfg':pAdmCfg};
   (pgs[id]||pDash)();
 }
 
@@ -708,21 +729,56 @@ async function delInv(id){if(!confirm('Excluir ativo?'))return;await SB.from('in
 // ===========================
 async function pDash(){
   const [{data:txs},{data:inv},{data:goals}]=await Promise.all([SB.from('transactions').select('*').eq('user_id',CU.id),SB.from('investments').select('value').eq('user_id',CU.id),SB.from('goals').select('*').eq('user_id',CU.id)]);
-  const now=new Date();const cm=now.getMonth();const cy=now.getFullYear();
-  // FIX: usa T12:00:00 para evitar problema de timezone na filtragem
-  const txM=(txs||[]).filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===cm&&d.getFullYear()===cy;});
-  const txP=(txs||[]).filter(t=>{const d=new Date(t.date+'T12:00:00');const pm=cm===0?11:cm-1;const py=cm===0?cy-1:cy;return d.getMonth()===pm&&d.getFullYear()===py;});
-  const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const exp=(txs||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const incM=txM.filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const expM=txM.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const expP=txP.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const invested=(inv||[]).reduce((s,i)=>s+parseFloat(i.value),0);
-  const bal=inc-exp;const pct=incM>0?Math.round(expM/incM*100):0;const varE=expP>0?Math.round((expM-expP)/expP*100):0;
+
+  // Data local sem timezone — mesmo padrão dos Relatórios
+  const now=new Date();
+  const cy=now.getFullYear();
+  const cm=now.getMonth()+1; // 1-12
+
+  // Filtra pelo mês/ano extraindo YYYY e MM direto da string salva (YYYY-MM-DD)
+  function isMesAtual(dateStr){
+    if(!dateStr)return false;
+    const s=String(dateStr).split('T')[0]; // garante só a parte da data
+    const [y,m]=s.split('-').map(Number);
+    return y===cy&&m===cm;
+  }
+  function isMesAnterior(dateStr){
+    if(!dateStr)return false;
+    const s=String(dateStr).split('T')[0];
+    const [y,m]=s.split('-').map(Number);
+    const pm=cm===1?12:cm-1;const py=cm===1?cy-1:cy;
+    return y===py&&m===pm;
+  }
+
+  const allTxs=txs||[];
+  const txM=allTxs.filter(t=>isMesAtual(t.date));
+  const txP=allTxs.filter(t=>isMesAnterior(t.date));
+
+  // Aceita tanto 'income'/'expense' quanto 'entrada'/'saida'
+  const isInc=t=>t.type==='income'||t.type==='entrada';
+  const isExp=t=>t.type==='expense'||t.type==='saida';
+
+  const inc=allTxs.filter(isInc).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const exp=allTxs.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const incM=txM.filter(isInc).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const expM=txM.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const expP=txP.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const invested=Math.max(0,(inv||[]).reduce((s,i)=>s+parseFloat(i.value||0),0));
+  const bal=inc-exp;
+  const pct=incM>0?Math.round(expM/incM*100):0;
+  const varE=expP>0?Math.round((expM-expP)/expP*100):0;
   const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const iY=Array(12).fill(0),eY=Array(12).fill(0);
-  (txs||[]).forEach(t=>{if(new Date(t.date+'T12:00:00').getFullYear()===cy){const m=new Date(t.date+'T12:00:00').getMonth();if(t.type==='income')iY[m]+=parseFloat(t.amount);else eY[m]+=parseFloat(t.amount);}});
-  const recent=(txs||[]).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  allTxs.forEach(t=>{
+    const s=String(t.date).split('T')[0];
+    const[y,m]=s.split('-').map(Number);
+    if(y===cy){
+      const idx=m-1; // 0-based para o array
+      if(isInc(t))iY[idx]+=parseFloat(t.amount||0);
+      else if(isExp(t))eY[idx]+=parseFloat(t.amount||0);
+    }
+  });
+  const recent=allTxs.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const nome=CP?.full_name?.split(' ')[0]||'você';
   const ins=[];
   if(bal>0&&varE<0)ins.push({tp:'suc',i:'🎉',t:'Parabéns!',x:`Você economizou ${Math.abs(varE)}% a mais que o mês passado. Continue assim!`});
@@ -799,7 +855,10 @@ async function pTx(){
 }
 
 async function pMetas(){
-  const [{data:goals},{data:txs}]=await Promise.all([SB.from('goals').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),SB.from('transactions').select('amount,type').eq('user_id',CU.id)]);
+  const [{data:goals},{data:txs}]=await Promise.all([
+    SB.from('goals').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),
+    SB.from('transactions').select('amount,type,date').eq('user_id',CU.id)
+  ]);
   const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
   const exp=(txs||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
   const sobra=inc-exp;const tG=(goals||[]).reduce((s,g)=>s+parseFloat(g.target_amount),0);const sG=(goals||[]).reduce((s,g)=>s+parseFloat(g.current_amount),0);
