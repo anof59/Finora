@@ -700,12 +700,18 @@ async function saveTx(){
 
 async function saveMeta(){
   const t=document.getElementById('m-t').value.trim(),tg=parseFloat(document.getElementById('m-tg').value),cu=parseFloat(document.getElementById('m-cu').value)||0,c=document.getElementById('m-c').value;
-  if(!t){toast('Informe o nome!');return;}if(!tg||tg<=0){toast('Informe o valor!');return;}
+  if(!t){toast('Informe o nome!');return;}if(!tg||tg<=0){toast('Informe o valor total da meta!');return;}
   const btn=document.getElementById('btn-sv-meta');btn.disabled=true;setSpin('sp-meta',true);
   const {error}=await SB.from('goals').insert({user_id:CU.id,title:t,target_amount:tg,current_amount:cu,color:c});
   btn.disabled=false;setSpin('sp-meta',false);
   if(error){toast('Erro: '+error.message);return;}
-  closeM('mo-meta');['m-t','m-tg','m-cu'].forEach(id=>document.getElementById(id).value='');toast('✅ Meta criada!');pMetas();
+  closeM('mo-meta');
+  document.getElementById('m-t').value='';
+  document.getElementById('m-tg').value='';
+  document.getElementById('m-cu').value='';
+  document.getElementById('m-d').value='';
+  toast('✅ Meta criada!');
+  await pMetas();
 }
 
 async function saveInv(){
