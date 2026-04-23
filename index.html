@@ -76,18 +76,29 @@ body{display:flex;background:var(--gray-bg);color:var(--text)}
 .sidebar-overlay.active{display:block}
 
 /* SIDEBAR */
-.sidebar-logo{padding:16px 14px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
-.logo-text{font-size:16px;font-weight:700;color:var(--blue)}
-.logo-sub{font-size:9px;color:var(--text-muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
-nav{flex:1;padding:10px 0;overflow-y:auto}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-muted);border-radius:8px;margin:1px 8px;transition:.15s;user-select:none}
-.nav-item:hover{background:#f3f4f6;color:var(--text)}
-.nav-item.active{background:var(--blue);color:white}
-.sidebar-user{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-.uname{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
-.urole{font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
-.sidebar-extra{padding:6px 8px;border-top:1px solid var(--border)}
+.sidebar{background:#f8fafc}
+.sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border)}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#1565c0,#1e88e5);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-text{font-size:17px;font-weight:800;color:#0d1b2e;letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:var(--text-muted);font-weight:500;margin-top:1px}
+.plan-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;background:#e0f2fe;color:#0369a1;margin-top:3px}
+nav{flex:1;padding:10px 0 6px;overflow-y:auto}
+.nav-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#b0bac5;padding:10px 18px 4px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#64748b;border-radius:10px;margin:1px 10px;transition:background .18s,color .18s,box-shadow .18s;user-select:none;position:relative}
+.nav-item:hover{background:#eef2f7;color:#1a1a2e}
+.nav-item.active{background:linear-gradient(135deg,#1565c0 0%,#1e88e5 100%);color:#fff;box-shadow:0 3px 10px rgba(30,136,229,.28)}
+.nav-item.active svg{stroke:#fff}
+.nav-item svg{flex-shrink:0;transition:stroke .18s}
+.nav-ai-badge{margin-left:auto;background:#10b981;color:#fff;font-size:8px;font-weight:700;letter-spacing:.3px;padding:2px 6px;border-radius:20px;text-transform:uppercase}
+.nav-divider{height:1px;background:var(--border);margin:8px 14px}
+.sidebar-user{padding:14px 14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#29b6f6);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;box-shadow:0 2px 6px rgba(30,136,229,.3)}
+.uname{font-size:13px;font-weight:700;color:#0d1b2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.urole{font-size:10px;color:#94a3b8;font-weight:500;margin-top:1px}
+.sidebar-extra{padding:4px 10px 2px;border-top:1px solid var(--border)}
+.sidebar-extra .nav-item{color:#94a3b8;font-size:12px}
+.sidebar-extra .nav-item:hover{background:#fee2e2;color:#dc2626}
+.sidebar-extra .nav-item:hover svg{stroke:#dc2626}
 
 /* COMPONENTS */
 .page-header{margin-bottom:18px}
@@ -262,23 +273,34 @@ tr:last-child td{border-bottom:none}
 <!-- APP -->
 <div id="app" style="display:none;flex:1;height:100%">
   <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
-  <div class="sidebar" id="sidebar">
+      <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" fill="#1a6fc4" opacity=".15"/><path d="M8 18l4-4 4 4 4-8" stroke="#1a6fc4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div><div class="logo-text">Finora</div><div class="logo-sub" id="sidebar-role-label">User Panel</div></div>
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M7 18l4-5 4 5 5-9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Finora</div>
+        <div class="logo-sub" id="sidebar-role-label">User Panel</div>
+        <div class="plan-badge" id="sidebar-plan-badge">Free</div>
+      </div>
     </div>
     <nav id="sidebar-nav"></nav>
+    <div class="nav-divider"></div>
     <div class="sidebar-extra">
+      <div class="nav-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configurações
+      </div>
       <div class="nav-item" onclick="doLogout()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         Sair
       </div>
     </div>
     <div class="sidebar-user">
       <div class="avatar" id="sidebar-avatar">A</div>
-      <div>
+      <div style="min-width:0">
         <div class="uname" id="sidebar-name">Usuário</div>
-        <div class="urole" id="sidebar-role-tag">User</div>
+        <div class="urole">Plano <span id="sidebar-role-tag">Free</span></div>
       </div>
     </div>
   </div>
@@ -352,21 +374,32 @@ async function doLogout(){
   document.getElementById('app').style.display='none';
 }
 
-const userNav=[{id:'dashboard',label:'Dashboard',icon:'grid'},{id:'entradas',label:'Entradas',icon:'plus-circle'},{id:'gastos',label:'Gastos',icon:'minus-circle'},{id:'metas',label:'Metas',icon:'target'},{id:'investimentos',label:'Investimentos',icon:'trending-up'},{id:'analise',label:'Análise',icon:'bar-chart'},{id:'tabelas',label:'Tabelas',icon:'table'},{id:'assistente',label:'Assistente IA',icon:'shield'}];
+const userNav=[
+  {id:'dashboard',label:'Dashboard',icon:'grid',group:'main'},
+  {id:'entradas',label:'Transações',icon:'bar-chart',group:'main'},
+  {id:'metas',label:'Metas',icon:'target',group:'main'},
+  {id:'investimentos',label:'Investimentos',icon:'trending-up',group:'main'},
+  {id:'analise',label:'Análise',icon:'plus-circle',group:'main'},
+  {id:'tabelas',label:'Tabelas',icon:'table',group:'main'},
+  {id:'assistente',label:'Assistente IA',icon:'shield',group:'main',badge:'Novo'},
+];
 const adminNav=[{id:'painel-admin',label:'Painel Admin',icon:'shield'},{id:'gestao-usuarios',label:'Gestão de Usuários',icon:'users'},{id:'analise-usuarios',label:'Análise de Usuários',icon:'bar-chart'},{id:'dashboard-usuario',label:'Dashboard Usuário',icon:'grid'}];
 
 function setupApp(){
   const isAdmin=currentProfile?.role==='admin';
   const nav=isAdmin?adminNav:userNav;
   const nome=currentProfile?.full_name||currentUser?.email?.split('@')[0]||'Usuário';
+  const plan=currentProfile?.plan||'Free';
   document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin Console':'User Panel';
-  document.getElementById('sidebar-role-tag').textContent=isAdmin?'Admin':'User';
+  document.getElementById('sidebar-role-tag').textContent=isAdmin?'Admin':plan;
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
+  const planBadgeEl=document.getElementById('sidebar-plan-badge');
+  if(planBadgeEl){planBadgeEl.textContent=plan;planBadgeEl.className='plan-badge';if(plan==='Pro')planBadgeEl.style.cssText='background:#fef3c7;color:#92400e';else if(plan==='Vitalício'||plan==='Premium')planBadgeEl.style.cssText='background:#f3e8ff;color:#6b21a8';}
   const el=document.getElementById('sidebar-nav');
-  el.innerHTML=nav.map((n,i)=>`<div class="nav-item${i===0?' active':''}" onclick="navigate('${n.id}',this)">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">${iconPath(n.icon)}</svg>${n.label}</div>`).join('');
-  navigate(nav[0].id,el.firstChild);
+  el.innerHTML=`<div class="nav-section-label">Menu principal</div>`+nav.map((n,i)=>`<div class="nav-item${i===0?' active':''}" onclick="navigate('${n.id}',this)">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">${iconPath(n.icon)}</svg>${n.label}${n.badge?`<span class="nav-ai-badge">${n.badge}</span>`:''}</div>`).join('');
+  navigate(nav[0].id,el.querySelector('.nav-item'));
 }
 
 const pageTitles={assistente:'Assistente Financeiro IA',dashboard:'Seu controle financeiro',entradas:'Entradas & Renda',gastos:'Gastos & Despesas',metas:'Metas & Objetivos',investimentos:'Investimentos & Patrimônio',analise:'Inteligência Financeira',tabelas:'Dados Consolidados','painel-admin':'Painel Admin','gestao-usuarios':'Gestão de Usuários','analise-usuarios':'Análise de Usuários','dashboard-usuario':'Dashboard Usuário'};
