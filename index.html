@@ -759,43 +759,163 @@ async function pDash(){
 }
 
 async function pTx(){
-  const {data:txs}=await SB.from('transactions').select('*').eq('user_id',CU.id).order('date',{ascending:false});
-  let tab='all',cat='',srch='';
-  const totI=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const totE=(txs||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const cats=[...new Set((txs||[]).map(t=>t.category||'Geral'))].sort();
-  function render(){
-    let f=txs||[];
-    if(tab==='income')f=f.filter(t=>t.type==='income');
-    else if(tab==='expense')f=f.filter(t=>t.type==='expense');
-    if(cat)f=f.filter(t=>(t.category||'Geral')===cat);
-    if(srch)f=f.filter(t=>t.description.toLowerCase().includes(srch.toLowerCase())||(t.category||'').toLowerCase().includes(srch.toLowerCase()));
-    const el=document.getElementById('tx-list');if(!el)return;
-    el.innerHTML=f.length?`<div class="txl">${f.map(t=>`<div class="txi"><div class="txiw ${t.type==='income'?'in':'out'}">${t.type==='income'?'💚':'🔴'}</div><div class="txin"><div class="txn">${t.description}</div><div class="txm">${fmtD(t.date)} · <span class="bg ${t.type==='income'?'gn':'rd'}">${t.category||'Geral'}</span></div></div><div class="txa ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div><button class="td2" onclick="delTx('${t.id}',pTx)">🗑</button></div>`).join('')}</div>`
-    :`<div class="es"><span class="ei">🔍</span><h3>Nenhuma transação</h3><p>Tente ajustar os filtros ou adicione uma nova transação.</p><button class="bp" onclick="openTx()">+ Nova Transação</button></div>`;
+  try{
+    const { data: txs, error } = await SB
+      .from('transactions')
+      .select('*')
+      .eq('user_id', CU.id)
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+
+    const list = txs || [];
+    const totI = list
+      .filter(t => t.type === 'income')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
+
+    const totE = list
+      .filter(t => t.type === 'expense')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
+
+    const cats = [...new Set(list.map(t => t.category || 'Geral'))].sort();
+
+    let tab = 'all';
+    let cat = '';
+    let srch = '';
+
+    function render(){
+      let f = [...list];
+
+      if (tab === 'income') f = f.filter(t => t.type === 'income');
+      else if (tab === 'expense') f = f.filter(t => t.type === 'expense');
+
+      if (cat) {
+        f = f.filter(t => (t.category || 'Geral') === cat);
+      }
+
+      if (srch) {
+        const q = srch.toLowerCase();
+        f = f.filter(t =>
+          String(t.description || '').toLowerCase().includes(q) ||
+          String(t.category || '').toLowerCase().includes(q)
+        );
+      }
+
+      const el = document.getElementById('tx-list');
+      if (!el) return;
+
+      el.innerHTML = f.length
+        ? `<div class="txl">${f.map(t => `
+            <div class="txi">
+              <div class="txiw ${t.type === 'income' ? 'in' : 'out'}">
+                ${t.type === 'income' ? '💚' : '🔴'}
+              </div>
+              <div class="txin">
+                <div class="txn">${t.description || 'Sem descrição'}</div>
+                <div class="txm">
+                  ${fmtD(t.date)} ·
+                  <span class="bg ${t.type === 'income' ? 'gn' : 'rd'}">
+                    ${t.category || 'Geral'}
+                  </span>
+                </div>
+              </div>
+              <div class="txa ${t.type}">
+                ${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}
+              </div>
+              <button class="td2" onclick="delTx('${t.id}', pTx)">🗑</button>
+            </div>
+          `).join('')}</div>`
+        : `<div class="es">
+            <span class="ei">🔍</span>
+            <h3>Nenhuma transação</h3>
+            <p>Tente ajustar os filtros ou adicione uma nova transação.</p>
+            <button class="bp" onclick="openTx()">+ Nova Transação</button>
+          </div>`;
+    }
+
+    document.getElementById('mc').innerHTML = `
+      <div class="pa">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:20px;font-weight:800;letter-spacing:-.3px">Transações</div>
+            <div style="font-size:13px;color:var(--tm)">${list.length} registradas</div>
+          </div>
+          <button class="bp" onclick="openTx()">
+            <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nova Transação
+          </button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+          <div style="background:var(--green-lt);border:1px solid #bbf7d0;border-radius:var(--r);padding:14px">
+            <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.4px">Total Entradas</div>
+            <div style="font-size:20px;font-weight:800;color:var(--green);margin-top:4px">${fmt(totI)}</div>
+          </div>
+          <div style="background:var(--red-lt);border:1px solid #fecaca;border-radius:var(--r);padding:14px">
+            <div style="font-size:11px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.4px">Total Saídas</div>
+            <div style="font-size:20px;font-weight:800;color:var(--red);margin-top:4px">${fmt(totE)}</div>
+          </div>
+        </div>
+
+        <div class="tbar">
+          <button class="tbb active" onclick="setTab('all',this)">Todas (${list.length})</button>
+          <button class="tbb" onclick="setTab('income',this)">Entradas (${list.filter(t => t.type === 'income').length})</button>
+          <button class="tbb" onclick="setTab('expense',this)">Saídas (${list.filter(t => t.type === 'expense').length})</button>
+        </div>
+
+        <div class="fr2">
+          <div class="sf" style="flex:1">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input id="tx-srch" placeholder="Buscar..." oninput="txSrch(this.value)"/>
+          </div>
+          <select class="fs" onchange="txCat(this.value)">
+            <option value="">Todas categorias</option>
+            ${cats.map(c => `<option>${c}</option>`).join('')}
+          </select>
+        </div>
+
+        <div id="tx-list"></div>
+      </div>
+    `;
+
+    window.setTab = (t, el) => {
+      tab = t;
+      document.querySelectorAll('.tbb').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    };
+
+    window.txSrch = v => {
+      srch = v;
+      render();
+    };
+
+    window.txCat = v => {
+      cat = v;
+      render();
+    };
+
+    render();
+
+  } catch (e) {
+    console.error('Erro em pTx:', e);
+    document.getElementById('mc').innerHTML = `
+      <div class="pa">
+        <div class="es">
+          <span class="ei">⚠️</span>
+          <h3>Não foi possível carregar suas transações.</h3>
+          <p>Verifique sua conexão e tente novamente.</p>
+          <button class="bp" onclick="pTx()">Tentar novamente</button>
+        </div>
+      </div>
+    `;
   }
-  document.getElementById('mc').innerHTML=`<div class="pa">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
-    <div><div style="font-size:20px;font-weight:800;letter-spacing:-.3px">Transações</div><div style="font-size:13px;color:var(--tm)">${(txs||[]).length} registradas</div></div>
-    <button class="bp" onclick="openTx()"><svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nova Transação</button>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
-    <div style="background:var(--green-lt);border:1px solid #bbf7d0;border-radius:var(--r);padding:14px"><div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.4px">Total Entradas</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:4px">${fmt(totI)}</div></div>
-    <div style="background:var(--red-lt);border:1px solid #fecaca;border-radius:var(--r);padding:14px"><div style="font-size:11px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.4px">Total Saídas</div><div style="font-size:20px;font-weight:800;color:var(--red);margin-top:4px">${fmt(totE)}</div></div>
-  </div>
-  <div class="tbar">
-    <button class="tbb active" onclick="setTab('all',this)">Todas (${(txs||[]).length})</button>
-    <button class="tbb" onclick="setTab('income',this)">Entradas (${(txs||[]).filter(t=>t.type==='income').length})</button>
-    <button class="tbb" onclick="setTab('expense',this)">Saídas (${(txs||[]).filter(t=>t.type==='expense').length})</button>
-  </div>
-  <div class="fr2">
-    <div class="sf" style="flex:1"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="tx-srch" placeholder="Buscar..." oninput="txSrch(this.value)"/></div>
-    <select class="fs" onchange="txCat(this.value)"><option value="">Todas categorias</option>${cats.map(c=>`<option>${c}</option>`).join('')}</select>
-  </div>
-  <div id="tx-list"></div>
-  </div>`;
-  window.setTab=(t,el)=>{tab=t;document.querySelectorAll('.tbb').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();};
-  window.txSrch=v=>{srch=v;render();};window.txCat=v=>{cat=v;render();};render();
 }
 
 async function pMetas(){
