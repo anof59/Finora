@@ -708,66 +708,115 @@ async function delInv(id){if(!confirm('Excluir ativo?'))return;await SB.from('in
 // ===========================
 async function pDash(){
   try{
-    const [{data:txs, error:txErr},{data:inv, error:invErr},{data:goals, error:goalErr}] = await Promise.all([
-      SB.from('transactions').select('*').eq('user_id',CU.id),
-      SB.from('investments').select('value').eq('user_id',CU.id),
-      SB.from('goals').select('*').eq('user_id',CU.id)
+    const [
+      { data: txs, error: txErr },
+      { data: inv, error: invErr },
+      { data: goals, error: goalsErr }
+    ] = await Promise.all([
+      SB.from('transactions').select('*').eq('user_id', CU.id),
+      SB.from('investments').select('value').eq('user_id', CU.id),
+      SB.from('goals').select('*').eq('user_id', CU.id)
     ]);
 
-    if(txErr) throw txErr;
-    if(invErr) throw invErr;
-    if(goalErr) throw goalErr;
+    if (txErr) throw txErr;
+    if (invErr) throw invErr;
+    if (goalsErr) throw goalsErr;
 
     const list = txs || [];
     const invList = inv || [];
     const goalsList = goals || [];
 
     const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const prevDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
-    const prevMonth = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+    const currentYear = now.getFullYear();
+    const currentMonthNum = now.getMonth() + 1;
+    const prevDate = new Date(currentYear, now.getMonth() - 1, 1);
+    const prevYear = prevDate.getFullYear();
+    const prevMonthNum = prevDate.getMonth() + 1;
 
-    const txM = list.filter(t => String(t.date || '').slice(0,7) === currentMonth);
-    const txP = list.filter(t => String(t.date || '').slice(0,7) === prevMonth);
+    function normType(t){
+      const v = String(t || '').toLowerCase().trim();
+      if (['income','entrada','ganho','ganhos','receita'].includes(v)) return 'income';
+      if (['expense','saida','saída','gasto','gastos','despesa','despesas'].includes(v)) return 'expense';
+      return v;
+    }
+
+    function getYearMonth(d){
+      const s = String(d || '').trim();
+
+      // YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss
+      if (/^\d{4}-\d{2}/.test(s)) {
+        return {
+          y: parseInt(s.slice(0,4), 10),
+          m: parseInt(s.slice(5,7), 10)
+        };
+      }
+
+      // DD/MM/YYYY
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+        const p = s.split('/');
+        return {
+          y: parseInt(p[2], 10),
+          m: parseInt(p[1], 10)
+        };
+      }
+
+      // fallback
+      const dt = new Date(s);
+      if (!isNaN(dt.getTime())) {
+        return {
+          y: dt.getFullYear(),
+          m: dt.getMonth() + 1
+        };
+      }
+
+      return { y: 0, m: 0 };
+    }
+
+    const txM = list.filter(t => {
+      const ym = getYearMonth(t.date);
+      return ym.y === currentYear && ym.m === currentMonthNum;
+    });
+
+    const txP = list.filter(t => {
+      const ym = getYearMonth(t.date);
+      return ym.y === prevYear && ym.m === prevMonthNum;
+    });
 
     const inc = list
-      .filter(t => t.type === 'income')
-      .reduce((s,t) => s + parseFloat(t.amount || 0), 0);
+      .filter(t => normType(t.type) === 'income')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
 
     const exp = list
-      .filter(t => t.type === 'expense')
-      .reduce((s,t) => s + parseFloat(t.amount || 0), 0);
+      .filter(t => normType(t.type) === 'expense')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
 
     const incM = txM
-      .filter(t => t.type === 'income')
-      .reduce((s,t) => s + parseFloat(t.amount || 0), 0);
+      .filter(t => normType(t.type) === 'income')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
 
     const expM = txM
-      .filter(t => t.type === 'expense')
-      .reduce((s,t) => s + parseFloat(t.amount || 0), 0);
+      .filter(t => normType(t.type) === 'expense')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
 
     const expP = txP
-      .filter(t => t.type === 'expense')
-      .reduce((s,t) => s + parseFloat(t.amount || 0), 0);
+      .filter(t => normType(t.type) === 'expense')
+      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
 
-    const invested = invList.reduce((s,i) => s + parseFloat(i.value || 0), 0);
+    const invested = invList.reduce((s, i) => s + parseFloat(i.value || 0), 0);
     const bal = inc - exp;
     const pct = incM > 0 ? Math.round((expM / incM) * 100) : 0;
     const varE = expP > 0 ? Math.round(((expM - expP) / expP) * 100) : 0;
 
     const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const currentYear = now.getFullYear();
     const iY = Array(12).fill(0);
     const eY = Array(12).fill(0);
 
     list.forEach(t => {
-      const ds = String(t.date || '');
-      const y = parseInt(ds.slice(0,4), 10);
-      const m = parseInt(ds.slice(5,7), 10) - 1;
-
-      if(y === currentYear && m >= 0 && m < 12){
-        if(t.type === 'income') iY[m] += parseFloat(t.amount || 0);
-        if(t.type === 'expense') eY[m] += parseFloat(t.amount || 0);
+      const ym = getYearMonth(t.date);
+      const idx = ym.m - 1;
+      if (ym.y === currentYear && idx >= 0 && idx < 12) {
+        if (normType(t.type) === 'income') iY[idx] += parseFloat(t.amount || 0);
+        if (normType(t.type) === 'expense') eY[idx] += parseFloat(t.amount || 0);
       }
     });
 
@@ -778,7 +827,7 @@ async function pDash(){
     const nome = CP?.full_name?.split(' ')[0] || 'você';
     const ins = [];
 
-    if(bal > 0 && varE < 0){
+    if (bal > 0 && varE < 0) {
       ins.push({
         tp:'suc',
         i:'🎉',
@@ -787,14 +836,14 @@ async function pDash(){
       });
     }
 
-    if(pct >= 80){
+    if (pct >= 80) {
       ins.push({
         tp:'err',
         i:'⚠️',
         t:'Orçamento crítico',
         x:`Gastos em ${pct}% da renda. Revise suas despesas urgentemente.`
       });
-    } else if(pct >= 60){
+    } else if (pct >= 60) {
       ins.push({
         tp:'wrn',
         i:'📊',
@@ -803,26 +852,26 @@ async function pDash(){
       });
     }
 
-    if(invested === 0 && bal > 500){
+    if (invested === 0 && bal > 500) {
       ins.push({
         tp:'info',
         i:'💡',
         t:'Que tal investir?',
-        x:`Você tem ${fmt(bal)} disponível. Com Selic a 10,75%, seu dinheiro pode render mais.`
+        x:`Você tem ${fmt(bal)} disponível. Seu dinheiro pode render mais.`
       });
     }
 
     const topCat = Object.entries(
       txM
-        .filter(t => t.type === 'expense')
-        .reduce((a,t) => {
+        .filter(t => normType(t.type) === 'expense')
+        .reduce((a, t) => {
           const c = t.category || 'Geral';
           a[c] = (a[c] || 0) + parseFloat(t.amount || 0);
           return a;
         }, {})
     ).sort((a,b) => b[1] - a[1])[0];
 
-    if(topCat){
+    if (topCat) {
       ins.push({
         tp:'info',
         i:'🔍',
@@ -831,7 +880,7 @@ async function pDash(){
       });
     }
 
-    if(incM > expM && incM > 0){
+    if (incM > expM && incM > 0) {
       ins.push({
         tp:'suc',
         i:'💰',
@@ -851,6 +900,10 @@ async function pDash(){
           <span>↓ ${fmt(expM)}</span>
           <span>📈 ${fmt(invested)}</span>
         </div>
+      </div>
+
+      <div style="background:#fff8e1;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:16px">
+        Debug: total transações = ${list.length} | mês atual = ${txM.length} | ganhos mês = ${fmt(incM)} | gastos mês = ${fmt(expM)}
       </div>
 
       <div class="sg">
@@ -930,12 +983,12 @@ async function pDash(){
       <div class="txl">
         ${recent.length ? recent.map(t => `
           <div class="txi">
-            <div class="txiw ${t.type === 'income' ? 'in' : 'out'}">${t.type === 'income' ? '💚' : '🔴'}</div>
+            <div class="txiw ${normType(t.type) === 'income' ? 'in' : 'out'}">${normType(t.type) === 'income' ? '💚' : '🔴'}</div>
             <div class="txin">
               <div class="txn">${t.description || 'Sem descrição'}</div>
               <div class="txm">${fmtD(t.date)} · ${t.category || 'Geral'}</div>
             </div>
-            <div class="txa ${t.type}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
+            <div class="txa ${normType(t.type)}">${normType(t.type) === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
           </div>
         `).join('') : '<div style="padding:28px;text-align:center;color:var(--tm);font-size:13px">Nenhuma transação ainda.</div>'}
       </div>
@@ -943,7 +996,7 @@ async function pDash(){
 
     setTimeout(() => {
       const c = document.getElementById('c-line');
-      if(!c) return;
+      if (!c) return;
 
       charts.push(new Chart(c,{
         type:'line',
@@ -1000,6 +1053,7 @@ async function pDash(){
     `;
   }
 }
+
 async function pMetas(){
   const [{data:goals},{data:txs}]=await Promise.all([SB.from('goals').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),SB.from('transactions').select('amount,type').eq('user_id',CU.id)]);
   const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
@@ -1414,4 +1468,3 @@ function expPDF(){const t=window._txData||[];const inc=t.filter(x=>x.type==='inc
 </script>
 </body>
 </html>
-
