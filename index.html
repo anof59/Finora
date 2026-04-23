@@ -708,21 +708,56 @@ async function delInv(id){if(!confirm('Excluir ativo?'))return;await SB.from('in
 // ===========================
 async function pDash(){
   const [{data:txs},{data:inv},{data:goals}]=await Promise.all([SB.from('transactions').select('*').eq('user_id',CU.id),SB.from('investments').select('value').eq('user_id',CU.id),SB.from('goals').select('*').eq('user_id',CU.id)]);
-  const now=new Date();const cm=now.getMonth();const cy=now.getFullYear();
-  // FIX: usa T12:00:00 para evitar problema de timezone na filtragem
-  const txM=(txs||[]).filter(t=>{const d=new Date(t.date+'T12:00:00');return d.getMonth()===cm&&d.getFullYear()===cy;});
-  const txP=(txs||[]).filter(t=>{const d=new Date(t.date+'T12:00:00');const pm=cm===0?11:cm-1;const py=cm===0?cy-1:cy;return d.getMonth()===pm&&d.getFullYear()===py;});
-  const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const exp=(txs||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const incM=txM.filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const expM=txM.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const expP=txP.filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount),0);
-  const invested=(inv||[]).reduce((s,i)=>s+parseFloat(i.value),0);
-  const bal=inc-exp;const pct=incM>0?Math.round(expM/incM*100):0;const varE=expP>0?Math.round((expM-expP)/expP*100):0;
+
+  // Data local sem timezone — mesmo padrão dos Relatórios
+  const now=new Date();
+  const cy=now.getFullYear();
+  const cm=now.getMonth()+1; // 1-12
+
+  // Filtra pelo mês/ano extraindo YYYY e MM direto da string salva (YYYY-MM-DD)
+  function isMesAtual(dateStr){
+    if(!dateStr)return false;
+    const s=String(dateStr).split('T')[0]; // garante só a parte da data
+    const [y,m]=s.split('-').map(Number);
+    return y===cy&&m===cm;
+  }
+  function isMesAnterior(dateStr){
+    if(!dateStr)return false;
+    const s=String(dateStr).split('T')[0];
+    const [y,m]=s.split('-').map(Number);
+    const pm=cm===1?12:cm-1;const py=cm===1?cy-1:cy;
+    return y===py&&m===pm;
+  }
+
+  const allTxs=txs||[];
+  const txM=allTxs.filter(t=>isMesAtual(t.date));
+  const txP=allTxs.filter(t=>isMesAnterior(t.date));
+
+  // Aceita tanto 'income'/'expense' quanto 'entrada'/'saida'
+  const isInc=t=>t.type==='income'||t.type==='entrada';
+  const isExp=t=>t.type==='expense'||t.type==='saida';
+
+  const inc=allTxs.filter(isInc).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const exp=allTxs.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const incM=txM.filter(isInc).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const expM=txM.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const expP=txP.filter(isExp).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  const invested=Math.max(0,(inv||[]).reduce((s,i)=>s+parseFloat(i.value||0),0));
+  const bal=inc-exp;
+  const pct=incM>0?Math.round(expM/incM*100):0;
+  const varE=expP>0?Math.round((expM-expP)/expP*100):0;
   const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const iY=Array(12).fill(0),eY=Array(12).fill(0);
-  (txs||[]).forEach(t=>{if(new Date(t.date+'T12:00:00').getFullYear()===cy){const m=new Date(t.date+'T12:00:00').getMonth();if(t.type==='income')iY[m]+=parseFloat(t.amount);else eY[m]+=parseFloat(t.amount);}});
-  const recent=(txs||[]).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  allTxs.forEach(t=>{
+    const s=String(t.date).split('T')[0];
+    const[y,m]=s.split('-').map(Number);
+    if(y===cy){
+      const idx=m-1; // 0-based para o array
+      if(isInc(t))iY[idx]+=parseFloat(t.amount||0);
+      else if(isExp(t))eY[idx]+=parseFloat(t.amount||0);
+    }
+  });
+  const recent=allTxs.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const nome=CP?.full_name?.split(' ')[0]||'você';
   const ins=[];
   if(bal>0&&varE<0)ins.push({tp:'suc',i:'🎉',t:'Parabéns!',x:`Você economizou ${Math.abs(varE)}% a mais que o mês passado. Continue assim!`});
