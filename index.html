@@ -623,8 +623,8 @@ function launchApp(){
   el.innerHTML=nav.map(g=>`<div class="nav-s">${g.s}</div>${g.items.map((n,i)=>`<div class="ni${i===0?' active':''}" id="ni-${n.id}" onclick="nav('${n.id}',this)">${icon(n.i)}${n.l}</div>`).join('')}`).join('');
   document.querySelectorAll('.auth').forEach(s=>s.classList.remove('active'));
   document.getElementById('app').style.display='flex';
-  const firstId=nav[0].items[0].id;
-  nav2(firstId,document.getElementById(`ni-${firstId}`));
+  const firstId = CP?.role === 'admin' ? 'adm-users' : 'transacoes';
+nav2(firstId, document.getElementById(`ni-${firstId}`));
 }
 
 function nav(id,el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));if(el)el.classList.add('active');closeSB();nav2(id);}
