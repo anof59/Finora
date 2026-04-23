@@ -708,202 +708,61 @@ async function delInv(id){if(!confirm('Excluir ativo?'))return;await SB.from('in
 // ===========================
 async function pDash(){
   try{
-    const [
-      { data: txs, error: txErr },
-      { data: inv, error: invErr },
-      { data: goals, error: goalsErr }
-    ] = await Promise.all([
-      SB.from('transactions').select('*').eq('user_id', CU.id),
-      SB.from('investments').select('value').eq('user_id', CU.id),
-      SB.from('goals').select('*').eq('user_id', CU.id)
+    const [{data:txs},{data:inv},{data:goals}] = await Promise.all([
+      SB.from('transactions').select('*').eq('user_id',CU.id),
+      SB.from('investments').select('value').eq('user_id',CU.id),
+      SB.from('goals').select('*').eq('user_id',CU.id)
     ]);
 
-    if (txErr) throw txErr;
-    if (invErr) throw invErr;
-    if (goalsErr) throw goalsErr;
+    const now=new Date();
+    const cy=now.getFullYear();
+    const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-    const list = txs || [];
-    const invList = inv || [];
-    const goalsList = goals || [];
+    const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const exp=(txs||[]).filter(t=>t.type==='expense').reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const invested=(inv||[]).reduce((s,i)=>s+parseFloat(i.value||0),0);
+    const bal=inc-exp;
 
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonthNum = now.getMonth() + 1;
-    const prevDate = new Date(currentYear, now.getMonth() - 1, 1);
-    const prevYear = prevDate.getFullYear();
-    const prevMonthNum = prevDate.getMonth() + 1;
+    const iY=Array(12).fill(0),eY=Array(12).fill(0);
+    (txs||[]).forEach(t=>{
+      const dStr=String(t.date||'');
+      let y,m;
 
-    function normType(t){
-      const v = String(t || '').toLowerCase().trim();
-      if (['income','entrada','ganho','ganhos','receita'].includes(v)) return 'income';
-      if (['expense','saida','saída','gasto','gastos','despesa','despesas'].includes(v)) return 'expense';
-      return v;
-    }
-
-    function getYearMonth(d){
-      const s = String(d || '').trim();
-
-      // YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss
-      if (/^\d{4}-\d{2}/.test(s)) {
-        return {
-          y: parseInt(s.slice(0,4), 10),
-          m: parseInt(s.slice(5,7), 10)
-        };
+      if(/^\d{4}-\d{2}-\d{2}/.test(dStr)){
+        y=parseInt(dStr.slice(0,4),10);
+        m=parseInt(dStr.slice(5,7),10)-1;
+      }else if(/^\d{2}\/\d{2}\/\d{4}$/.test(dStr)){
+        const p=dStr.split('/');
+        y=parseInt(p[2],10);
+        m=parseInt(p[1],10)-1;
+      }else{
+        const d=new Date(dStr);
+        if(!isNaN(d.getTime())){
+          y=d.getFullYear();
+          m=d.getMonth();
+        }
       }
 
-      // DD/MM/YYYY
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const p = s.split('/');
-        return {
-          y: parseInt(p[2], 10),
-          m: parseInt(p[1], 10)
-        };
-      }
-
-      // fallback
-      const dt = new Date(s);
-      if (!isNaN(dt.getTime())) {
-        return {
-          y: dt.getFullYear(),
-          m: dt.getMonth() + 1
-        };
-      }
-
-      return { y: 0, m: 0 };
-    }
-
-    const txM = list.filter(t => {
-      const ym = getYearMonth(t.date);
-      return ym.y === currentYear && ym.m === currentMonthNum;
-    });
-
-    const txP = list.filter(t => {
-      const ym = getYearMonth(t.date);
-      return ym.y === prevYear && ym.m === prevMonthNum;
-    });
-
-    const inc = list
-      .filter(t => normType(t.type) === 'income')
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
-
-    const exp = list
-      .filter(t => normType(t.type) === 'expense')
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
-
-    const incM = txM
-      .filter(t => normType(t.type) === 'income')
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
-
-    const expM = txM
-      .filter(t => normType(t.type) === 'expense')
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
-
-    const expP = txP
-      .filter(t => normType(t.type) === 'expense')
-      .reduce((s, t) => s + parseFloat(t.amount || 0), 0);
-
-    const invested = invList.reduce((s, i) => s + parseFloat(i.value || 0), 0);
-    const bal = inc - exp;
-    const pct = incM > 0 ? Math.round((expM / incM) * 100) : 0;
-    const varE = expP > 0 ? Math.round(((expM - expP) / expP) * 100) : 0;
-
-    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const iY = Array(12).fill(0);
-    const eY = Array(12).fill(0);
-
-    list.forEach(t => {
-      const ym = getYearMonth(t.date);
-      const idx = ym.m - 1;
-      if (ym.y === currentYear && idx >= 0 && idx < 12) {
-        if (normType(t.type) === 'income') iY[idx] += parseFloat(t.amount || 0);
-        if (normType(t.type) === 'expense') eY[idx] += parseFloat(t.amount || 0);
+      if(y===cy && m>=0 && m<12){
+        if(t.type==='income') iY[m]+=parseFloat(t.amount||0);
+        else if(t.type==='expense') eY[m]+=parseFloat(t.amount||0);
       }
     });
 
-    const recent = [...list]
-      .sort((a,b) => String(b.date || '').localeCompare(String(a.date || '')))
-      .slice(0,5);
+    const recent=(txs||[]).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).slice(0,5);
+    const nome=CP?.full_name?.split(' ')[0]||'você';
 
-    const nome = CP?.full_name?.split(' ')[0] || 'você';
-    const ins = [];
-
-    if (bal > 0 && varE < 0) {
-      ins.push({
-        tp:'suc',
-        i:'🎉',
-        t:'Parabéns!',
-        x:`Você economizou ${Math.abs(varE)}% a mais que o mês passado. Continue assim!`
-      });
-    }
-
-    if (pct >= 80) {
-      ins.push({
-        tp:'err',
-        i:'⚠️',
-        t:'Orçamento crítico',
-        x:`Gastos em ${pct}% da renda. Revise suas despesas urgentemente.`
-      });
-    } else if (pct >= 60) {
-      ins.push({
-        tp:'wrn',
-        i:'📊',
-        t:'Gastos moderados',
-        x:`Você usou ${pct}% da renda este mês. Fique atento.`
-      });
-    }
-
-    if (invested === 0 && bal > 500) {
-      ins.push({
-        tp:'info',
-        i:'💡',
-        t:'Que tal investir?',
-        x:`Você tem ${fmt(bal)} disponível. Seu dinheiro pode render mais.`
-      });
-    }
-
-    const topCat = Object.entries(
-      txM
-        .filter(t => normType(t.type) === 'expense')
-        .reduce((a, t) => {
-          const c = t.category || 'Geral';
-          a[c] = (a[c] || 0) + parseFloat(t.amount || 0);
-          return a;
-        }, {})
-    ).sort((a,b) => b[1] - a[1])[0];
-
-    if (topCat) {
-      ins.push({
-        tp:'info',
-        i:'🔍',
-        t:'Maior gasto do mês',
-        x:`${fmt(topCat[1])} em ${topCat[0]}.`
-      });
-    }
-
-    if (incM > expM && incM > 0) {
-      ins.push({
-        tp:'suc',
-        i:'💰',
-        t:'Saldo positivo!',
-        x:`Você tem ${fmt(incM - expM)} sobrando este mês.`
-      });
-    }
-
-    document.getElementById('mc').innerHTML = `<div class="pa">
+    document.getElementById('mc').innerHTML=`<div class="pa">
       <div style="background:linear-gradient(135deg,#1251a3,#1565c0,#1976d2);border-radius:var(--rl);padding:22px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;bottom:-20px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
         <div style="font-size:13px;opacity:.8;margin-bottom:6px">Olá, ${nome} 👋</div>
         <div style="font-size:26px;font-weight:900;margin-bottom:4px;letter-spacing:-.5px">${fmt(bal)}</div>
-        <div style="font-size:13px;opacity:.8">${pct<=50?'✅ Situação saudável':pct<=80?'🟡 Atenção aos gastos':'🔴 Orçamento crítico'}</div>
+        <div style="font-size:13px;opacity:.8">${bal>=0?'✅ Situação saudável':'⚠️ Atenção ao saldo'}</div>
         <div style="margin-top:14px;display:flex;gap:16px;font-size:12px;opacity:.85;flex-wrap:wrap">
-          <span>↑ ${fmt(incM)}</span>
-          <span>↓ ${fmt(expM)}</span>
+          <span>↑ ${fmt(inc)}</span>
+          <span>↓ ${fmt(exp)}</span>
           <span>📈 ${fmt(invested)}</span>
         </div>
-      </div>
-
-      <div style="background:#fff8e1;border:1px solid #fde68a;border-radius:12px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:16px">
-        Debug: total transações = ${list.length} | mês atual = ${txM.length} | ganhos mês = ${fmt(incM)} | gastos mês = ${fmt(expM)}
       </div>
 
       <div class="sg">
@@ -915,15 +774,14 @@ async function pDash(){
 
         <div class="sc g ca" style="animation-delay:.1s">
           <div class="si g">${icon('trend')}</div>
-          <div class="sl">Ganhos do Mês</div>
-          <div class="sv" style="color:var(--green);font-size:20px">${fmt(incM)}</div>
+          <div class="sl">Entradas</div>
+          <div class="sv" style="color:var(--green);font-size:20px">${fmt(inc)}</div>
         </div>
 
         <div class="sc r ca" style="animation-delay:.15s">
           <div class="si r">${icon('bar')}</div>
-          <div class="sl">Gastos do Mês</div>
-          <div class="sv" style="color:var(--red);font-size:20px">${fmt(expM)}</div>
-          <div class="sd ${varE<=0?'up':'dn'}">${varE>0?'▲':'▼'} ${Math.abs(varE)}% vs mês ant.</div>
+          <div class="sl">Saídas</div>
+          <div class="sv" style="color:var(--red);font-size:20px">${fmt(exp)}</div>
         </div>
 
         <div class="sc p ca" style="animation-delay:.2s">
@@ -933,22 +791,10 @@ async function pDash(){
         </div>
       </div>
 
-      ${ins.length ? `<div style="margin-bottom:16px">
-        ${ins.slice(0,3).map((x,i)=>`
-          <div class="ic ${x.tp}" style="animation-delay:${.1+i*.07}s">
-            <span class="ii">${x.i}</span>
-            <div>
-              <div class="it">${x.t}</div>
-              <div class="ix">${x.x}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>` : ''}
-
       <div class="cc">
         <div class="cc-h">
           <div>
-            <div class="cc-t">Evolução Financeira ${currentYear}</div>
+            <div class="cc-t">Evolução Financeira ${cy}</div>
             <div class="cc-s">Ganhos vs Gastos por mês</div>
           </div>
         </div>
@@ -957,47 +803,38 @@ async function pDash(){
         </div>
       </div>
 
-      ${goalsList.length ? `
-        <div style="font-size:14px;font-weight:700;margin-bottom:12px;letter-spacing:-.2px">🎯 Progresso das Metas</div>
-        ${goalsList.slice(0,3).map(g=>{
-          const p = g.target_amount > 0 ? Math.min(100, Math.round((g.current_amount / g.target_amount) * 100)) : 0;
-          return `
-            <div class="gc">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                <div style="font-size:14px;font-weight:700">${g.title}</div>
-                <span style="font-size:13px;font-weight:800;color:${g.color || 'var(--blue)'}">${p}%</span>
-              </div>
-              <div class="pb">
-                <div class="pf" style="width:${p}%;background:${g.color || 'var(--blue)'}"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-top:7px">
-                <span>${fmt(g.current_amount)}</span>
-                <span>${fmt(g.target_amount)}</span>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      ` : ''}
+      ${(goals||[]).length?`<div style="font-size:14px;font-weight:700;margin-bottom:12px;letter-spacing:-.2px">🎯 Progresso das Metas</div>
+      ${(goals||[]).slice(0,3).map(g=>{
+        const p=g.target_amount>0?Math.min(100,Math.round(g.current_amount/g.target_amount*100)):0;
+        return`<div class="gc">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:700">${g.title}</div>
+            <span style="font-size:13px;font-weight:800;color:${g.color||'var(--blue)'}">${p}%</span>
+          </div>
+          <div class="pb"><div class="pf" style="width:${p}%;background:${g.color||'var(--blue)'}"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-top:7px">
+            <span>${fmt(g.current_amount)}</span>
+            <span>${fmt(g.target_amount)}</span>
+          </div>
+        </div>`;
+      }).join('')}`:''}
 
       <div style="font-size:14px;font-weight:700;margin-bottom:12px;letter-spacing:-.2px">🕐 Últimas Transações</div>
       <div class="txl">
-        ${recent.length ? recent.map(t => `
-          <div class="txi">
-            <div class="txiw ${normType(t.type) === 'income' ? 'in' : 'out'}">${normType(t.type) === 'income' ? '💚' : '🔴'}</div>
-            <div class="txin">
-              <div class="txn">${t.description || 'Sem descrição'}</div>
-              <div class="txm">${fmtD(t.date)} · ${t.category || 'Geral'}</div>
-            </div>
-            <div class="txa ${normType(t.type)}">${normType(t.type) === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
+        ${recent.length?recent.map(t=>`<div class="txi">
+          <div class="txiw ${t.type==='income'?'in':'out'}">${t.type==='income'?'💚':'🔴'}</div>
+          <div class="txin">
+            <div class="txn">${t.description||'Sem descrição'}</div>
+            <div class="txm">${fmtD(t.date)} · ${t.category||'Geral'}</div>
           </div>
-        `).join('') : '<div style="padding:28px;text-align:center;color:var(--tm);font-size:13px">Nenhuma transação ainda.</div>'}
+          <div class="txa ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div>
+        </div>`).join(''):'<div style="padding:28px;text-align:center;color:var(--tm);font-size:13px">Nenhuma transação ainda.</div>'}
       </div>
     </div>`;
 
-    setTimeout(() => {
-      const c = document.getElementById('c-line');
-      if (!c) return;
-
+    setTimeout(()=>{
+      const c=document.getElementById('c-line');
+      if(!c) return;
       charts.push(new Chart(c,{
         type:'line',
         data:{
@@ -1031,29 +868,19 @@ async function pDash(){
               ...BC.scales.y,
               ticks:{
                 ...BC.scales.y.ticks,
-                callback:v => v >= 1000 ? 'R$'+Math.round(v/1000)+'k' : 'R$'+v
+                callback:v=>v>=1000?'R$'+Math.round(v/1000)+'k':'R$'+v
               }
             }
           }
         }
       }));
-    }, 60);
+    },60);
 
-  } catch(e){
-    console.error('Erro em pDash:', e);
-    document.getElementById('mc').innerHTML = `
-      <div class="pa">
-        <div class="es">
-          <span class="ei">⚠️</span>
-          <h3>Não foi possível carregar o dashboard.</h3>
-          <p>Tente novamente em instantes.</p>
-          <button class="bp" onclick="pDash()">Tentar novamente</button>
-        </div>
-      </div>
-    `;
+  }catch(e){
+    console.error('Erro em pDash:',e);
+    document.getElementById('mc').innerHTML=`<div class="pa"><div class="es"><span class="ei">⚠️</span><h3>Não foi possível carregar o dashboard.</h3><p>Tente novamente em instantes.</p><button class="bp" onclick="pDash()">Tentar novamente</button></div></div>`;
   }
 }
-
 async function pMetas(){
   const [{data:goals},{data:txs}]=await Promise.all([SB.from('goals').select('*').eq('user_id',CU.id).order('created_at',{ascending:false}),SB.from('transactions').select('amount,type').eq('user_id',CU.id)]);
   const inc=(txs||[]).filter(t=>t.type==='income').reduce((s,t)=>s+parseFloat(t.amount),0);
@@ -1468,3 +1295,4 @@ function expPDF(){const t=window._txData||[];const inc=t.filter(x=>x.type==='inc
 </script>
 </body>
 </html>
+
