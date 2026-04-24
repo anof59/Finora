@@ -1593,6 +1593,8 @@ function afDelDivida(i){const d=afLoad();d.dividas.splice(i,1);afSave(d);pAssist
 function afSalvarRenda(){const d=afLoad();d.renda=parseFloat(document.getElementById('af-renda-val').value||0);afSave(d);pAssistente();}
 function afSalvarNotas(){const d=afLoad();d.notas=document.getElementById('af-notas-txt').value;afSave(d);pAssistente();}
 
+} // fecha pAnalise
+
 /* ===== ADMIN ===== */
 async function pAdminPainel(){
   const {data:profs}=await sb.from('profiles').select('*');
