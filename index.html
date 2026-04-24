@@ -645,35 +645,366 @@ async function saveTx(){
   pTx(); // recarrega lista
 }
 
-/* METAS */
+/* ===== METAS ===== */
+const METAS_KEY='finora_metas_v1';
+function metasLoad(){try{return JSON.parse(localStorage.getItem(METAS_KEY)||'[]')}catch(e){return[];}}
+function metasSave(d){localStorage.setItem(METAS_KEY,JSON.stringify(d));}
+
 async function pMetas(){
-  const {data:goals}=await sb.from('goals').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  const metas=metasLoad();
   const {data:txs}=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);
   const income=txs?.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)||0;
   const expense=txs?.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)||0;
-  const sobra=income-expense;
+  const sobra=Math.max(0,income-expense);
+
   document.getElementById('main-content').innerHTML=`
-  <div class="page-header-row"><div class="page-header"><h1>Metas & Objetivos</h1><p>Seu progresso financeiro.</p></div><button class="btn-primary">Criar Meta</button></div>
-  ${sobra>0?`<div class="suggestion-card"><div style="display:flex;align-items:center;gap:10px;font-size:13px;flex:1"><span style="font-size:20px">🐷</span><div>Você tem <strong style="color:var(--green)">${fmt(sobra)}</strong> sobrando. Que tal guardar?</div></div><button class="btn-primary btn-green" style="font-size:12px;padding:7px 12px">Usar Sobra</button></div>`:''}
-  ${goals?.length?goals.map(g=>{const p=Math.min(100,Math.round((g.current_amount/g.target_amount)*100));return`<div class="chart-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:600">${g.title}</div><div style="font-size:13px;color:var(--text-muted)">${p}%</div></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${g.color||'var(--blue)'}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-top:6px"><span>${fmt(g.current_amount)}</span><span>${fmt(g.target_amount)}</span></div></div>`;}).join(''):`<div class="empty-card">Nenhuma meta criada. Comece definindo um objetivo!</div>`}`;
+<style>
+.meta-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+.meta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mc,var(--blue));border-radius:14px 14px 0 0}
+.meta-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px}
+.meta-title{font-size:15px;font-weight:700}
+.meta-pct-badge{background:var(--mc,var(--blue));color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.meta-bar{height:8px;border-radius:4px;background:#f1f2f5;overflow:hidden;margin:10px 0 6px}
+.meta-bar-fill{height:100%;border-radius:4px;background:var(--mc,var(--blue));transition:.4s}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.meta-stat{background:#f8fafc;border-radius:8px;padding:10px 12px}
+.meta-stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)}
+.meta-stat-val{font-size:14px;font-weight:700;margin-top:3px}
+.meta-sugestao{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:9px 12px;font-size:12px;color:#15803d;margin-top:10px;display:flex;align-items:center;gap:8px}
+.meta-actions{display:flex;gap:6px;margin-top:12px}
+.btn-meta-del{padding:5px 12px;background:#fef2f2;border:1px solid #fecaca;color:var(--red);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
+.btn-meta-add-val{padding:5px 12px;background:#eff6ff;border:1px solid #bfdbfe;color:var(--blue);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
+.metas-empty{background:#fff;border:1px dashed var(--border);border-radius:16px;padding:56px 30px;text-align:center}
+.metas-empty-icon{font-size:48px;margin-bottom:12px}
+.metas-empty h3{font-size:16px;font-weight:700;margin-bottom:6px;color:#1a1a2e}
+.metas-empty p{font-size:13px;color:var(--text-muted);line-height:1.6;max-width:320px;margin:0 auto 20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--white);border-radius:16px;width:100%;max-width:440px;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.18);animation:fadeUp .25s ease}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px}
+.modal-field{margin-bottom:12px}
+.modal-field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);margin-bottom:5px}
+.modal-field input,.modal-field select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;background:#f9fafb;color:var(--text);outline:none}
+.modal-field input:focus{border-color:var(--blue);background:#fff}
+.modal-footer{display:flex;gap:8px;margin-top:18px}
+.btn-modal-save{flex:1;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-modal-cancel{padding:10px 16px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:14px;cursor:pointer}
+.color-picker{display:flex;gap:8px;flex-wrap:wrap}
+.color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
+.color-dot.sel{border-color:#fff;box-shadow:0 0 0 2px #1a6fc4}
+</style>
+  <div class="page-header-row">
+    <div class="page-header"><h1>Central de Metas 🎯</h1><p>Acompanhe seus objetivos financeiros.</p></div>
+    <button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button>
+  </div>
+  ${sobra>0?`<div class="suggestion-card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;font-size:13px;flex:1"><span style="font-size:20px">💡</span><div>Sobram <strong style="color:var(--green)">${fmt(sobra)}</strong> após seus gastos. Direcione para uma meta!</div></div></div>`:''}
+  <div id="metas-lista">
+  ${metas.length?metas.map((m,i)=>{
+    const alvo=parseFloat(m.alvo||0);const guardado=parseFloat(m.guardado||0);
+    const p=alvo>0?Math.min(100,Math.round(guardado/alvo*100)):0;
+    const falta=Math.max(0,alvo-guardado);
+    const hoje=new Date();const prazo=m.prazo?new Date(m.prazo+'T12:00:00'):null;
+    const meses=prazo?Math.max(1,Math.ceil((prazo-hoje)/(1000*60*60*24*30))):null;
+    const porMes=meses&&falta>0?Math.ceil(falta/meses):null;
+    const cor=m.cor||'#1a6fc4';
+    return`<div class="meta-card" style="--mc:${cor}">
+      <div class="meta-top">
+        <div><div class="meta-title">${m.nome}</div>${m.prazo?`<div style="font-size:11px;color:var(--text-muted);margin-top:3px">📅 Prazo: ${fmtD(m.prazo)}</div>`:''}</div>
+        <div class="meta-pct-badge">${p}%</div>
+      </div>
+      <div class="meta-bar"><div class="meta-bar-fill" style="width:${p}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted)"><span>${fmt(guardado)} guardados</span><span>Meta: ${fmt(alvo)}</span></div>
+      <div class="meta-grid">
+        <div class="meta-stat"><div class="meta-stat-label">Falta</div><div class="meta-stat-val" style="color:${falta>0?'var(--red)':'var(--green)'}">${fmt(falta)}</div></div>
+        <div class="meta-stat"><div class="meta-stat-label">Progresso</div><div class="meta-stat-val" style="color:${cor}">${p}%</div></div>
+        ${meses?`<div class="meta-stat"><div class="meta-stat-label">Meses</div><div class="meta-stat-val">${meses}</div></div>`:'<div class="meta-stat"><div class="meta-stat-label">Status</div><div class="meta-stat-val" style="font-size:11px">'+(p>=100?'✅ Concluída':'Em andamento')+'</div></div>'}
+      </div>
+      ${porMes?`<div class="meta-sugestao">💰 Guarde <strong>${fmt(porMes)}/mês</strong> para atingir essa meta no prazo.</div>`:''}
+      <div class="meta-actions">
+        <button class="btn-meta-add-val" onclick="openAddValorMeta(${i})">+ Adicionar valor</button>
+        <button class="btn-meta-del" onclick="deleteMeta(${i})">Excluir</button>
+      </div>
+    </div>`;
+  }).join(''):`<div class="metas-empty"><div class="metas-empty-icon">🎯</div><h3>Nenhuma meta ainda</h3><p>Crie sua primeira meta financeira e acompanhe seu progresso passo a passo.</p><button class="btn-primary" onclick="openMetaModal()">Criar primeira meta</button></div>`}
+  </div>`;
 }
 
-/* INVESTIMENTOS */
+function openMetaModal(){
+  const cores=['#1a6fc4','#16a34a','#dc2626','#7c3aed','#d97706','#0891b2','#db2777'];
+  document.body.insertAdjacentHTML('beforeend',`
+  <div class="modal-overlay" id="meta-modal" onclick="if(event.target.id==='meta-modal')closeMetaModal()">
+    <div class="modal-box">
+      <div class="modal-title">Nova Meta 🎯</div>
+      <div class="modal-field"><label>Nome da meta</label><input id="m-nome" placeholder="Ex: Viagem, Reserva de emergência..."/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field"><label>Valor alvo (R$)</label><input type="number" id="m-alvo" placeholder="0,00"/></div>
+        <div class="modal-field"><label>Já guardei (R$)</label><input type="number" id="m-guardado" placeholder="0,00"/></div>
+      </div>
+      <div class="modal-field"><label>Prazo</label><input type="date" id="m-prazo"/></div>
+      <div class="modal-field"><label>Cor</label><div class="color-picker" id="color-picker">
+        ${cores.map((c,i)=>`<div class="color-dot${i===0?' sel':''}" style="background:${c}" data-cor="${c}" onclick="selectCor(this)"></div>`).join('')}
+      </div></div>
+      <input type="hidden" id="m-cor" value="${cores[0]}"/>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="closeMetaModal()">Cancelar</button>
+        <button class="btn-modal-save" onclick="saveMeta()">Criar Meta</button>
+      </div>
+    </div>
+  </div>`);
+}
+function selectCor(el){document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');document.getElementById('m-cor').value=el.dataset.cor;}
+function closeMetaModal(){const m=document.getElementById('meta-modal');if(m)m.remove();}
+function saveMeta(){
+  const nome=document.getElementById('m-nome').value.trim();
+  const alvo=parseFloat(document.getElementById('m-alvo').value||0);
+  const guardado=parseFloat(document.getElementById('m-guardado').value||0);
+  const prazo=document.getElementById('m-prazo').value;
+  const cor=document.getElementById('m-cor').value;
+  if(!nome||!alvo)return alert('Informe o nome e o valor alvo.');
+  const d=metasLoad();d.push({nome,alvo,guardado,prazo,cor});metasSave(d);closeMetaModal();pMetas();
+}
+function deleteMeta(i){if(!confirm('Excluir esta meta?'))return;const d=metasLoad();d.splice(i,1);metasSave(d);pMetas();}
+function openAddValorMeta(i){
+  const m=metasLoad()[i];
+  document.body.insertAdjacentHTML('beforeend',`
+  <div class="modal-overlay" id="addval-modal" onclick="if(event.target.id==='addval-modal')document.getElementById('addval-modal').remove()">
+    <div class="modal-box">
+      <div class="modal-title">Adicionar valor — ${m.nome}</div>
+      <div class="modal-field"><label>Quanto guardar agora (R$)</label><input type="number" id="av-val" placeholder="0,00"/></div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="document.getElementById('addval-modal').remove()">Cancelar</button>
+        <button class="btn-modal-save" onclick="saveAddValorMeta(${i})">Confirmar</button>
+      </div>
+    </div>
+  </div>`);
+}
+function saveAddValorMeta(i){
+  const v=parseFloat(document.getElementById('av-val').value||0);
+  if(!v)return;
+  const d=metasLoad();d[i].guardado=parseFloat(d[i].guardado||0)+v;metasSave(d);
+  document.getElementById('addval-modal').remove();pMetas();
+}
+
+/* ===== INVESTIMENTOS ===== */
+const INV_KEY='finora_inv_v1';
+function invLoad(){try{return JSON.parse(localStorage.getItem(INV_KEY)||'[]')}catch(e){return[];}}
+function invSave(d){localStorage.setItem(INV_KEY,JSON.stringify(d));}
+
 async function pInv(){
-  const {data:inv}=await sb.from('investments').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
-  const total=inv?.reduce((s,i)=>s+parseFloat(i.value),0)||0;
+  const invs=invLoad();
+  const total=invs.reduce((s,i)=>s+parseFloat(i.valor||0),0);
+  const rendTotal=invs.reduce((s,i)=>{const r=parseFloat(i.rend||0);return s+parseFloat(i.valor||0)*r/100;},0);
+  const projetado=total+rendTotal;
+  const tipos={};invs.forEach(i=>{tipos[i.tipo]=(tipos[i.tipo]||0)+parseFloat(i.valor||0);});
+  const cores=['#1a6fc4','#16a34a','#7c3aed','#d97706','#0891b2','#dc2626'];
+
   document.getElementById('main-content').innerHTML=`
-  <div class="page-header-row"><div class="page-header"><h1>Investimentos & Patrimônio</h1></div><button class="btn-primary">+ Adicionar Ativo</button></div>
-  ${inv?.length?`<div class="cards-grid"><div class="card"><div class="card-label">Total Investido</div><div class="card-value">${fmt(total)}</div></div></div>
-  <div class="table-card" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Valor</th><th>Rendimento</th></tr></thead><tbody>${inv.map(i=>`<tr><td style="font-weight:500">${i.name}</td><td><span class="bs bf">${i.type||'-'}</span></td><td class="td-green">${fmt(i.value)}</td><td style="color:var(--blue);font-weight:600">${i.yield||'-'}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty-card">Nenhum investimento cadastrado.</div>`}
-  <div class="invest-info">
-    <div class="invest-section"><h3>Onde Investir</h3><div class="invest-item"><svg width="14" height="14" fill="none" stroke="#4ade80" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div><strong style="color:#e2e8f0">Renda Fixa:</strong> CDBs e Tesouro Direto.</div></div><div class="invest-dark-card"><div class="ilabel">Dólar</div><p>Boa janela para aportes internacionais.</p><div class="price">🔸 R$ 4,99</div></div></div>
+<style>
+.inv-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;transition:.15s}
+.inv-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.inv-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.inv-info{flex:1;min-width:0}
+.inv-name{font-size:14px;font-weight:700}
+.inv-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.inv-val-col{text-align:right;flex-shrink:0}
+.inv-total{font-size:15px;font-weight:700;color:var(--green)}
+.inv-rend{font-size:11px;color:var(--text-muted);margin-top:2px}
+.inv-empty{background:#fff;border:1px dashed var(--border);border-radius:16px;padding:56px 30px;text-align:center}
+.tipo-bar{height:6px;border-radius:3px;background:#f1f2f5;overflow:hidden;margin-top:4px}
+.tipo-fill{height:100%;border-radius:3px}
+.simul-card{background:linear-gradient(135deg,#1565c0,#1e88e5);border-radius:14px;padding:20px;color:#fff;margin-bottom:16px}
+.simul-card h3{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.75;margin-bottom:8px}
+.simul-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.15);font-size:13px}
+.simul-row:last-child{border:none;padding-top:12px}
+.simul-row .simul-val{font-size:16px;font-weight:700}
+</style>
+  <div class="page-header-row">
+    <div class="page-header"><h1>Painel de Investimentos 📈</h1><p>Acompanhe e simule o crescimento do seu patrimônio.</p></div>
+    <button class="btn-primary" onclick="openInvModal()">+ Novo Ativo</button>
+  </div>
+  <div class="cards-grid" style="margin-bottom:16px">
+    <div class="card"><div class="card-label">Total Investido</div><div class="card-value td-green">${fmt(total)}</div></div>
+    <div class="card"><div class="card-label">Ativos Cadastrados</div><div class="card-value">${invs.length}</div></div>
+    <div class="card card-blue"><div class="card-label">Projeção Anual</div><div class="card-value">${fmt(projetado)}</div></div>
+  </div>
+  ${total>0?`<div class="simul-card">
+    <h3>Simulação de Crescimento</h3>
+    <div class="simul-row"><span>Capital atual</span><span class="simul-val">${fmt(total)}</span></div>
+    <div class="simul-row"><span>Rendimento estimado (1 ano)</span><span style="color:#4ade80;font-weight:700">+${fmt(rendTotal)}</span></div>
+    <div class="simul-row"><span>Projeção 12 meses</span><span class="simul-val">${fmt(projetado)}</span></div>
+    <div class="simul-row"><span>Projeção 24 meses</span><span class="simul-val">${fmt(total+rendTotal*2)}</span></div>
+  </div>`:''}
+  ${Object.keys(tipos).length>1?`<div class="chart-card" style="margin-bottom:16px"><div class="chart-title">Distribuição por Tipo</div><div style="margin-top:12px">${Object.entries(tipos).map(([k,v],i)=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600">${k}</span><span style="color:${cores[i%cores.length]}">${total>0?Math.round(v/total*100):0}% · ${fmt(v)}</span></div><div class="tipo-bar"><div class="tipo-fill" style="width:${total>0?Math.round(v/total*100):0}%;background:${cores[i%cores.length]}"></div></div></div>`).join('')}</div></div>`:''}
+  <div style="font-size:13px;font-weight:700;margin-bottom:10px">Meus Ativos</div>
+  <div id="inv-lista">
+  ${invs.length?invs.map((inv,i)=>{
+    const icones={'Renda Fixa':'🏦','Ações':'📊','FII':'🏢','Criptomoeda':'₿','Poupança':'🐷','Tesouro':'🇧🇷','Outro':'💼'};
+    const ic=icones[inv.tipo]||'💼';
+    const r=parseFloat(inv.rend||0);
+    const rendAnual=parseFloat(inv.valor||0)*r/100;
+    return`<div class="inv-card">
+      <div class="inv-icon" style="background:${cores[i%cores.length]}18">${ic}</div>
+      <div class="inv-info">
+        <div class="inv-name">${inv.nome}</div>
+        <div class="inv-sub">${inv.tipo}${inv.obs?' · '+inv.obs:''}</div>
+      </div>
+      <div class="inv-val-col">
+        <div class="inv-total">${fmt(inv.valor)}</div>
+        <div class="inv-rend">+${r}%/ano · ${fmt(rendAnual)}</div>
+      </div>
+      <button onclick="deleteInv(${i})" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;padding:0 4px;flex-shrink:0">×</button>
+    </div>`;
+  }).join(''):`<div class="inv-empty"><div style="font-size:40px;margin-bottom:12px">📈</div><h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Nenhum ativo cadastrado</h3><p style="font-size:13px;color:var(--text-muted);max-width:280px;margin:0 auto 18px">Adicione seus investimentos e veja o patrimônio crescer.</p><button class="btn-primary" onclick="openInvModal()">Adicionar primeiro ativo</button></div>`}
+  </div>
+  <div class="invest-info" style="margin-top:16px">
+    <div class="invest-section"><h3>Onde Investir Agora</h3><div class="invest-item"><svg width="14" height="14" fill="none" stroke="#4ade80" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div><strong style="color:#e2e8f0">Renda Fixa:</strong> CDBs e Tesouro com Selic elevada.</div></div><div class="invest-dark-card"><div class="ilabel">Dólar</div><p>Janela para aportes internacionais.</p><div class="price">🔸 R$ 4,99</div></div></div>
     <div><div class="crypto-card"><div class="clabel">Cripto Market</div><div class="cvalue">R$ 375.131</div><div style="font-size:12px;opacity:.8">▲ 0,28% nas últimas 24h</div></div><div class="rates-card"><h3>Taxas de Hoje</h3><div class="rate-row"><span>Selic</span><span style="color:var(--blue);font-weight:600">10,75% a.a</span></div><div class="rate-row"><span>IPCA</span><span style="color:var(--red);font-weight:600">4,50%</span></div><div class="rate-row"><span>Euro</span><span style="font-weight:600">R$ 5,88</span></div></div></div>
   </div>`;
 }
 
-/* ANÁLISE */
+function openInvModal(){
+  document.body.insertAdjacentHTML('beforeend',`
+  <div class="modal-overlay" id="inv-modal" onclick="if(event.target.id==='inv-modal')closeInvModal()">
+    <div class="modal-box">
+      <div class="modal-title">Novo Ativo 📈</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field"><label>Nome</label><input id="iv-nome" placeholder="Ex: Tesouro Selic"/></div>
+        <div class="modal-field"><label>Tipo</label><select id="iv-tipo"><option>Renda Fixa</option><option>Ações</option><option>FII</option><option>Criptomoeda</option><option>Poupança</option><option>Tesouro</option><option>Outro</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-field"><label>Valor Investido (R$)</label><input type="number" id="iv-valor" placeholder="0,00"/></div>
+        <div class="modal-field"><label>Rendimento estimado (%/ano)</label><input type="number" id="iv-rend" placeholder="Ex: 12"/></div>
+      </div>
+      <div class="modal-field"><label>Observação</label><input id="iv-obs" placeholder="Opcional"/></div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="closeInvModal()">Cancelar</button>
+        <button class="btn-modal-save" onclick="saveInv()">Adicionar Ativo</button>
+      </div>
+    </div>
+  </div>`);
+}
+function closeInvModal(){const m=document.getElementById('inv-modal');if(m)m.remove();}
+function saveInv(){
+  const nome=document.getElementById('iv-nome').value.trim();
+  const tipo=document.getElementById('iv-tipo').value;
+  const valor=parseFloat(document.getElementById('iv-valor').value||0);
+  const rend=parseFloat(document.getElementById('iv-rend').value||0);
+  const obs=document.getElementById('iv-obs').value.trim();
+  if(!nome||!valor)return alert('Informe nome e valor.');
+  const d=invLoad();d.push({nome,tipo,valor,rend,obs});invSave(d);closeInvModal();pInv();
+}
+function deleteInv(i){if(!confirm('Excluir este ativo?'))return;const d=invLoad();d.splice(i,1);invSave(d);pInv();}
+
+/* ===== ANÁLISE ===== */
 async function pAnalise(){
+  const {data:txs}=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
+  const all=txs||[];
+  const income=all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0);
+  const expense=all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0);
+  const saldo=income-expense;
+
+  // Score financeiro 0-100
+  let score=50;
+  if(income>0){
+    const pct=expense/income;
+    if(pct<=0.5)score=90;else if(pct<=0.7)score=70;else if(pct<=0.9)score=45;else score=20;
+  }
+  if(income===0&&expense===0)score=50;
+  const scoreColor=score>=75?'#16a34a':score>=50?'#d97706':'#dc2626';
+  const scoreLabel=score>=75?'Excelente 🌟':score>=50?'Regular ⚡':'Crítico 🚨';
+
+  // Por categoria
+  const byCat={};
+  all.filter(t=>isExpense(t.type)).forEach(t=>{const c=t.category||'Geral';byCat[c]=(byCat[c]||0)+parseFloat(t.amount);});
+  const catRank=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const cores=['#dc2626','#d97706','#7c3aed','#1a6fc4','#0891b2','#16a34a'];
+
+  // Por mês
+  const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const incM=Array(12).fill(0),expM=Array(12).fill(0);
+  all.forEach(t=>{const p=String(t.date||'').split('T')[0].split('-');const m=p.length===3?parseInt(p[1])-1:0;if(isIncome(t.type))incM[m]+=parseFloat(t.amount);else expM[m]+=parseFloat(t.amount);});
+
+  // Insights automáticos
+  const insights=[];
+  if(saldo>0)insights.push({tipo:'ok',icon:'✅',txt:`Saldo positivo de <strong>${fmt(saldo)}</strong>. Continue assim!`});
+  else insights.push({tipo:'danger',icon:'🚨',txt:`Saldo negativo de <strong>${fmt(Math.abs(saldo))}</strong>. Revise seus gastos.`});
+  if(catRank.length){const top=catRank[0];const economia20=top[1]*0.2;insights.push({tipo:'warn',icon:'💡',txt:`Maior gasto: <strong>${top[0]}</strong> (${fmt(top[1])}). Reduzindo 20%, economiza <strong>${fmt(economia20)}/período</strong>.`});}
+  if(income>0){const pct=Math.round(expense/income*100);insights.push({tipo:pct>80?'danger':pct>60?'warn':'ok',icon:pct>80?'⚠️':pct>60?'📊':'💰',txt:`Você gasta <strong>${pct}%</strong> da sua renda. ${pct>80?'Nível crítico — reduza gastos.':pct>60?'Fique atento ao orçamento.':'Nível saudável!'}`});}
+
+  document.getElementById('main-content').innerHTML=`
+<style>
+.score-ring{position:relative;width:90px;height:90px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+.insight-card{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.55;margin-bottom:10px;border-left:3px solid;display:flex;align-items:flex-start;gap:10px}
+.insight-card.ok{background:#f0fdf4;border-color:#16a34a;color:#15803d}
+.insight-card.warn{background:#fffbeb;border-color:#d97706;color:#92400e}
+.insight-card.danger{background:#fef2f2;border-color:#dc2626;color:#991b1b}
+.cat-bar-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
+.cat-bar-item:last-child{border:none}
+</style>
+  <div class="page-header"><h1>Central de Inteligência Financeira 🧠</h1><p>Seus números analisados em tempo real.</p></div>
+
+  <!-- Score + Resumo -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div class="score-ring">
+      <svg width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="36" fill="none" stroke="#f1f2f5" stroke-width="8"/>
+        <circle cx="45" cy="45" r="36" fill="none" stroke="${scoreColor}" stroke-width="8"
+          stroke-dasharray="${Math.round(2*Math.PI*36)}" stroke-dashoffset="${Math.round(2*Math.PI*36*(1-score/100))}" stroke-linecap="round"/>
+      </svg>
+      <div class="score-num" style="color:${scoreColor}">${score}</div>
+    </div>
+    <div style="flex:1;min-width:160px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)">Score Financeiro</div>
+      <div style="font-size:20px;font-weight:800;color:${scoreColor};margin:4px 0">${scoreLabel}</div>
+      <div style="font-size:12px;color:var(--text-muted)">Baseado na relação gastos/renda</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex:2;min-width:240px">
+      <div style="background:#f8fafc;border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)">Total Ganhos</div><div style="font-size:16px;font-weight:700;color:var(--green);margin-top:4px">${fmt(income)}</div></div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)">Total Gastos</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-top:4px">${fmt(expense)}</div></div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)">Saldo</div><div style="font-size:16px;font-weight:700;color:${saldo>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(saldo)}</div></div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div style="font-size:13px;font-weight:700;margin-bottom:10px">💡 Insights Automáticos</div>
+  ${insights.map(i=>`<div class="insight-card ${i.tipo}"><span style="font-size:16px;flex-shrink:0">${i.icon}</span><span>${i.txt}</span></div>`).join('')}
+
+  <!-- Gráfico mensal -->
+  <div class="chart-card" style="margin-top:16px">
+    <div class="chart-title">Evolução Mensal — Ganhos vs Gastos</div>
+    <div class="chart-sub">Comparativo mês a mês</div>
+    <div style="position:relative;height:200px"><canvas id="c-analise-bar"></canvas></div>
+  </div>
+
+  <!-- Ranking categorias -->
+  ${catRank.length?`<div class="chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div><div class="chart-title">Gastos por Categoria</div><div class="chart-sub">Ranking dos maiores centros de gasto</div></div>
+      <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Total gastos</div><div style="font-size:16px;font-weight:700">${fmt(expense)}</div></div>
+    </div>
+    ${catRank.map(([cat,val],i)=>{const pct=expense>0?Math.round(val/expense*100):0;return`<div class="cat-bar-item">
+      <div style="width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${cores[i]}18;font-size:11px;font-weight:700;color:${cores[i]};flex-shrink:0">#${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;margin-bottom:4px"><span>${cat}</span><span style="color:${cores[i]};font-weight:700">${pct}%</span></div>
+        <div style="height:5px;border-radius:3px;background:#f1f2f5;overflow:hidden"><div style="width:${pct}%;height:100%;border-radius:3px;background:${cores[i]}"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;flex-shrink:0;min-width:80px;text-align:right">${fmt(val)}</div>
+    </div>`;}).join('')}
+  </div>`:''}`;
+
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f3f4f6'},ticks:{font:{size:10}}}}};
+  setTimeout(()=>{
+    allCharts.push(new Chart(document.getElementById('c-analise-bar'),{
+      type:'bar',
+      data:{labels:months,datasets:[
+        {label:'Ganhos',data:incM,backgroundColor:'#16a34a44',borderColor:'#16a34a',borderWidth:1.5,borderRadius:4},
+        {label:'Gastos',data:expM,backgroundColor:'#dc262644',borderColor:'#dc2626',borderWidth:1.5,borderRadius:4}
+      ]},
+      options:base
+    }));
+  },60);
+}
   const {data:txs}=await sb.from('transactions').select('*').eq('user_id',currentUser.id).filter('type','in','("expense","saida","gasto","despesa")');
   const {data:allTxs}=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
   const total=txs?.reduce((s,t)=>s+parseFloat(t.amount),0)||0;
@@ -714,15 +1045,119 @@ async function pAnalise(){
   },60);
 }
 
-/* TABELAS */
+/* ===== TABELAS ===== */
+let tabelaCache=[],tabelaFiltro='all',tabelaBusca='';
+
 async function pTabelas(){
   const {data:txs}=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
-  const sorted=[...(txs||[])].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  tabelaCache=[...(txs||[])].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  renderTabela();
+}
+
+function renderTabela(){
+  const q=tabelaBusca.toLowerCase();
+  const filtered=tabelaCache.filter(t=>{
+    const matchTipo=tabelaFiltro==='all'||(tabelaFiltro==='income'&&isIncome(t.type))||(tabelaFiltro==='expense'&&isExpense(t.type));
+    const matchBusca=!q||String(t.description||'').toLowerCase().includes(q)||String(t.category||'').toLowerCase().includes(q);
+    return matchTipo&&matchBusca;
+  });
+
   document.getElementById('main-content').innerHTML=`
-  <div class="page-header-row"><div class="page-header"><h1>Relatórios</h1><p>Histórico completo.</p></div><button class="btn-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>CSV</button></div>
-  <div class="table-card" style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead><tbody>
-  ${sorted.length?sorted.map(t=>`<tr><td class="td-gray">${fmtD(t.date)}</td><td style="font-weight:500">${t.description||'-'}</td><td><span class="bs bf">${t.category||'Geral'}</span></td><td><span class="bs ${isIncome(t.type)?'ba':'bi'}">${isIncome(t.type)?'Entrada':'Saída'}</span></td><td class="${isIncome(t.type)?'td-green':'td-red'}" style="text-align:right">${isIncome(t.type)?'+':'-'}${fmt(t.amount)}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">Nenhuma transação.</td></tr>'}
-  </tbody></table></div>`;
+<style>
+.export-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn-exp{display:flex;align-items:center;gap:5px;padding:7px 13px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;transition:.15s;white-space:nowrap}
+.btn-exp:hover{background:#f3f4f6}
+.btn-exp-pdf{border-color:#dc2626;color:#dc2626}
+.btn-exp-xls{border-color:#16a34a;color:#16a34a}
+.btn-exp-doc{border-color:#1a6fc4;color:#1a6fc4}
+.tbl-action{background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:5px;font-size:12px;font-weight:600}
+.tbl-del{color:#dc2626;background:#fef2f2}
+</style>
+  <div class="page-header-row" style="align-items:flex-start">
+    <div class="page-header"><h1>Central de Controle 📋</h1><p>${tabelaCache.length} transações encontradas.</p></div>
+    <div class="export-btns">
+      <button class="btn-exp btn-exp-pdf" onclick="exportPDF()">📄 PDF</button>
+      <button class="btn-exp btn-exp-xls" onclick="exportXLS()">📊 Excel</button>
+      <button class="btn-exp btn-exp-doc" onclick="exportDOC()">📝 Word</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="search-bar" style="margin:0;flex:1;min-width:180px;max-width:320px">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input placeholder="Buscar por descrição ou categoria..." value="${tabelaBusca}" oninput="tabelaBusca=this.value;renderTabela()"/>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn${tabelaFiltro==='all'?' active':''}" onclick="tabelaFiltro='all';renderTabela()">Todas</button>
+      <button class="tab-btn${tabelaFiltro==='income'?' active':''}" onclick="tabelaFiltro='income';renderTabela()">Entradas</button>
+      <button class="tab-btn${tabelaFiltro==='expense'?' active':''}" onclick="tabelaFiltro='expense';renderTabela()">Saídas</button>
+    </div>
+  </div>
+  <div class="table-card" style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th><th>Ações</th></tr></thead>
+      <tbody>
+      ${filtered.length?filtered.map(t=>`<tr>
+        <td class="td-gray" style="white-space:nowrap">${fmtD(t.date)}</td>
+        <td style="font-weight:500;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description||'-'}</td>
+        <td><span class="bs bf">${t.category||'Geral'}</span></td>
+        <td><span class="bs ${isIncome(t.type)?'ba':'bi'}">${isIncome(t.type)?'Entrada':'Saída'}</span></td>
+        <td class="${isIncome(t.type)?'td-green':'td-red'}" style="text-align:right;white-space:nowrap">${isIncome(t.type)?'+':'-'}${fmt(t.amount)}</td>
+        <td><button class="tbl-action tbl-del" onclick="deleteTx('${t.id}')">Excluir</button></td>
+      </tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Nenhuma transação encontrada.</td></tr>`}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+async function deleteTx(id){
+  if(!confirm('Excluir esta transação?'))return;
+  await sb.from('transactions').delete().eq('id',id);
+  tabelaCache=tabelaCache.filter(t=>t.id!==id);
+  renderTabela();
+}
+
+/* ---- Exportações ---- */
+function tabelaDados(){
+  return tabelaCache.filter(t=>{
+    if(tabelaFiltro==='income')return isIncome(t.type);
+    if(tabelaFiltro==='expense')return isExpense(t.type);
+    return true;
+  });
+}
+
+function exportXLS(){
+  const rows=tabelaDados();
+  let csv='Data,Descrição,Categoria,Tipo,Valor\n';
+  rows.forEach(t=>{
+    const val=(isIncome(t.type)?1:-1)*parseFloat(t.amount||0);
+    csv+=`${fmtD(t.date)},"${(t.description||'').replace(/"/g,'""')}","${t.category||'Geral'}",${isIncome(t.type)?'Entrada':'Saída'},${val.toFixed(2)}\n`;
+  });
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`finora-transacoes-${new Date().toISOString().split('T')[0]}.csv`;a.click();
+}
+
+function exportDOC(){
+  const rows=tabelaDados();
+  const linhas=rows.map(t=>`<tr><td>${fmtD(t.date)}</td><td>${t.description||'-'}</td><td>${t.category||'Geral'}</td><td>${isIncome(t.type)?'Entrada':'Saída'}</td><td>${(isIncome(t.type)?'+':'-')+fmt(t.amount)}</td></tr>`).join('');
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'/><title>Finora - Relatório</title><style>body{font-family:Arial;font-size:11pt}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px}th{background:#1a6fc4;color:white}h1{color:#1a6fc4}</style></head><body><h1>Finora — Relatório de Transações</h1><p>Gerado em: ${new Date().toLocaleDateString('pt-BR')}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${linhas}</tbody></table></body></html>`;
+  const blob=new Blob([html],{type:'application/msword'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`finora-relatorio-${new Date().toISOString().split('T')[0]}.doc`;a.click();
+}
+
+function exportPDF(){
+  const rows=tabelaDados();
+  const income=rows.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0);
+  const expense=rows.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0);
+  const linhas=rows.map(t=>`<tr><td>${fmtD(t.date)}</td><td>${t.description||'-'}</td><td>${t.category||'Geral'}</td><td style="color:${isIncome(t.type)?'#16a34a':'#dc2626'}">${isIncome(t.type)?'Entrada':'Saída'}</td><td style="text-align:right;font-weight:600;color:${isIncome(t.type)?'#16a34a':'#dc2626'}">${(isIncome(t.type)?'+':'-')+fmt(t.amount)}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset='utf-8'/><title>Finora PDF</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a2e;padding:30px}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1a6fc4;padding-bottom:14px;margin-bottom:20px}.logo{font-size:22px;font-weight:800;color:#1a6fc4}.date{font-size:11px;color:#6b7280}.summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}.sum-card{background:#f8fafc;border-radius:8px;padding:12px}.sum-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#6b7280;margin-bottom:4px}.sum-val{font-size:16px;font-weight:800}table{width:100%;border-collapse:collapse}th{background:#1a6fc4;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.3px}td{padding:8px 10px;border-bottom:1px solid #f1f2f5;font-size:11px}tr:nth-child(even) td{background:#f9fafb}.footer{margin-top:24px;text-align:center;font-size:10px;color:#94a3b8}@media print{body{padding:10px}}</style></head>
+  <body><div class="header"><div class="logo">Finora</div><div class="date">Relatório gerado em ${new Date().toLocaleDateString('pt-BR')}</div></div>
+  <div class="summary"><div class="sum-card"><div class="sum-label">Total Entradas</div><div class="sum-val" style="color:#16a34a">${fmt(income)}</div></div><div class="sum-card"><div class="sum-label">Total Saídas</div><div class="sum-val" style="color:#dc2626">${fmt(expense)}</div></div><div class="sum-card"><div class="sum-label">Saldo</div><div class="sum-val" style="color:${income-expense>=0?'#16a34a':'#dc2626'}">${fmt(income-expense)}</div></div></div>
+  <table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th style="text-align:right">Valor</th></tr></thead><tbody>${linhas}</tbody></table>
+  <div class="footer">Finora — Controle Financeiro Pessoal · ${rows.length} transações</div></body></html>`;
+  const win=window.open('','_blank');win.document.write(html);win.document.close();
+  setTimeout(()=>win.print(),400);
 }
 
 /* CONFIGURAÇÕES */
