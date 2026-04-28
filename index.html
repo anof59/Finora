@@ -140,11 +140,6 @@ tr:last-child td{border-bottom:none}
 .progress-fill{height:100%;border-radius:3px;background:var(--blue)}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
 @media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
-.nav-metas-item { position: relative; overflow: hidden; transition: all 0.3s ease; }
-.nav-metas-item:hover { background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important; color: #15803d !important; transform: translateX(4px); }
-.nav-metas-item:hover svg { stroke: #15803d; transform: scale(1.15) rotate(5deg); transition: all 0.3s; }
-.nav-metas-item.active { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(22,163,74,0.3) !important; transform: translateX(4px); }
-.nav-metas-item.active svg { stroke: #fff !important; }
 </style>
 </head>
 <body>
@@ -233,10 +228,6 @@ tr:last-child td{border-bottom:none}
     <div class="sidebar-bottom">
       <div class="nav-divider"></div>
       <div class="sidebar-extra">
-        <div class="nav-item" onclick="pCfg()">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          Configurações
-        </div>
         <div class="nav-item nav-logout" onclick="doLogout()">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           Sair
@@ -298,7 +289,6 @@ function iconPath(n){
 var userNav=[
   {id:'dashboard',label:'Dashboard',icon:'grid'},
   {id:'transacoes',label:'Transações',icon:'arrows'},
-  {id:'metas',label:'Metas',icon:'trophy',badge:'2 Ativas'},
   {id:'investimentos',label:'Investimentos',icon:'trending-up'},
   {id:'analise',label:'Análise',icon:'bar-chart'},
   {id:'tabelas',label:'Tabelas',icon:'table'},
@@ -455,12 +445,7 @@ function setupApp(){
   var h='<div class="nav-section-label">Menu principal</div>';
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
-    var isMetas = n.id === 'metas';
-    var extraClass = isMetas ? ' nav-metas-item' : '';
-    var tooltip = isMetas ? ' title="Gerencie seus objetivos financeiros"' : '';
-    var badgeStyle = isMetas ? ' style="background:#15803d;padding:2px 6px;border-radius:12px;font-size:9px"' : '';
-    
-    h+='<div class="nav-item'+(i===0?' active':'')+extraClass+'" onclick="navigate(\''+n.id+'\',this)"'+tooltip+'><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'+n.label+(n.badge?'<span class="nav-ai-badge"'+badgeStyle+'>'+n.badge+'</span>':'')+'</div>';
+    h+='<div class="nav-item'+(i===0?' active':'')+'" onclick="navigate(\''+n.id+'\',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'+n.label+(n.badge?'<span class="nav-ai-badge">'+n.badge+'</span>':'')+'</div>';
   }
   el.innerHTML=h;
   navigate(nav[0].id,el.querySelector('.nav-item'));
