@@ -138,6 +138,22 @@ tr:last-child td{border-bottom:none}
 .search-bar input{border:none;background:none;outline:none;font-size:13px;width:100%}
 .progress-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden;margin-top:6px}
 .progress-fill{height:100%;border-radius:3px;background:var(--blue)}
+/* ── Sidebar v2 ── */
+.nav-item{position:relative}
+.nav-item:hover{background:#eef2f7;color:#1a1a2e;transform:translateX(2px)}
+.nav-item{transition:background .18s,color .18s,transform .15s}
+.nav-item.active{background:linear-gradient(135deg,#1565c0,#1e88e5);color:#fff;box-shadow:0 3px 12px rgba(30,136,229,.30)}
+.nav-item.active .nav-item-badge{background:rgba(255,255,255,.25);color:#fff}
+.nav-item-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.nav-item-badge.green{background:#dcfce7;color:#15803d}
+.nav-item-badge.blue{background:#dbeafe;color:#1d4ed8}
+.nav-item-badge.new{background:#10b981;color:#fff;text-transform:uppercase}
+.nav-item-badge.amber{background:#fef3c7;color:#92400e}
+.nav-tooltip{display:none;position:absolute;left:calc(var(--sidebar-w) - 4px);top:50%;transform:translateY(-50%);background:#0f172a;color:#f8fafc;font-size:11px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.25);line-height:1.4}
+.nav-tooltip::before{content:'';position:absolute;right:100%;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-color:#0f172a}
+.nav-item:hover .nav-tooltip{display:block}
+.nav-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#c4cdd8;padding:12px 18px 3px;margin-top:2px;display:flex;align-items:center;gap:6px}
+.nav-section-label::after{content:'';flex:1;height:1px;background:#eef2f7;margin-left:4px}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
 @media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
 </style>
@@ -280,32 +296,46 @@ function iconPath(n){
     shield:'<path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7z"/>',
     users:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
     'plus-circle':'<circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>',
-    trophy:'<path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/>'
+    trophy:'<path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/>',
+    wallet:'<path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z"/><path d="M16 12a1 1 0 110 2 1 1 0 010-2z" fill="currentColor" stroke="none"/>',
+    calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>'
   };
   return m[n]||'';
 }
 
 /* ===== NAV ===== */
 var userNav=[
-  {id:'dashboard',label:'Dashboard',icon:'grid'},
-  {id:'transacoes',label:'Transações',icon:'arrows'},
-  {id:'investimentos',label:'Investimentos',icon:'trending-up'},
-  {id:'analise',label:'Análise',icon:'bar-chart'},
-  {id:'tabelas',label:'Tabelas',icon:'table'},
-  {id:'assistente-financeiro',label:'Assistente Financeiro',icon:'plus-circle',badge:'Novo'}
+  {section:'Visão Geral'},
+  {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
+  {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
+  {section:'Gestão'},
+  {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controle inteligente do seu dinheiro',badgeKey:'livre'},
+  {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Planeje seu futuro financeiro'},
+  {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Resumo do seu mês financeiro',badgeKey:'mes'},
+  {section:'Patrimônio'},
+  {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
+  {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
+  {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
+  {section:'Ferramentas'},
+  {id:'assistente-financeiro',label:'Assistente Financeiro',icon:'plus-circle',badge:'Novo',badgeStyle:'new',tooltip:'Gerencie saldos e dívidas'}
 ];
 var adminNav=[
-  {id:'admin-visao-geral',label:'Visão Geral',icon:'grid'},
-  {id:'admin-usuarios',label:'Usuários',icon:'users'},
-  {id:'admin-assinaturas',label:'Assinaturas e Planos',icon:'trending-up'},
-  {id:'admin-pagamentos',label:'Pagamentos',icon:'arrows'},
-  {id:'admin-acessos',label:'Acessos e Bloqueios',icon:'shield'},
-  {id:'admin-relatorios',label:'Relatórios',icon:'table'},
-  {id:'admin-config',label:'Configurações',icon:'bar-chart'}
+  {section:'Painel'},
+  {id:'admin-visao-geral',label:'Visão Geral',icon:'grid',tooltip:'Resumo geral do SaaS'},
+  {section:'Usuários'},
+  {id:'admin-usuarios',label:'Usuários',icon:'users',tooltip:'Gerenciar todos os usuários'},
+  {id:'admin-assinaturas',label:'Assinaturas e Planos',icon:'trending-up',tooltip:'Planos e receita'},
+  {id:'admin-pagamentos',label:'Pagamentos',icon:'arrows',tooltip:'Histórico de pagamentos'},
+  {section:'Controle'},
+  {id:'admin-acessos',label:'Acessos e Bloqueios',icon:'shield',tooltip:'Bloquear e desbloquear acesso'},
+  {id:'admin-relatorios',label:'Relatórios',icon:'table',tooltip:'Exportar dados'},
+  {id:'admin-config',label:'Configurações',icon:'bar-chart',tooltip:'Configurações do sistema'}
 ];
 var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
   analise:'Análise',tabelas:'Tabelas','assistente-financeiro':'Assistente Financeiro',
+  organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -328,6 +358,7 @@ function navigate(pageId,el){
   var map={
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
     analise:pAnalise,tabelas:pTabelas,'assistente-financeiro':pAssistenteFinanceiro,
+    organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
@@ -431,6 +462,26 @@ async function doCadastro(btn){
   }
 }
 
+var _navBadges={};
+
+async function refreshNavBadges(){
+  try{
+    var r=await sb.from('transactions').select('amount,type,date').eq('user_id',currentUser.id);
+    var all=r.data||[];
+    var now=new Date();
+    var ym=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+    var mesAll=all.filter(function(t){return String(t.date||'').startsWith(ym);});
+    var incMes=mesAll.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+    var expMes=mesAll.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+    var saldoMes=incMes-expMes;
+    var totalInc=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+    var totalExp=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+    var livre=totalInc-totalExp;
+    _navBadges.livre=livre>0?'R$ '+Math.round(livre)+' livre':null;
+    _navBadges.mes=saldoMes>=0?'R$ '+Math.round(saldoMes)+' livre':null;
+  }catch(e){_navBadges={};}
+}
+
 function setupApp(){
   var isAdmin=currentProfile&&currentProfile.role==='admin';
   var nav=isAdmin?adminNav:userNav;
@@ -441,14 +492,43 @@ function setupApp(){
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
   document.getElementById('sidebar-plan-badge').textContent=plan;
+
+  if(!isAdmin){
+    refreshNavBadges().then(function(){renderSidebarNav(nav);});
+  } else {
+    renderSidebarNav(nav);
+  }
+}
+
+function renderSidebarNav(nav){
   var el=document.getElementById('sidebar-nav');
-  var h='<div class="nav-section-label">Menu principal</div>';
+  var h='';
+  var firstItem=null;
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
-    h+='<div class="nav-item'+(i===0?' active':'')+'" onclick="navigate(\''+n.id+'\',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'+n.label+(n.badge?'<span class="nav-ai-badge">'+n.badge+'</span>':'')+'</div>';
+    if(n.section!=null){
+      h+='<div class="nav-section-label">'+n.section+'</div>';
+      continue;
+    }
+    if(!firstItem)firstItem=n;
+    var badgeHtml='';
+    if(n.badge){
+      var bStyle=n.badgeStyle||'new';
+      badgeHtml='<span class="nav-item-badge '+bStyle+'">'+n.badge+'</span>';
+    } else if(n.badgeKey&&_navBadges[n.badgeKey]){
+      badgeHtml='<span class="nav-item-badge green">'+_navBadges[n.badgeKey]+'</span>';
+    }
+    var tooltipHtml=n.tooltip?'<span class="nav-tooltip">'+n.tooltip+'</span>':'';
+    h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="">'
+      +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'
+      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
+      +badgeHtml
+      +tooltipHtml
+      +'</div>';
   }
   el.innerHTML=h;
-  navigate(nav[0].id,el.querySelector('.nav-item'));
+  var firstEl=el.querySelector('.nav-item');
+  if(firstEl&&firstItem){firstEl.classList.add('active');navigate(firstItem.id,firstEl);}
 }
 
 /* ===== DASHBOARD ===== */
@@ -1041,6 +1121,187 @@ function exportPDF(){var inc=tabelaCache.filter(function(t){return isIncome(t.ty
 
 /* ===== CONFIGURAÇÕES ===== */
 function pCfg(){document.getElementById('topbar-title').textContent='Configurações';devScreen();}
+
+/* ===== ORGANIZAÇÃO ===== */
+async function pOrganizacao(){
+  var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);
+  var all=r.data||[];
+  var inc=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var exp=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var saldo=inc-exp;
+  var pGastar=Math.max(0,saldo*0.50);
+  var pGuardar=Math.max(0,saldo*0.20);
+  var pInvestir=Math.max(0,saldo*0.30);
+  var alertCor=saldo<=0?'#dc2626':saldo<500?'#d97706':'#16a34a';
+  var alertMsg=saldo<=0?'Saldo negativo. Reduza gastos antes de planejar aportes.':saldo<500?'Saldo moderado. Priorize a reserva de emergência.':'Saldo saudável! Distribua com inteligência.';
+  document.getElementById('main-content').innerHTML=
+    '<div class="page-header-row"><div class="page-header"><h1>Organização 💳</h1><p>Controle inteligente do seu dinheiro</p></div></div>'
+    +'<div style="background:'+alertCor+'12;border:1px solid '+alertCor+'44;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:'+alertCor+';flex-shrink:0"></div>'
+    +'<span style="font-size:13px;color:'+alertCor+';font-weight:600">'+alertMsg+'</span></div>'
+    +'<div class="cards-grid" style="margin-bottom:24px">'
+    +'<div class="card"><div class="card-label">Ganhos Totais</div><div class="card-value td-green">'+fmt(inc)+'</div></div>'
+    +'<div class="card"><div class="card-label">Gastos Totais</div><div class="card-value td-red">'+fmt(exp)+'</div></div>'
+    +'<div class="card" style="border-left:4px solid '+(saldo>=0?'#16a34a':'#dc2626')+'"><div class="card-label">Saldo Livre</div><div class="card-value" style="color:'+(saldo>=0?'#16a34a':'#dc2626')+'">'+fmt(saldo)+'</div></div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:20px">'
+    +'<div style="padding:16px 20px;border-bottom:1px solid #f3f4f6"><div style="font-size:14px;font-weight:700">Como distribuir seu saldo</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Baseado na regra 50/20/30 adaptada ao seu perfil</div></div>'
+    +[
+      {label:'Pode gastar',val:pGastar,pct:50,cor:'#1a6fc4',desc:'Despesas essenciais e lazer',icon:'🛒'},
+      {label:'Deve guardar',val:pGuardar,pct:20,cor:'#16a34a',desc:'Reserva de emergência',icon:'🏦'},
+      {label:'Pode investir',val:pInvestir,pct:30,cor:'#7c3aed',desc:'Crescimento patrimonial',icon:'📈'}
+    ].map(function(b){return '<div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #f8fafc">'
+      +'<div style="width:44px;height:44px;border-radius:12px;background:'+b.cor+'15;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+b.icon+'</div>'
+      +'<div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<div><div style="font-size:13px;font-weight:700;color:#0d1b2e">'+b.label+'</div><div style="font-size:11px;color:#94a3b8">'+b.desc+'</div></div>'
+      +'<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:'+b.cor+'">'+fmt(b.val)+'</div><div style="font-size:10px;color:#94a3b8;font-weight:600">'+b.pct+'% do saldo</div></div></div>'
+      +'<div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="width:'+b.pct+'%;height:100%;background:'+b.cor+';border-radius:3px"></div></div>'
+      +'</div></div>';}).join('')
+    +'</div>'
+    +'<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:14px;padding:18px 20px;color:#fff">'
+    +'<div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Dica do Assistente</div>'
+    +'<div style="font-size:13px;line-height:1.7;color:#e2e8f0">'+(saldo>0?'Com seu saldo de <strong style="color:#4ade80">'+fmt(saldo)+'</strong>, você pode guardar <strong style="color:#4ade80">'+fmt(pGuardar)+'</strong> agora mesmo. Pequenos aportes consistentes criam grandes patrimônios.':'Organize seus gastos para liberar caixa. Revise a aba de <strong style="color:#f9a8d4">Transações</strong> e identifique onde cortar.')+'</div></div>';
+}
+
+/* ===== PLANEJAMENTO ===== */
+var PLAN_KEY='finora_plan_v1';
+function planLoad(){try{return JSON.parse(localStorage.getItem(PLAN_KEY)||'{"estrategias":[],"regra":"50-30-20","meta_mensal":0}');}catch(e){return{estrategias:[],regra:'50-30-20',meta_mensal:0};}}
+function planSave(d){localStorage.setItem(PLAN_KEY,JSON.stringify(d));}
+
+async function pPlanejamento(){
+  var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);
+  var all=r.data||[];
+  var inc=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var exp=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var saldo=inc-exp;
+  var d=planLoad();
+
+  var regras={
+    '50-30-20':{label:'50/30/20',desc:'50% necessidades · 30% desejos · 20% poupança',cor:'#1a6fc4',dist:[50,30,20]},
+    '70-20-10':{label:'70/20/10',desc:'70% gastos · 20% poupança · 10% investimento',cor:'#16a34a',dist:[70,20,10]},
+    '60-20-20':{label:'60/20/20',desc:'60% estilo de vida · 20% metas · 20% futuro',cor:'#7c3aed',dist:[60,20,20]}
+  };
+  var rAtual=regras[d.regra]||regras['50-30-20'];
+  var dist=rAtual.dist;
+
+  var html='<div class="page-header-row"><div class="page-header"><h1>Planejamento 🧭</h1><p>Estratégias para seu futuro financeiro</p></div></div>';
+
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px">';
+  Object.entries(regras).forEach(function(e){
+    var k=e[0];var rv=e[1];var ativ=d.regra===k;
+    html+='<div onclick="planSetRegra(\''+k+'\')" style="background:'+(ativ?'linear-gradient(135deg,#1565c0,#1e88e5)':'#fff')+';border:2px solid '+(ativ?'#1565c0':'#e5e7eb')+';border-radius:14px;padding:16px;cursor:pointer;transition:all .2s">'
+      +'<div style="font-size:16px;font-weight:800;color:'+(ativ?'#fff':'#0d1b2e')+';margin-bottom:4px">'+rv.label+'</div>'
+      +'<div style="font-size:12px;color:'+(ativ?'rgba(255,255,255,.8)':'#6b7280')+'">'+rv.desc+'</div>'
+      +(ativ?'<div style="margin-top:10px;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase">✓ Estratégia Ativa</div>':'')
+      +'</div>';
+  });
+  html+='</div>';
+
+  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:20px">'
+    +'<div style="padding:16px 20px;border-bottom:1px solid #f3f4f6"><div style="font-size:14px;font-weight:700">Distribuição pelo Método '+rAtual.label+'</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Calculado com base na sua renda total de '+fmt(inc)+'</div></div>'
+    +[['Necessidades',dist[0],'#1a6fc4'],['Desejos / Lazer',dist[1],'#f59e0b'],['Poupança / Investimento',dist[2],'#16a34a']].map(function(b){
+      var val=inc*b[1]/100;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #f8fafc;gap:12px">'
+        +'<div style="display:flex;align-items:center;gap:10px"><div style="width:10px;height:10px;border-radius:50%;background:'+b[2]+';flex-shrink:0"></div><span style="font-size:13px;font-weight:600;color:#0d1b2e">'+b[0]+'</span><span style="font-size:11px;color:#94a3b8">('+b[1]+'%)</span></div>'
+        +'<strong style="font-size:14px;color:'+b[2]+'">'+fmt(val)+'</strong></div>';
+    }).join('')+'</div>';
+
+  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden">'
+    +'<div style="padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:14px;font-weight:700">Estratégias Personalizadas</div><div style="font-size:12px;color:#6b7280;margin-top:2px">Anotações e planos do seu futuro</div></div>'
+    +'<button onclick="planOpenModal()" style="padding:7px 14px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">+ Adicionar</button></div>';
+  if(!d.estrategias.length){html+='<div style="padding:40px;text-align:center;color:#9ca3af;font-size:13px">Nenhuma estratégia definida ainda.</div>';}
+  else{d.estrategias.forEach(function(e,i){html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid #f8fafc">'
+    +'<div><div style="font-size:13px;font-weight:700;color:#0d1b2e;margin-bottom:4px">'+e.titulo+'</div><div style="font-size:12px;color:#6b7280;line-height:1.5">'+e.descricao+'</div></div>'
+    +'<button onclick="planDel('+i+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;flex-shrink:0">×</button></div>';});}
+  html+='</div>';
+
+  document.getElementById('main-content').innerHTML=html;
+}
+function planSetRegra(r){var d=planLoad();d.regra=r;planSave(d);pPlanejamento();}
+function planOpenModal(){
+  mkModal('plan-modal','<div class="modal-title">Nova Estratégia 🧭</div>'
+    +'<div class="modal-field"><label>Título</label><input id="pl-titulo" placeholder="Ex: Economizar para viagem"/></div>'
+    +'<div class="modal-field"><label>Descrição</label><input id="pl-desc" placeholder="Ex: Cortar assinaturas e guardar R$ 300/mês"/></div>'
+    +'<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'plan-modal\')">Cancelar</button><button class="btn-modal-save" onclick="planSaveModal()">Salvar</button></div>');
+}
+function planSaveModal(){
+  var t=(document.getElementById('pl-titulo').value||'').trim();
+  var desc=(document.getElementById('pl-desc').value||'').trim();
+  if(!t){alert('Informe o título.');return;}
+  var d=planLoad();d.estrategias.push({titulo:t,descricao:desc});planSave(d);closeModal('plan-modal');pPlanejamento();
+}
+function planDel(i){var d=planLoad();d.estrategias.splice(i,1);planSave(d);pPlanejamento();}
+
+/* ===== MÊS ATUAL ===== */
+async function pMesAtual(){
+  var r=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
+  var all=r.data||[];
+  var now=new Date();
+  var ym=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  var mesAll=all.filter(function(t){return String(t.date||'').startsWith(ym);});
+  var incMes=mesAll.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var expMes=mesAll.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var saldoMes=incMes-expMes;
+  var diasMes=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  var diaAtual=now.getDate();
+  var pctMes=Math.round(diaAtual/diasMes*100);
+  var gastosDia=expMes/diaAtual;
+  var previsaoExp=gastosDia*diasMes;
+  var diasRestantes=diasMes-diaAtual;
+  var gastoPorDiaIdeal=incMes>0?(incMes-expMes)/Math.max(1,diasRestantes):0;
+  var nomeMes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][now.getMonth()];
+
+  var alertMsg='',alertCor='#16a34a';
+  if(expMes>incMes){alertMsg='Gastos superaram a renda este mês.';alertCor='#dc2626';}
+  else if(previsaoExp>incMes){alertMsg='No ritmo atual, você vai gastar mais do que ganha até o fim do mês.';alertCor='#d97706';}
+  else{alertMsg='Mês sob controle. Você está dentro do orçamento!';alertCor='#16a34a';}
+
+  var byCat={};
+  mesAll.filter(function(t){return isExpense(t.type);}).forEach(function(t){var c=t.category||'Geral';byCat[c]=(byCat[c]||0)+parseFloat(t.amount);});
+  var catRank=Object.entries(byCat).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var cores=['#dc2626','#d97706','#7c3aed','#1a6fc4','#0891b2'];
+
+  var html='<div class="page-header-row"><div class="page-header"><h1>Mês Atual 📅</h1><p>'+nomeMes+' de '+now.getFullYear()+' — Dia '+diaAtual+' de '+diasMes+'</p></div></div>'
+    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 20px;margin-bottom:20px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<div style="font-size:13px;font-weight:700;color:#0d1b2e">Progresso do Mês</div>'
+    +'<div style="font-size:12px;color:#6b7280;font-weight:600">'+diaAtual+' / '+diasMes+' dias ('+pctMes+'%)</div></div>'
+    +'<div style="height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin-bottom:14px">'
+    +'<div style="width:'+pctMes+'%;height:100%;background:linear-gradient(90deg,#1565c0,#1e88e5);border-radius:5px;transition:width 1s ease"></div></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:'+alertCor+';font-weight:600">'
+    +'<div style="width:8px;height:8px;border-radius:50%;background:'+alertCor+'"></div>'+alertMsg+'</div></div>'
+    +'<div class="cards-grid" style="margin-bottom:20px">'
+    +'<div class="card"><div class="card-label">Entradas do Mês</div><div class="card-value td-green">'+fmt(incMes)+'</div></div>'
+    +'<div class="card"><div class="card-label">Saídas do Mês</div><div class="card-value td-red">'+fmt(expMes)+'</div></div>'
+    +'<div class="card" style="border-left:4px solid '+(saldoMes>=0?'#16a34a':'#dc2626')+'"><div class="card-label">Saldo Restante</div><div class="card-value" style="color:'+(saldoMes>=0?'#16a34a':'#dc2626')+'">'+fmt(saldoMes)+'</div></div>'
+    +'<div class="card"><div class="card-label">Previsão de Gastos</div><div class="card-value" style="font-size:16px;color:#d97706">'+fmt(previsaoExp)+'</div></div>'
+    +'</div>';
+
+  if(diasRestantes>0){
+    html+='<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:14px;padding:18px 20px;margin-bottom:20px;color:#fff">'
+      +'<div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Guia para o Restante do Mês</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+      +'<div><div style="font-size:11px;color:#64748b;margin-bottom:4px">Dias restantes</div><div style="font-size:22px;font-weight:800;color:#e2e8f0">'+diasRestantes+'</div></div>'
+      +'<div><div style="font-size:11px;color:#64748b;margin-bottom:4px">Pode gastar por dia</div><div style="font-size:22px;font-weight:800;color:'+(gastoPorDiaIdeal>=0?'#4ade80':'#f87171')+'">'+fmt(Math.max(0,gastoPorDiaIdeal))+'</div></div>'
+      +'</div></div>';
+  }
+
+  if(catRank.length){
+    html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden"><div style="padding:14px 20px;border-bottom:1px solid #f3f4f6"><div style="font-size:14px;font-weight:700">Gastos por Categoria — '+nomeMes+'</div></div>';
+    catRank.forEach(function(e,ci){
+      var pct=expMes>0?Math.round(e[1]/expMes*100):0;
+      var cor=cores[ci%cores.length];
+      html+='<div style="padding:12px 20px;border-bottom:1px solid #f8fafc"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px"><span>'+e[0]+'</span><div style="display:flex;gap:10px;align-items:center"><span style="color:'+cor+'">'+pct+'%</span><span style="color:#0d1b2e">'+fmt(e[1])+'</span></div></div>'
+        +'<div style="height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+cor+';border-radius:3px"></div></div></div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:40px;text-align:center;color:#9ca3af;font-size:13px">Nenhuma transação registrada em '+nomeMes+'.</div>';
+  }
+
+  document.getElementById('main-content').innerHTML=html;
+}
 
 /* ===== ASSISTENTE FINANCEIRO ===== */
 var AF2_KEY='finora_af2_v1';
