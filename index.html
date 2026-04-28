@@ -551,63 +551,275 @@ function mkModal(id,inner){
 }
 
 /* ===== METAS ===== */
-var METAS_KEY='finora_metas_v1';
+var METAS_KEY='finora_metas_v2';
 function metasLoad(){try{return JSON.parse(localStorage.getItem(METAS_KEY)||'[]');}catch(e){return[];}}
 function metasSave(d){localStorage.setItem(METAS_KEY,JSON.stringify(d));}
 async function pMetas(){
   var metas=metasLoad();
   var sobra=0;
-  try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobra=Math.max(0,all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0)-all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0));}catch(e){}
-  var html='<div class="page-header-row"><div class="page-header"><h1>Metas 🎯</h1></div><button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button></div>';
-  if(sobra>0)html+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px">💡 Sobram <strong style="color:#16a34a">'+fmt(sobra)+'</strong> após seus gastos.</div>';
-  if(!metas.length){html+='<div style="background:#fff;border:1px dashed #d1d5db;border-radius:14px;padding:52px 20px;text-align:center"><div style="font-size:44px;margin-bottom:10px">🎯</div><div style="font-size:15px;font-weight:700;margin-bottom:6px">Nenhuma meta</div><button class="btn-primary" onclick="openMetaModal()">Criar meta</button></div>';}
-  else{
-    var cores=['#1a6fc4','#16a34a','#dc2626','#7c3aed','#d97706','#0891b2'];
-    metas.forEach(function(m,i){
-      var alvo=parseFloat(m.alvo)||0,guardado=parseFloat(m.guardado)||0;
+  try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobra=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
+  
+  var html=`<div class="page-header-row"><div class="page-header"><h1>Metas Financeiras 🎯</h1><p>Defina, gerencie e alcance seus objetivos</p></div><button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button></div>`;
+  
+  var dicas = [];
+  var metasConcluidas = metas.filter(m => m.guardado >= m.alvo && m.alvo > 0).length;
+  if(metasConcluidas > 0) dicas.push({i:'🏆', txt:`Você já atingiu <strong>${metasConcluidas} meta(s)</strong>! Selo de Disciplina Financeira desbloqueado.`, cor:'#d97706', bg:'#fffbeb', br:'#f59e0b'});
+  
+  if(sobra > 0) dicas.push({i:'💡', txt:`Seu saldo livre do mês é <strong>${fmt(sobra)}</strong>. Distribuindo esse valor nas suas metas, você acelera suas conquistas.`, cor:'#15803d', bg:'#f0fdf4', br:'#16a34a'});
+  else dicas.push({i:'🤖', txt:`Você não tem sobra de caixa no momento. Que tal revisar seus gastos para poder investir nas suas metas?`, cor:'#92400e', bg:'#fffbeb', br:'#d97706'});
+
+  var alerts = [];
+  metas.forEach(m => {
+    var pct = m.alvo>0 ? Math.min(100, Math.round(m.guardado/m.alvo*100)) : 0;
+    if(pct >= 80 && pct < 100) alerts.push(`A meta <strong>${m.nome}</strong> está ${pct}% concluída! Falta muito pouco.`);
+  });
+  if(alerts.length) dicas.push({i:'🔥', txt: alerts.join('<br>'), cor:'#c2410c', bg:'#ffedd5', br:'#f97316'});
+
+  html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">`;
+  dicas.forEach(d => {
+    html += `<div style="background:${d.bg};border-left:4px solid ${d.br};border-radius:10px;padding:14px 18px;font-size:13px;color:${d.cor};display:flex;gap:12px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,0.05)">
+      <span style="font-size:20px">${d.i}</span><div style="line-height:1.5">${d.txt}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if(!metas.length){
+    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:60px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)"><div style="font-size:48px;margin-bottom:14px">🚀</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Você ainda não tem metas</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">Defina um objetivo, prazo e deixe a IA ajudar você a chegar lá.</div><button class="btn-primary" onclick="openMetaModal()" style="padding:10px 20px;font-size:14px">Criar minha primeira meta</button></div>`;
+  } else {
+    html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:16px;">`;
+    metas.forEach((m,i)=>{
+      var alvo=parseFloat(m.alvo)||0, guardado=parseFloat(m.guardado)||0;
       var pct=alvo>0?Math.min(100,Math.round(guardado/alvo*100)):0;
       var falta=Math.max(0,alvo-guardado);
-      var cor=m.cor||cores[i%cores.length];
-      html+='<div style="background:#fff;border:1px solid #e5e7eb;border-top:3px solid '+cor+';border-radius:12px;padding:18px;margin-bottom:12px">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:700">'+m.nome+'</div><span style="background:'+cor+';color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">'+pct+'%</span></div>'
-        +'<div style="height:8px;background:#f1f2f5;border-radius:4px;overflow:hidden;margin-bottom:8px"><div style="width:'+pct+'%;height:100%;background:'+cor+';border-radius:4px"></div></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:12px"><span>'+fmt(guardado)+' guardados</span><span>Meta: '+fmt(alvo)+'</span></div>'
-        +'<div style="display:flex;gap:8px"><button onclick="openAddValorMeta('+i+')" style="padding:6px 12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1a6fc4;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Valor</button><button onclick="deleteMeta('+i+')" style="padding:6px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Excluir</button></div>'
-        +'</div>';
+      var cor=m.cor||'#1a6fc4';
+      var sug = '';
+      if(m.prazo) {
+         var hoje = new Date(); var dPrazo = new Date(m.prazo);
+         var meses = (dPrazo.getFullYear() - hoje.getFullYear())*12 + (dPrazo.getMonth() - hoje.getMonth());
+         if(meses > 0 && falta > 0) sug = `Guarde <strong>${fmt(falta/meses)}</strong>/mês`;
+         else if(falta > 0) sug = `⚠️ Prazo se esgotando!`;
+         else sug = `🎉 Meta Concluída!`;
+      }
+      
+      html+=`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${cor}"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0d1b2e">${m.nome}</div>
+            ${m.prazo?`<div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo: ${fmtD(m.prazo)}</div>`:''}
+          </div>
+          <span style="background:${cor}15;color:${cor};font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px">${pct}%</span>
+        </div>
+        
+        <div style="height:10px;background:#f1f2f5;border-radius:5px;overflow:hidden;margin-bottom:12px">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg, ${cor}cc, ${cor});border-radius:5px;transition:width 1s cubic-bezier(0.4, 0, 0.2, 1)"></div>
+        </div>
+        
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:16px">
+          <div style="color:#6b7280">Guardado: <strong style="color:#1a1a2e">${fmt(guardado)}</strong></div>
+          <div style="color:#6b7280">Alvo: <strong style="color:#1a1a2e">${fmt(alvo)}</strong></div>
+        </div>
+        
+        ${sug ? `<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#475569;margin-bottom:16px;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>${sug}</div>` : ''}
+
+        <div style="display:flex;gap:8px;border-top:1px solid #f3f4f6;padding-top:16px">
+          <button onclick="openAddValorMeta(${i})" style="flex:1;padding:8px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Progresso</button>
+          <button onclick="deleteMeta(${i})" style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+        </div>
+      </div>`;
     });
+    html += `</div>`;
   }
   document.getElementById('main-content').innerHTML=html;
 }
+
 function openMetaModal(){
-  var cores=['#1a6fc4','#16a34a','#dc2626','#7c3aed','#d97706','#0891b2'];
-  var dots='';for(var i=0;i<cores.length;i++)dots+='<div onclick="selectMetaCor(this,\''+cores[i]+'\')" style="width:22px;height:22px;border-radius:50%;background:'+cores[i]+';cursor:pointer;border:2px solid '+(i===0?'#1a6fc4':'transparent')+'"></div>';
-  mkModal('meta-modal','<div class="modal-title">Nova Meta 🎯</div><div class="modal-field"><label>Nome</label><input id="m-nome" placeholder="Ex: Viagem"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Valor alvo (R$)</label><input type="number" id="m-alvo"/></div><div class="modal-field"><label>Já guardei (R$)</label><input type="number" id="m-guardado"/></div></div><div class="modal-field"><label>Cor</label><div id="meta-cores" style="display:flex;gap:8px">'+dots+'</div><input type="hidden" id="m-cor" value="'+cores[0]+'"/></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'meta-modal\')">Cancelar</button><button class="btn-modal-save" onclick="saveMeta()">Criar</button></div>');
+  var cores=['#1a6fc4','#16a34a','#dc2626','#7c3aed','#d97706','#0891b2','#e11d48'];
+  var dots=''; cores.forEach((c,i)=>{dots+=`<div onclick="selectMetaCor(this,'${c}')" style="width:26px;height:26px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${i===0?'#111827':'transparent'};box-shadow:0 2px 4px rgba(0,0,0,0.1)"></div>`;});
+  mkModal('meta-modal',`<div class="modal-title">Nova Meta Inteligente 🎯</div>
+    <div class="modal-field"><label>Qual seu objetivo?</label><input id="m-nome" placeholder="Ex: Viagem para o Japão"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="modal-field"><label>Valor alvo (R$)</label><input type="number" id="m-alvo"/></div>
+      <div class="modal-field"><label>Já tenho (R$)</label><input type="number" id="m-guardado" value="0"/></div>
+    </div>
+    <div class="modal-field"><label>Prazo (Data limite)</label><input type="date" id="m-prazo"/></div>
+    <div class="modal-field"><label>Cor do Card</label><div id="meta-cores" style="display:flex;gap:10px">${dots}</div><input type="hidden" id="m-cor" value="${cores[0]}"/></div>
+    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('meta-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveMeta()">Criar Meta</button></div>`);
 }
-function selectMetaCor(el,cor){document.querySelectorAll('#meta-cores div').forEach(function(d){d.style.borderColor='transparent';});el.style.borderColor='#1a6fc4';document.getElementById('m-cor').value=cor;}
-function saveMeta(){var nome=(document.getElementById('m-nome').value||'').trim();var alvo=parseFloat(document.getElementById('m-alvo').value||0);var guardado=parseFloat(document.getElementById('m-guardado').value||0);var cor=document.getElementById('m-cor').value;if(!nome||!alvo){alert('Informe nome e valor.');return;}var d=metasLoad();d.push({nome:nome,alvo:alvo,guardado:guardado,cor:cor});metasSave(d);closeModal('meta-modal');pMetas();}
-function deleteMeta(i){if(!confirm('Excluir?'))return;var d=metasLoad();d.splice(i,1);metasSave(d);pMetas();}
-function openAddValorMeta(i){var m=metasLoad()[i];mkModal('addval-modal','<div class="modal-title">Adicionar valor — '+m.nome+'</div><div class="modal-field"><label>Valor (R$)</label><input type="number" id="av-val"/></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'addval-modal\')">Cancelar</button><button class="btn-modal-save" onclick="saveAddValorMeta('+i+')">Confirmar</button></div>');}
-function saveAddValorMeta(i){var v=parseFloat(document.getElementById('av-val').value||0);if(!v){alert('Informe valor.');return;}var d=metasLoad();d[i].guardado=parseFloat(d[i].guardado||0)+v;metasSave(d);closeModal('addval-modal');pMetas();}
+function selectMetaCor(el,cor){document.querySelectorAll('#meta-cores div').forEach(d=>d.style.borderColor='transparent');el.style.borderColor='#111827';document.getElementById('m-cor').value=cor;}
+function saveMeta(){
+  var nome=(document.getElementById('m-nome').value||'').trim();
+  var alvo=parseFloat(document.getElementById('m-alvo').value||0);
+  var guardado=parseFloat(document.getElementById('m-guardado').value||0);
+  var prazo=document.getElementById('m-prazo').value;
+  var cor=document.getElementById('m-cor').value;
+  if(!nome||!alvo){alert('Informe nome e valor alvo.');return;}
+  var d=metasLoad(); d.push({nome:nome,alvo:alvo,guardado:guardado,prazo:prazo,cor:cor}); metasSave(d); closeModal('meta-modal'); pMetas();
+}
+function deleteMeta(i){if(!confirm('Tem certeza que deseja excluir esta meta?'))return;var d=metasLoad();d.splice(i,1);metasSave(d);pMetas();}
+function openAddValorMeta(i){
+  var m=metasLoad()[i];
+  mkModal('addval-modal',`<div class="modal-title">Progresso — ${m.nome}</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Faltam ${fmt(m.alvo - m.guardado)} para concluir sua meta.</div>
+    <div class="modal-field"><label>Novo Aporte (R$)</label><input type="number" id="av-val" placeholder="0.00"/></div>
+    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('addval-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAddValorMeta(${i})">Adicionar Valor</button></div>`);
+}
+function saveAddValorMeta(i){var v=parseFloat(document.getElementById('av-val').value||0);if(!v){alert('Informe o valor do aporte.');return;}var d=metasLoad();d[i].guardado=parseFloat(d[i].guardado||0)+v;metasSave(d);closeModal('addval-modal');pMetas();}
 
 /* ===== INVESTIMENTOS ===== */
-var INV_KEY='finora_inv_v1';
+var INV_KEY='finora_inv_v2';
 function invLoad(){try{return JSON.parse(localStorage.getItem(INV_KEY)||'[]');}catch(e){return[];}}
 function invSave(d){localStorage.setItem(INV_KEY,JSON.stringify(d));}
-function pInv(){
+
+async function pInv(){
   var invs=invLoad();
-  var total=invs.reduce(function(s,i){return s+parseFloat(i.valor||0);},0);
-  var rendAnual=invs.reduce(function(s,i){return s+parseFloat(i.valor||0)*(parseFloat(i.rend||0)/100);},0);
-  var cores=['#1a6fc4','#16a34a','#7c3aed','#d97706','#0891b2','#dc2626'];
-  var icones={'Renda Fixa':'🏦','Ações':'📊','FII':'🏢','Criptomoeda':'₿','Poupança':'🐷','Tesouro':'🇧🇷','Outro':'💼'};
-  var html='<div class="page-header-row"><div class="page-header"><h1>Investimentos 📈</h1></div><button class="btn-primary" onclick="openInvModal()">+ Novo Ativo</button></div>'
-    +'<div class="cards-grid"><div class="card"><div class="card-label">Total</div><div class="card-value td-green">'+fmt(total)+'</div></div><div class="card"><div class="card-label">Ativos</div><div class="card-value">'+invs.length+'</div></div><div class="card card-blue"><div class="card-label">Rend. anual</div><div class="card-value">+'+fmt(rendAnual)+'</div></div><div class="card"><div class="card-label">Projeção 12m</div><div class="card-value">'+fmt(total+rendAnual)+'</div></div></div>';
-  if(!invs.length)html+='<div style="background:#fff;border:1px dashed #d1d5db;border-radius:14px;padding:48px 20px;text-align:center"><div style="font-size:40px;margin-bottom:10px">📈</div><div style="font-size:15px;font-weight:700;margin-bottom:6px">Nenhum ativo</div><button class="btn-primary" onclick="openInvModal()">Adicionar</button></div>';
-  else invs.forEach(function(inv,i){var ic=icones[inv.tipo]||'💼';var cor=cores[i%cores.length];var ra=parseFloat(inv.valor||0)*(parseFloat(inv.rend||0)/100);html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:12px;background:'+cor+'18;display:flex;align-items:center;justify-content:center;font-size:20px">'+ic+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+inv.nome+'</div><div style="font-size:11px;color:#6b7280">'+inv.tipo+(inv.rend?' · '+inv.rend+'%/ano':'')+'</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:700;color:#16a34a">'+fmt(inv.valor)+'</div>'+(ra>0?'<div style="font-size:11px;color:#6b7280">+'+fmt(ra)+'/ano</div>':'')+'</div><button onclick="deleteInv('+i+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:20px;padding:0 4px">×</button></div>';});
+  var total=invs.reduce((s,i)=>s+parseFloat(i.valor||0),0);
+  var lucroPrej = invs.reduce((s,i)=>s+(parseFloat(i.atual||i.valor)-parseFloat(i.valor)), 0);
+  var patrimonyAtual = total + lucroPrej;
+  
+  var sobrou = 0;
+  try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobrou=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
+
+  var cores={'Renda Fixa':'#16a34a','Ações':'#1a6fc4','Criptomoeda':'#d97706','FII':'#7c3aed','Outro':'#6b7280'};
+  var icones={'Renda Fixa':'🏦','Ações':'📈','FII':'🏢','Criptomoeda':'₿','Outro':'💼'};
+  
+  var html=`<div class="page-header-row"><div class="page-header"><h1>Investimentos 💼</h1><p>Gestão de patrimônio e evolução inteligente</p></div><button class="btn-primary" onclick="openInvModal()">+ Novo Ativo</button></div>`;
+
+  var dicas = [];
+  if(total === 0) dicas.push(`Sua jornada investidora começa aqui. Com <strong>R$ 50</strong> já é possível investir no Tesouro Direto.`);
+  else if(total < 5000) dicas.push(`Foque em montar sua <strong>Reserva de Emergência</strong> (ideal: 6x seu custo mensal) em Renda Fixa de liquidez diária.`);
+  else if(!invs.some(i=>i.tipo==='Ações' || i.tipo==='FII')) dicas.push(`Que tal diversificar? Você tem 100% em ativos conservadores. Avalie fundos imobiliários ou ações.`);
+  
+  if(sobrou > 0) dicas.push(`💡 Sobrou <strong>${fmt(sobrou)}</strong> este mês! Você pode investir isso hoje e acelerar seus ganhos.`);
+
+  html += `<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start">
+    <div style="font-size:24px">🧠</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#0d1b2e;margin-bottom:4px">Insights da IA FFinora</div>
+      <div style="font-size:13px;color:#475569;line-height:1.6">${dicas.join('<br>')}</div>
+    </div>
+  </div>`;
+
+  html += `<div class="cards-grid" style="margin-bottom:24px;">
+    <div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Patrimônio Total</div><div class="card-value">${fmt(patrimonyAtual)}</div></div>
+    <div class="card" style="border-left:4px solid #6b7280"><div class="card-label">Valor Aplicado</div><div class="card-value" style="color:#475569">${fmt(total)}</div></div>
+    <div class="card" style="border-left:4px solid ${lucroPrej>=0?'#16a34a':'#dc2626'}"><div class="card-label">Lucro / Prejuízo</div><div class="card-value" style="color:${lucroPrej>=0?'#16a34a':'#dc2626'}">${lucroPrej>=0?'+':''}${fmt(lucroPrej)}</div></div>
+  </div>`;
+
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px, 1fr));gap:16px;margin-bottom:20px">
+    <div class="chart-card" style="margin:0"><div class="chart-title">Evolução do Patrimônio (Projeção Anual)</div><div style="position:relative;height:240px;margin-top:10px"><canvas id="c-inv"></canvas></div></div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:#0d1b2e">Simulador de Juros Compostos 🔮</div>
+      <div class="modal-field"><label>Aporte Mensal (R$)</label><input type="number" id="sim-aporte" value="500" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
+      <div class="modal-field"><label>Taxa Anual (%)</label><input type="number" id="sim-taxa" value="10" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
+      <div class="modal-field"><label>Anos</label><input type="number" id="sim-anos" value="10" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;margin-top:auto">
+        <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase">Você terá:</div>
+        <div id="sim-resultado" style="font-size:22px;font-weight:800;color:#16a34a;margin-top:4px">R$ 0,00</div>
+      </div>
+    </div>
+  </div>`;
+
+  if(!invs.length){
+    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:40px 20px;text-align:center;"><div style="font-size:32px;margin-bottom:10px">📉</div><div style="font-size:15px;font-weight:700;margin-bottom:16px">Nenhum ativo na carteira</div><button class="btn-primary" onclick="openInvModal()">Adicionar Ativo</button></div>`;
+  } else {
+    html += `<div style="font-size:16px;font-weight:700;margin-bottom:14px;color:#0d1b2e">Sua Carteira</div>`;
+    html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px, 1fr));gap:12px;">`;
+    invs.forEach((inv,i)=>{
+      var ic=icones[inv.tipo]||'💼'; var cor=cores[inv.tipo]||'#1a6fc4';
+      var valor=parseFloat(inv.valor||0); var atual=parseFloat(inv.atual||inv.valor||0);
+      var variacao = atual - valor;
+      var pct = valor>0 ? (variacao/valor)*100 : 0;
+      var corVar = variacao>=0 ? '#16a34a' : '#dc2626';
+      var iconVar = variacao>=0 ? '▲' : '▼';
+      
+      html+=`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;transition:box-shadow 0.2s;position:relative">
+        <button onclick="deleteInv(${i})" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px">×</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:40px;height:40px;border-radius:10px;background:${cor}15;display:flex;align-items:center;justify-content:center;font-size:20px">${ic}</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#0d1b2e;padding-right:20px">${inv.nome}</div>
+            <div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:2px">${inv.tipo}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;background:#f8fafc;padding:12px;border-radius:8px">
+          <div>
+            <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Saldo Atual</div>
+            <div style="font-size:16px;font-weight:800;color:#1a1a2e">${fmt(atual)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Rendimento</div>
+            <div style="font-size:12px;font-weight:700;color:${corVar}">${iconVar} ${fmt(Math.abs(variacao))} (${pct.toFixed(2)}%)</div>
+          </div>
+        </div>
+        <button onclick="openAtualizarInv(${i})" style="width:100%;margin-top:10px;padding:8px;background:#fff;border:1px solid #e5e7eb;color:#1a6fc4;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Atualizar Valor</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  
   document.getElementById('main-content').innerHTML=html;
+  calcSimulacao();
+
+  setTimeout(()=>{
+    var ctx=document.getElementById('c-inv');if(!ctx)return;
+    var labels=['Hoje','Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6'];
+    var base = patrimonyAtual || 1000;
+    var dataLine = [base];
+    for(var j=1;j<=6;j++) dataLine.push(dataLine[j-1] * 1.01); 
+    
+    allCharts.push(new Chart(ctx,{type:'line',data:{labels:labels,datasets:[
+      {label:'Projeção Conservadora',data:dataLine,borderColor:'#1a6fc4',backgroundColor:'rgba(26, 111, 196, 0.1)',fill:true,tension:0.4,borderWidth:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f2f5'}}}}}));
+  }, 60);
 }
-function openInvModal(){mkModal('inv-modal','<div class="modal-title">Novo Ativo 📈</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Nome</label><input id="iv-nome"/></div><div class="modal-field"><label>Tipo</label><select id="iv-tipo"><option>Renda Fixa</option><option>Ações</option><option>FII</option><option>Criptomoeda</option><option>Poupança</option><option>Tesouro</option><option>Outro</option></select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Valor (R$)</label><input type="number" id="iv-valor"/></div><div class="modal-field"><label>Rendimento (%/ano)</label><input type="number" id="iv-rend"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'inv-modal\')">Cancelar</button><button class="btn-modal-save" onclick="saveInv()">Adicionar</button></div>');}
-function saveInv(){var nome=(document.getElementById('iv-nome').value||'').trim();var tipo=document.getElementById('iv-tipo').value;var valor=parseFloat(document.getElementById('iv-valor').value||0);var rend=parseFloat(document.getElementById('iv-rend').value||0);if(!nome||!valor){alert('Informe nome e valor.');return;}var d=invLoad();d.push({nome:nome,tipo:tipo,valor:valor,rend:rend});invSave(d);closeModal('inv-modal');pInv();}
-function deleteInv(i){if(!confirm('Excluir?'))return;var d=invLoad();d.splice(i,1);invSave(d);pInv();}
+
+function calcSimulacao(){
+  var aporte = parseFloat(document.getElementById('sim-aporte')?.value||0);
+  var taxaAno = parseFloat(document.getElementById('sim-taxa')?.value||0) / 100;
+  var anos = parseInt(document.getElementById('sim-anos')?.value||0);
+  var meses = anos * 12;
+  var taxaMes = Math.pow(1 + taxaAno, 1/12) - 1;
+  var futuro = 0;
+  for(var i=0; i<meses; i++){ futuro = (futuro + aporte) * (1 + taxaMes); }
+  var el = document.getElementById('sim-resultado');
+  if(el) el.textContent = fmt(futuro);
+}
+
+function openInvModal(){
+  mkModal('inv-modal',`<div class="modal-title">Novo Ativo 📈</div>
+    <div class="modal-field"><label>Nome do Ativo</label><input id="iv-nome" placeholder="Ex: Tesouro Selic 2027"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="modal-field"><label>Tipo de Investimento</label>
+        <select id="iv-tipo">
+          <option>Renda Fixa</option><option>Ações</option><option>FII</option><option>Criptomoeda</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="modal-field"><label>Valor Aplicado (R$)</label><input type="number" id="iv-valor" placeholder="0.00"/></div>
+    </div>
+    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveInv()">Adicionar à Carteira</button></div>`);
+}
+function saveInv(){
+  var nome=(document.getElementById('iv-nome').value||'').trim();
+  var tipo=document.getElementById('iv-tipo').value;
+  var valor=parseFloat(document.getElementById('iv-valor').value||0);
+  if(!nome||!valor){alert('Informe nome e valor.');return;}
+  var d=invLoad(); d.push({nome:nome,tipo:tipo,valor:valor,atual:valor}); invSave(d); closeModal('inv-modal'); pInv();
+}
+function deleteInv(i){if(!confirm('Deseja remover este ativo da carteira?'))return;var d=invLoad();d.splice(i,1);invSave(d);pInv();}
+function openAtualizarInv(i){
+  var inv = invLoad()[i];
+  var atual = parseFloat(inv.atual||inv.valor||0);
+  mkModal('att-inv-modal', `<div class="modal-title">Atualizar Saldo</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Ativo: <strong>${inv.nome}</strong></div>
+    <div class="modal-field"><label>Saldo Atual (R$)</label><input type="number" id="att-iv-val" value="${atual}"/></div>
+    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('att-inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAtualizarInv(${i})">Salvar</button></div>`);
+}
+function saveAtualizarInv(i){
+  var val = parseFloat(document.getElementById('att-iv-val').value);
+  if(isNaN(val)){alert('Valor inválido');return;}
+  var d=invLoad(); d[i].atual = val; invSave(d); closeModal('att-inv-modal'); pInv();
+}
 
 /* ===== ANÁLISE ===== */
 async function pAnalise(){
