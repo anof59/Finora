@@ -668,14 +668,19 @@ function saveAddValorMeta(i){var v=parseFloat(document.getElementById('av-val').
 
 /* ===== INVESTIMENTOS ===== */
 var INV_KEY='finora_inv_v2';
+var PERFIL_KEY='finora_perfil_v1';
 function invLoad(){try{return JSON.parse(localStorage.getItem(INV_KEY)||'[]');}catch(e){return[];}}
 function invSave(d){localStorage.setItem(INV_KEY,JSON.stringify(d));}
+function perfilLoad(){return localStorage.getItem(PERFIL_KEY)||'Moderado';}
+function perfilSave(p){localStorage.setItem(PERFIL_KEY,p);}
 
 async function pInv(){
   var invs=invLoad();
+  var perfil=perfilLoad();
   var total=invs.reduce((s,i)=>s+parseFloat(i.valor||0),0);
   var lucroPrej = invs.reduce((s,i)=>s+(parseFloat(i.atual||i.valor)-parseFloat(i.valor)), 0);
   var patrimonyAtual = total + lucroPrej;
+  var rentabilidade = total > 0 ? (lucroPrej / total) * 100 : 0;
   
   var sobrou = 0;
   try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobrou=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
@@ -683,48 +688,82 @@ async function pInv(){
   var cores={'Renda Fixa':'#16a34a','Ações':'#1a6fc4','Criptomoeda':'#d97706','FII':'#7c3aed','Outro':'#6b7280'};
   var icones={'Renda Fixa':'🏦','Ações':'📈','FII':'🏢','Criptomoeda':'₿','Outro':'💼'};
   
-  var html=`<div class="page-header-row"><div class="page-header"><h1>Investimentos 💼</h1><p>Gestão de patrimônio e evolução inteligente</p></div><button class="btn-primary" onclick="openInvModal()">+ Novo Ativo</button></div>`;
+  var html=`<div class="page-header-row"><div class="page-header"><h1>Investimentos 💼</h1><p>Seu painel inteligente de patrimônio e rentabilidade</p></div></div>`;
 
-  var dicas = [];
-  if(total === 0) dicas.push(`Sua jornada investidora começa aqui. Com <strong>R$ 50</strong> já é possível investir no Tesouro Direto.`);
-  else if(total < 5000) dicas.push(`Foque em montar sua <strong>Reserva de Emergência</strong> (ideal: 6x seu custo mensal) em Renda Fixa de liquidez diária.`);
-  else if(!invs.some(i=>i.tipo==='Ações' || i.tipo==='FII')) dicas.push(`Que tal diversificar? Você tem 100% em ativos conservadores. Avalie fundos imobiliários ou ações.`);
-  
-  if(sobrou > 0) dicas.push(`💡 Sobrou <strong>${fmt(sobrou)}</strong> este mês! Você pode investir isso hoje e acelerar seus ganhos.`);
+  // 1. RESUMO GERAL
+  html += `<h2 style="font-size:18px;margin-bottom:12px;color:#0d1b2e">1. Resumo Geral</h2>
+  <div class="cards-grid" style="margin-bottom:20px;">
+    <div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Patrimônio Total</div><div class="card-value" style="font-size:24px">${fmt(patrimonyAtual)}</div></div>
+    <div class="card" style="border-left:4px solid #6b7280"><div class="card-label">Total Investido</div><div class="card-value" style="font-size:20px;color:#475569">${fmt(total)}</div></div>
+    <div class="card" style="border-left:4px solid ${lucroPrej>=0?'#16a34a':'#dc2626'}"><div class="card-label">Lucro / Prejuízo</div><div class="card-value" style="font-size:20px;color:${lucroPrej>=0?'#16a34a':'#dc2626'}">${lucroPrej>=0?'+':''}${fmt(lucroPrej)}</div></div>
+    <div class="card" style="border-left:4px solid ${rentabilidade>=0?'#16a34a':'#dc2626'}"><div class="card-label">Rentabilidade Total</div><div class="card-value" style="font-size:20px;color:${rentabilidade>=0?'#16a34a':'#dc2626'}">${rentabilidade>=0?'+':''}${rentabilidade.toFixed(2)}%</div></div>
+  </div>`;
 
-  html += `<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start">
-    <div style="font-size:24px">🧠</div>
+  html += `<div class="chart-card" style="margin-bottom:30px;"><div class="chart-title">Evolução Histórica do Patrimônio</div><div style="position:relative;height:200px;margin-top:10px"><canvas id="c-resumo"></canvas></div></div>`;
+
+  // 2. ONDE INVESTIR (SUGESTÕES INTELIGENTES)
+  html += `<h2 style="font-size:18px;margin-bottom:12px;color:#0d1b2e;display:flex;justify-content:space-between;align-items:center">
+      <span>2. Onde Investir 🧠</span>
+      <button onclick="openPerfilModal()" style="font-size:12px;padding:6px 12px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:20px;cursor:pointer">Perfil: <strong>${perfil}</strong> ✎</button>
+  </h2>`;
+
+  var recomendacaoPerfil = '';
+  if(perfil === 'Conservador') recomendacaoPerfil = 'Para seu perfil, recomendamos focar 80% em <strong>Tesouro Direto e CDBs</strong>.';
+  else if(perfil === 'Moderado') recomendacaoPerfil = 'Para seu perfil, recomendamos uma mescla: 60% <strong>Renda Fixa</strong>, 30% <strong>FIIs</strong> e 10% <strong>Ações</strong>.';
+  else recomendacaoPerfil = 'Para seu perfil Agressivo, explore <strong>Ações e Criptomoedas</strong> com foco no longo prazo (mantendo sua reserva em Renda Fixa).';
+
+  var alertaCaixa = '';
+  if(sobrou > 0) alertaCaixa = `💸 <strong>Dica:</strong> Baseado no seu histórico de saldo livre, você pode investir <strong>${fmt(sobrou)}</strong> hoje mesmo! Não deixe dinheiro parado.`;
+  else alertaCaixa = `🔍 <strong>Atenção:</strong> Seu saldo livre este mês está apertado. Organize seus gastos em "Painel" antes de focar em novos aportes.`;
+
+  html += `<div style="background:linear-gradient(135deg, #0f172a, #1e293b);border-radius:12px;padding:16px;margin-bottom:16px;color:#fff;display:flex;gap:12px;align-items:flex-start;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)">
+    <div style="font-size:28px">🤖</div>
     <div>
-      <div style="font-size:13px;font-weight:700;color:#0d1b2e;margin-bottom:4px">Insights da IA FFinora</div>
-      <div style="font-size:13px;color:#475569;line-height:1.6">${dicas.join('<br>')}</div>
-    </div>
-  </div>`;
-
-  html += `<div class="cards-grid" style="margin-bottom:24px;">
-    <div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Patrimônio Total</div><div class="card-value">${fmt(patrimonyAtual)}</div></div>
-    <div class="card" style="border-left:4px solid #6b7280"><div class="card-label">Valor Aplicado</div><div class="card-value" style="color:#475569">${fmt(total)}</div></div>
-    <div class="card" style="border-left:4px solid ${lucroPrej>=0?'#16a34a':'#dc2626'}"><div class="card-label">Lucro / Prejuízo</div><div class="card-value" style="color:${lucroPrej>=0?'#16a34a':'#dc2626'}">${lucroPrej>=0?'+':''}${fmt(lucroPrej)}</div></div>
-  </div>`;
-
-  html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px, 1fr));gap:16px;margin-bottom:20px">
-    <div class="chart-card" style="margin:0"><div class="chart-title">Evolução do Patrimônio (Projeção Anual)</div><div style="position:relative;height:240px;margin-top:10px"><canvas id="c-inv"></canvas></div></div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;display:flex;flex-direction:column;justify-content:center">
-      <div style="font-size:15px;font-weight:700;margin-bottom:16px;color:#0d1b2e">Simulador de Juros Compostos 🔮</div>
-      <div class="modal-field"><label>Aporte Mensal (R$)</label><input type="number" id="sim-aporte" value="500" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
-      <div class="modal-field"><label>Taxa Anual (%)</label><input type="number" id="sim-taxa" value="10" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
-      <div class="modal-field"><label>Anos</label><input type="number" id="sim-anos" value="10" onkeyup="calcSimulacao()" onchange="calcSimulacao()"/></div>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;margin-top:auto">
-        <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase">Você terá:</div>
-        <div id="sim-resultado" style="font-size:22px;font-weight:800;color:#16a34a;margin-top:4px">R$ 0,00</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:#cbd5e1">Assistente FFinora</div>
+      <div style="font-size:13px;line-height:1.6;color:#f8fafc">
+        ${alertaCaixa}<br><br>
+        🎯 <strong>Estratégia:</strong> ${recomendacaoPerfil}
       </div>
     </div>
   </div>`;
 
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px, 1fr));gap:16px;margin-bottom:30px">
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px">
+      <div style="font-weight:800;color:#15803d;margin-bottom:12px;display:flex;align-items:center;gap:6px"><span>🟢</span> Renda Fixa</div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;color:#166534;line-height:1.6">
+        <li><strong>Tesouro Direto:</strong> Seguro e garantido pelo governo.</li>
+        <li><strong>CDBs:</strong> Emprestimo para bancos. Rende >100% CDI.</li>
+        <li><strong>LCI/LCA:</strong> Isentos de Imposto de Renda.</li>
+      </ul>
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px">
+      <div style="font-weight:800;color:#1d4ed8;margin-bottom:12px;display:flex;align-items:center;gap:6px"><span>🔵</span> Bolsa de Valores</div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;color:#1e3a8a;line-height:1.6">
+        <li><strong>Ações:</strong> Sócios de empresas (ex: Petrobras, Vale).</li>
+        <li><strong>FIIs:</strong> Fundos Imobiliários. Aluguéis mensais.</li>
+        <li><strong>ETFs:</strong> Fundos que seguem índices.</li>
+      </ul>
+    </div>
+    <div style="background:#fdf4ff;border:1px solid #fbcfe8;border-radius:12px;padding:16px">
+      <div style="font-weight:800;color:#86198f;margin-bottom:12px;display:flex;align-items:center;gap:6px"><span>🟣</span> Criptomoedas</div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;color:#701a75;line-height:1.6">
+        <li><strong>Bitcoin (BTC):</strong> Ouro digital, alta liquidez.</li>
+        <li><strong>Ethereum (ETH):</strong> Maior rede de smart contracts.</li>
+        <li><em>Alta volatilidade. Recomendado &lt; 5% da carteira.</em></li>
+      </ul>
+    </div>
+  </div>`;
+
+  // 3. MEUS INVESTIMENTOS
+  html += `<h2 style="font-size:18px;margin-bottom:12px;color:#0d1b2e;display:flex;justify-content:space-between;align-items:center">
+    <span>3. Meus Investimentos 💼</span>
+    <button class="btn-primary" style="padding:6px 14px;font-size:12px" onclick="openInvModal()">➕ Adicionar Ativo</button>
+  </h2>`;
+
   if(!invs.length){
-    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:40px 20px;text-align:center;"><div style="font-size:32px;margin-bottom:10px">📉</div><div style="font-size:15px;font-weight:700;margin-bottom:16px">Nenhum ativo na carteira</div><button class="btn-primary" onclick="openInvModal()">Adicionar Ativo</button></div>`;
+    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px"><div style="font-size:32px;margin-bottom:10px">📉</div><div style="font-size:14px;font-weight:700;margin-bottom:16px">Você ainda não possui investimentos cadastrados.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
   } else {
-    html += `<div style="font-size:16px;font-weight:700;margin-bottom:14px;color:#0d1b2e">Sua Carteira</div>`;
-    html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px, 1fr));gap:12px;">`;
+    html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:12px;margin-bottom:30px">`;
     invs.forEach((inv,i)=>{
       var ic=icones[inv.tipo]||'💼'; var cor=cores[inv.tipo]||'#1a6fc4';
       var valor=parseFloat(inv.valor||0); var atual=parseFloat(inv.atual||inv.valor||0);
@@ -733,7 +772,7 @@ async function pInv(){
       var corVar = variacao>=0 ? '#16a34a' : '#dc2626';
       var iconVar = variacao>=0 ? '▲' : '▼';
       
-      html+=`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;transition:box-shadow 0.2s;position:relative">
+      html+=`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);position:relative">
         <button onclick="deleteInv(${i})" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px">×</button>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
           <div style="width:40px;height:40px;border-radius:10px;background:${cor}15;display:flex;align-items:center;justify-content:center;font-size:20px">${ic}</div>
@@ -742,55 +781,175 @@ async function pInv(){
             <div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:2px">${inv.tipo}</div>
           </div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;background:#f8fafc;padding:12px;border-radius:8px">
-          <div>
-            <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Saldo Atual</div>
-            <div style="font-size:16px;font-weight:800;color:#1a1a2e">${fmt(atual)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
+          <div style="background:#f8fafc;padding:8px;border-radius:6px">
+            <span style="color:#6b7280;display:block;margin-bottom:2px">Investido</span><strong style="color:#1e293b">${fmt(valor)}</strong>
           </div>
-          <div style="text-align:right">
-            <div style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:4px">Rendimento</div>
-            <div style="font-size:12px;font-weight:700;color:${corVar}">${iconVar} ${fmt(Math.abs(variacao))} (${pct.toFixed(2)}%)</div>
+          <div style="background:#f8fafc;padding:8px;border-radius:6px;text-align:right">
+            <span style="color:#6b7280;display:block;margin-bottom:2px">Atual</span><strong style="color:#1e293b">${fmt(atual)}</strong>
           </div>
         </div>
-        <button onclick="openAtualizarInv(${i})" style="width:100%;margin-top:10px;padding:8px;background:#fff;border:1px solid #e5e7eb;color:#1a6fc4;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Atualizar Valor</button>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:#6b7280">Lucro/Prejuízo:</span>
+          <strong style="font-size:13px;color:${corVar}">${iconVar} ${fmt(Math.abs(variacao))} (${pct.toFixed(2)}%)</strong>
+        </div>
+        <button onclick="openAtualizarInv(${i})" style="width:100%;margin-top:12px;padding:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Atualizar Saldo</button>
       </div>`;
     });
     html += `</div>`;
   }
-  
-  document.getElementById('main-content').innerHTML=html;
-  calcSimulacao();
 
+  // 4. SIMULADOR INTERATIVO
+  html += `<h2 style="font-size:18px;margin-bottom:12px;color:#0d1b2e">4. Simulador 🚀</h2>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#475569;margin-bottom:8px">Simule seus investimentos para o futuro usando a magia dos juros compostos.</div>
+      <div class="modal-field" style="margin:0"><label>Valor Mensal (R$)</label><input type="number" id="sim2-aporte" value="200" onkeyup="calcSimulacaoV2()" onchange="calcSimulacaoV2()"/></div>
+      <div class="modal-field" style="margin:0"><label>Tempo</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" id="sim2-tempo" value="10" style="flex:2" onkeyup="calcSimulacaoV2()" onchange="calcSimulacaoV2()"/>
+          <select id="sim2-tipotempo" style="flex:1" onchange="calcSimulacaoV2()"><option value="anos">Anos</option><option value="meses">Meses</option></select>
+        </div>
+      </div>
+      <div class="modal-field" style="margin:0"><label>Tipo de Investimento</label>
+        <select id="sim2-perfil" onchange="calcSimulacaoV2()">
+          <option value="10">Renda Fixa (~ 10% a.a.)</option>
+          <option value="12">FIIs / Bolsa (~ 12% a.a.)</option>
+          <option value="20">Cripto / Agressivo (~ 20% a.a.)</option>
+        </select>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-top:auto">
+        <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase">Valor Futuro Estimado:</div>
+        <div id="sim2-resultado" style="font-size:26px;font-weight:800;color:#16a34a;margin-top:4px">R$ 0,00</div>
+        <div id="sim2-investido" style="font-size:12px;color:#166534;margin-top:4px">Total investido: R$ 0,00</div>
+      </div>
+    </div>
+    <div style="min-width:0">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;text-align:center">Crescimento Patrimonial</div>
+      <div style="position:relative;height:300px;width:100%"><canvas id="c-simulador"></canvas></div>
+    </div>
+  </div>`;
+
+  document.getElementById('main-content').innerHTML=html;
+
+  // Render Charts
   setTimeout(()=>{
-    var ctx=document.getElementById('c-inv');if(!ctx)return;
-    var labels=['Hoje','Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6'];
-    var base = patrimonyAtual || 1000;
-    var dataLine = [base];
-    for(var j=1;j<=6;j++) dataLine.push(dataLine[j-1] * 1.01); 
-    
-    allCharts.push(new Chart(ctx,{type:'line',data:{labels:labels,datasets:[
-      {label:'Projeção Conservadora',data:dataLine,borderColor:'#1a6fc4',backgroundColor:'rgba(26, 111, 196, 0.1)',fill:true,tension:0.4,borderWidth:2}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f2f5'}}}}}));
-  }, 60);
+    // Chart 1: Resumo Geral
+    var ctxRes = document.getElementById('c-resumo');
+    if(ctxRes){
+      var base = patrimonyAtual || 1000;
+      var dRes = [base*0.85, base*0.88, base*0.91, base*0.95, base*0.98, base];
+      allCharts.push(new Chart(ctxRes,{type:'line',data:{labels:['Mês -5','Mês -4','Mês -3','Mês -2','Mês -1','Hoje'],datasets:[
+        {label:'Evolução (Estimativa)',data:dRes,borderColor:'#1a6fc4',backgroundColor:'rgba(26, 111, 196, 0.15)',fill:true,tension:0.3,borderWidth:3,pointRadius:4,pointBackgroundColor:'#fff'}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f2f5'}}}}}));
+    }
+    calcSimulacaoV2();
+  }, 100);
 }
 
-function calcSimulacao(){
-  var aporte = parseFloat(document.getElementById('sim-aporte')?.value||0);
-  var taxaAno = parseFloat(document.getElementById('sim-taxa')?.value||0) / 100;
-  var anos = parseInt(document.getElementById('sim-anos')?.value||0);
-  var meses = anos * 12;
+// Simulador v2 global chart ref
+var simChart = null;
+
+function calcSimulacaoV2(){
+  var aporte = parseFloat(document.getElementById('sim2-aporte')?.value||0);
+  var tempoStr = document.getElementById('sim2-tipotempo')?.value;
+  var tempoVal = parseInt(document.getElementById('sim2-tempo')?.value||0);
+  var meses = tempoStr === 'anos' ? tempoVal * 12 : tempoVal;
+  var taxaAno = parseFloat(document.getElementById('sim2-perfil')?.value||10) / 100;
+  
   var taxaMes = Math.pow(1 + taxaAno, 1/12) - 1;
   var futuro = 0;
-  for(var i=0; i<meses; i++){ futuro = (futuro + aporte) * (1 + taxaMes); }
-  var el = document.getElementById('sim-resultado');
-  if(el) el.textContent = fmt(futuro);
+  var totalAportado = 0;
+  
+  var labels = ['Hoje'];
+  var dataJuros = [0];
+  var dataAporte = [0];
+
+  var step = Math.ceil(meses / 12) || 1;
+
+  for(var i=1; i<=meses; i++){ 
+    futuro = (futuro + aporte) * (1 + taxaMes); 
+    totalAportado += aporte;
+    
+    if(i % step === 0 || i === meses){
+      labels.push(tempoStr==='anos' ? `Mês ${i}` : `Mês ${i}`);
+      dataAporte.push(totalAportado);
+      dataJuros.push(futuro);
+    }
+  }
+
+  var elR = document.getElementById('sim2-resultado');
+  var elI = document.getElementById('sim2-investido');
+  if(elR) elR.textContent = fmt(futuro);
+  if(elI) elI.textContent = `Total aplicado (do seu bolso): ${fmt(totalAportado)}`;
+
+  // Update Chart
+  var ctxSim = document.getElementById('c-simulador');
+  if(!ctxSim) return;
+
+  if(simChart) simChart.destroy();
+  simChart = new Chart(ctxSim, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Total Acumulado (R$)',
+          data: dataJuros,
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22, 163, 74, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 0
+        },
+        {
+          label: 'Total Aplicado (R$)',
+          data: dataAporte,
+          borderColor: '#94a3b8',
+          borderDash: [5, 5],
+          backgroundColor: 'transparent',
+          fill: false,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' } },
+      scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f2f5' } } }
+    }
+  });
+  allCharts.push(simChart);
+}
+
+function openPerfilModal(){
+  var p = perfilLoad();
+  mkModal('perfil-modal',`<div class="modal-title">Seu Perfil de Investidor</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Defina seu perfil para receber recomendações inteligentes de IA mais adequadas.</div>
+    <div class="modal-field"><label>Selecione</label>
+      <select id="p-perfil">
+        <option value="Conservador" ${p==='Conservador'?'selected':''}>Conservador (Foco em segurança)</option>
+        <option value="Moderado" ${p==='Moderado'?'selected':''}>Moderado (Equilíbrio risco/retorno)</option>
+        <option value="Agressivo" ${p==='Agressivo'?'selected':''}>Agressivo (Foco em alto crescimento)</option>
+      </select>
+    </div>
+    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('perfil-modal')">Cancelar</button><button class="btn-modal-save" onclick="savePerfil()">Salvar Perfil</button></div>`);
+}
+function savePerfil(){
+  perfilSave(document.getElementById('p-perfil').value);
+  closeModal('perfil-modal');
+  pInv();
 }
 
 function openInvModal(){
-  mkModal('inv-modal',`<div class="modal-title">Novo Ativo 📈</div>
+  mkModal('inv-modal',`<div class="modal-title">Adicionar Investimento 📈</div>
     <div class="modal-field"><label>Nome do Ativo</label><input id="iv-nome" placeholder="Ex: Tesouro Selic 2027"/></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="modal-field"><label>Tipo de Investimento</label>
+      <div class="modal-field"><label>Categoria</label>
         <select id="iv-tipo">
           <option>Renda Fixa</option><option>Ações</option><option>FII</option><option>Criptomoeda</option><option>Outro</option>
         </select>
@@ -810,9 +969,9 @@ function deleteInv(i){if(!confirm('Deseja remover este ativo da carteira?'))retu
 function openAtualizarInv(i){
   var inv = invLoad()[i];
   var atual = parseFloat(inv.atual||inv.valor||0);
-  mkModal('att-inv-modal', `<div class="modal-title">Atualizar Saldo</div>
+  mkModal('att-inv-modal', `<div class="modal-title">Atualizar Saldo do Ativo</div>
     <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Ativo: <strong>${inv.nome}</strong></div>
-    <div class="modal-field"><label>Saldo Atual (R$)</label><input type="number" id="att-iv-val" value="${atual}"/></div>
+    <div class="modal-field"><label>Saldo Atualizado (R$)</label><input type="number" id="att-iv-val" value="${atual}"/></div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('att-inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAtualizarInv(${i})">Salvar</button></div>`);
 }
 function saveAtualizarInv(i){
