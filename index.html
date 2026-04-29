@@ -154,8 +154,37 @@ tr:last-child td{border-bottom:none}
 .nav-item:hover .nav-tooltip{display:block}
 .nav-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#c4cdd8;padding:12px 18px 3px;margin-top:2px;display:flex;align-items:center;gap:6px}
 .nav-section-label::after{content:'';flex:1;height:1px;background:#eef2f7;margin-left:4px}
+[data-theme="dark"]{--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--purple:#8b5cf6;--gray-bg:#0f172a;--text:#f8fafc;--text-muted:#94a3b8;--border:#334155;--white:#1e293b}
+[data-theme="dark"] #login-screen{background:#0f172a}
+[data-theme="dark"] .login-topbar{background:#1e293b;border-bottom-color:#334155}
+[data-theme="dark"] .login-card{background:#1e293b}
+[data-theme="dark"] .sidebar{background:#1e293b}
+[data-theme="dark"] .topbar{background:#1e293b}
+[data-theme="dark"] .icon-btn, [data-theme="dark"] .hamburger, [data-theme="dark"] .desktop-toggle{background:#334155;color:#f8fafc}
+[data-theme="dark"] .nav-item:hover{background:#334155;color:#fff}
+[data-theme="dark"] .tx-item{border-bottom-color:#334155}
+[data-theme="dark"] th, [data-theme="dark"] td{border-bottom-color:#334155}
+[data-theme="dark"] .form-group input, [data-theme="dark"] .modal-field input, [data-theme="dark"] .modal-field select{background:#0f172a;color:#f8fafc;border-color:#334155}
+[data-theme="dark"] .sidebar-logo, [data-theme="dark"] .sidebar-user{border-color:#334155}
+[data-theme="dark"] .logo-text, [data-theme="dark"] .uname{color:#f8fafc}
+[data-theme="dark"] .card, [data-theme="dark"] .chart-card, [data-theme="dark"] .tx-list, [data-theme="dark"] .modal-box{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .type-btn{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .nav-section-label::after{background:#334155}
+[data-theme="dark"] .nav-divider{background:#334155}
+[data-theme="dark"] .tab-bar{background:#334155}
+[data-theme="dark"] .tab-btn.active{background:#1e293b}
+[data-theme="dark"] .search-bar{background:#334155;border-color:#334155}
+
+.sidebar.collapsed{width:70px}
+.sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub, .sidebar.collapsed .plan-badge, .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-section-label, .sidebar.collapsed .uname, .sidebar.collapsed .urole, .sidebar.collapsed .nav-item-badge{display:none}
+.sidebar.collapsed .sidebar-logo{padding:20px 10px 16px;justify-content:center}
+.sidebar.collapsed .nav-item{justify-content:center;padding:12px;margin:2px 6px}
+.sidebar.collapsed .sidebar-user{padding:14px 10px;justify-content:center}
+.sidebar.collapsed .nav-divider{margin:8px 6px}
+
+.desktop-toggle{display:flex;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
-@media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
+@media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
 </style>
 </head>
 <body>
@@ -260,12 +289,20 @@ tr:last-child td{border-bottom:none}
   </div>
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <button class="icon-btn">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span class="badge"></span>
-      </button>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="desktop-toggle" onclick="toggleSidebarDesktop()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn" onclick="toggleTheme()" title="Mudar Tema">
+          <svg id="theme-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="badge"></span>
+        </button>
+      </div>
     </div>
     <div class="content" id="main-content"></div>
   </div>
@@ -318,7 +355,8 @@ var userNav=[
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
   {section:'Ferramentas'},
-  {id:'assistente-financeiro',label:'Assistente Financeiro',icon:'plus-circle',badge:'Novo',badgeStyle:'new',tooltip:'Gerencie saldos e dívidas'}
+  {id:'assistente-financeiro',label:'Assistente IA',icon:'plus-circle',badge:'Ultra',badgeStyle:'new',tooltip:'Inteligência Artificial conectada'},
+  {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
 var adminNav=[
   {section:'Painel'},
@@ -336,6 +374,7 @@ var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
   analise:'Análise',tabelas:'Tabelas','assistente-financeiro':'Assistente Financeiro',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
+  planos:'Planos e Assinatura',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -344,6 +383,13 @@ var pageTitles={
 
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('active');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('active');}
+function toggleSidebarDesktop(){document.getElementById('sidebar').classList.toggle('collapsed');}
+function toggleTheme(){
+  var html=document.documentElement;var t=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',t);localStorage.setItem('theme',t);
+  document.getElementById('theme-icon').innerHTML=t==='dark'?'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>':'<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+}
+window.addEventListener('DOMContentLoaded',function(){if(localStorage.getItem('theme')==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('theme-icon').innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';}});
 function setLoading(){document.getElementById('main-content').innerHTML='<div class="loading-card"><div class="spin-lg"></div><span>Carregando...</span></div>';}
 function devScreen(){document.getElementById('main-content').innerHTML='<div class="dev-screen"><h2>Em desenvolvimento</h2></div>';}
 
@@ -359,6 +405,7 @@ function navigate(pageId,el){
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
     analise:pAnalise,tabelas:pTabelas,'assistente-financeiro':pAssistenteFinanceiro,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
+    planos:pPlanos,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
@@ -456,7 +503,7 @@ async function doCadastro(btn){
   btn.disabled=false;tx.textContent='Criar conta grátis';sp.style.display='none';
   if(r.error){err.textContent=r.error.message==='User already registered'?'E-mail já cadastrado.':r.error.message;err.style.display='block';return;}
   if(r.data&&r.data.user){
-    try{await sb.from('profiles').insert({id:r.data.user.id,email:email,full_name:nome,role:'user',plan:'Free',status:'Ativo'});}catch(e){}
+    try{await sb.from('profiles').insert({id:r.data.user.id,email:email,full_name:nome,role:'user',plan:'free',status:'Ativo'});}catch(e){}
     ok.textContent='✅ Conta criada! Você já pode fazer login.';ok.style.display='block';
     setTimeout(function(){document.getElementById('cadastro-screen').remove();document.getElementById('login-email').value=email;},1800);
   }
@@ -486,12 +533,13 @@ function setupApp(){
   var isAdmin=currentProfile&&currentProfile.role==='admin';
   var nav=isAdmin?adminNav:userNav;
   var nome=(currentProfile&&currentProfile.full_name)||(currentUser&&currentUser.email.split('@')[0])||'Usuário';
-  var plan=(currentProfile&&currentProfile.plan)||'Free';
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var planDisplay=plan.charAt(0).toUpperCase()+plan.slice(1);
   document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin':'User Panel';
-  document.getElementById('sidebar-role-tag').textContent=plan;
+  document.getElementById('sidebar-role-tag').textContent=planDisplay;
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
-  document.getElementById('sidebar-plan-badge').textContent=plan;
+  document.getElementById('sidebar-plan-badge').textContent=planDisplay;
 
   if(!isAdmin){
     refreshNavBadges().then(function(){renderSidebarNav(nav);});
@@ -1308,6 +1356,11 @@ var AF2_KEY='finora_af2_v1';
 function af2Load(){try{return JSON.parse(localStorage.getItem(AF2_KEY)||'{"saldos":[],"dividas":[],"notas":""}');}catch(e){return{saldos:[],dividas:[],notas:''};}}
 function af2Save(d){localStorage.setItem(AF2_KEY,JSON.stringify(d));}
 function pAssistenteFinanceiro(){
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  if(plan !== 'ultra'){
+    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">A Inteligência Artificial FFinora está disponível apenas no plano Ultra. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
+    return;
+  }
   var d=af2Load();
   var totalGuardado=d.saldos.reduce(function(s,x){return s+parseFloat(x.valor||0);},0);
   var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
@@ -1338,6 +1391,44 @@ function af2SaveDivida(){var origem=(document.getElementById('af2-d-orig').value
 function af2DelDivida(i){var d=af2Load();d.dividas.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
 function af2SalvarNotas(){var v=document.getElementById('af2-notas').value;var d=af2Load();d.notas=v;af2Save(d);alert('Salvo!');}
 
+function pPlanos(){
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var isPro=plan==='pro';
+  var isUltra=plan==='ultra';
+  var html='<div class="page-header"><h1>Assinatura e Planos</h1><p>Escolha o melhor plano para o seu bolso</p></div>'
+    +'<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:20px">'
+    
+    +'<div style="background:#fff;border:2px solid '+(isPro?'#1a6fc4':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
+    +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para controle completo</div>'
+    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 19,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
+    +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
+    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
+    +'</div>'
+    +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Plano Atual':'Assinar Pro')+'</button>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
+    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
+    +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Ultra</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder máximo com IA</div>'
+    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
+    +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
+    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros auto</div><div>✅ Análise de gastos inteligente</div>'
+    +'</div>'
+    +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
+    +'</div>'
+    
+    +'</div>';
+  document.getElementById('main-content').innerHTML=html;
+}
+
+function assinarPlano(tipo){
+  alert('Integração de pagamento com a Stripe em breve!');
+}
+
 /* ===== ADMIN ===== */
 var adminUsers=[];
 var adminBusca='';
@@ -1350,31 +1441,31 @@ async function adminCarregarUsuarios(){
     if(res.error)throw res.error;
     adminUsers=(res.data||[]).map(function(p){return{
       id:p.id,nome:p.full_name||'Sem nome',email:p.email||'-',
-      plano:p.plan||'Free',status:p.status||'Ativo',role:p.role||'user',
+      plano:(p.plan||'free').toLowerCase(),status:p.status||'Ativo',role:p.role||'user',
       cadastro:fmtD(p.created_at),ultimo:fmtD(p.created_at),
-      pago:p.plan==='Pro'?'R$ 47,90':p.plan==='Vitalício'?'R$ 197,00':'R$ 0,00'
+      pago:(p.plan||'').toLowerCase()==='pro'?'R$ 19,90':(p.plan||'').toLowerCase()==='ultra'?'R$ 39,90':'R$ 0,00'
     };});
   }catch(e){adminUsers=[];console.error('Erro admin:',e);}
 }
 
 function adminCard(label,val,sub,cor){return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:6px">'+label+'</div><div style="font-size:22px;font-weight:800;color:'+(cor||'#0d1b2e')+'">'+val+'</div>'+(sub?'<div style="font-size:11px;color:#9ca3af;margin-top:4px">'+sub+'</div>':'')+'</div>';}
 function adminStatusBadge(s){var cfg={Ativo:'background:#dcfce7;color:#15803d',Bloqueado:'background:#fef2f2;color:#dc2626',Inativo:'background:#f3f4f6;color:#6b7280'};return '<span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;'+(cfg[s]||cfg['Inativo'])+'">'+s+'</span>';}
-function adminPlanoBadge(p){var cfg={Pro:'background:#eff6ff;color:#1d4ed8',Vitalício:'background:#f3e8ff;color:#6b21a8',Free:'background:#f3f4f6;color:#6b7280'};return '<span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;'+(cfg[p]||cfg['Free'])+'">'+p+'</span>';}
+function adminPlanoBadge(p){var cfg={pro:'background:#eff6ff;color:#1d4ed8',ultra:'background:#f3e8ff;color:#6b21a8',free:'background:#f3f4f6;color:#6b7280'};var lbl=p.charAt(0).toUpperCase()+p.slice(1);return '<span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;'+(cfg[p]||cfg['free'])+'">'+lbl+'</span>';}
 
 async function pAdminVisaoGeral(){
   setLoading();await adminCarregarUsuarios();
   var total=adminUsers.length;
   var ativos=adminUsers.filter(function(u){return u.status==='Ativo';}).length;
   var bloqueados=adminUsers.filter(function(u){return u.status==='Bloqueado';}).length;
-  var pro=adminUsers.filter(function(u){return u.plano==='Pro'||u.plano==='Vitalício';}).length;
-  var mrr=adminUsers.filter(function(u){return u.plano==='Pro';}).length*47.90;
+  var pro=adminUsers.filter(function(u){return u.plano==='pro'||u.plano==='ultra';}).length;
+  var mrr=adminUsers.filter(function(u){return u.plano==='pro';}).length*19.90 + adminUsers.filter(function(u){return u.plano==='ultra';}).length*39.90;
   var recent='';
   adminUsers.slice(0,6).forEach(function(u){recent+='<tr><td style="padding:11px 14px"><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></td><td style="padding:11px 14px">'+adminPlanoBadge(u.plano)+'</td><td style="padding:11px 14px">'+adminStatusBadge(u.status)+'</td><td style="padding:11px 14px;font-size:12px;color:#6b7280">'+u.cadastro+'</td></tr>';});
-  var planos=['Free','Pro','Vitalício'].map(function(p){var c=adminUsers.filter(function(u){return u.plano===p;}).length;var pct=total?Math.round(c/total*100):0;var cor=p==='Vitalício'?'#7c3aed':p==='Pro'?'#1565c0':'#9ca3af';return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+p+'</span><span style="font-weight:700">'+c+' ('+pct+'%)</span></div><div style="height:6px;background:#f1f2f5;border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:3px;background:'+cor+'"></div></div></div>';}).join('');
+  var planos=['free','pro','ultra'].map(function(p){var c=adminUsers.filter(function(u){return u.plano===p;}).length;var pct=total?Math.round(c/total*100):0;var cor=p==='ultra'?'#7c3aed':p==='pro'?'#1565c0':'#9ca3af';var lbl=p.charAt(0).toUpperCase()+p.slice(1);return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+lbl+'</span><span style="font-weight:700">'+c+' ('+pct+'%)</span></div><div style="height:6px;background:#f1f2f5;border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:3px;background:'+cor+'"></div></div></div>';}).join('');
   var statuses=[['Ativo','#16a34a'],['Bloqueado','#dc2626'],['Inativo','#9ca3af']].map(function(sc){var n=adminUsers.filter(function(u){return u.status===sc[0];}).length;var pct=total?Math.round(n/total*100):0;return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+sc[0]+'</span><span style="font-weight:700">'+n+' ('+pct+'%)</span></div><div style="height:6px;background:#f1f2f5;border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;border-radius:3px;background:'+sc[1]+'"></div></div></div>';}).join('');
   document.getElementById('main-content').innerHTML=
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px"><div style="width:38px;height:38px;background:linear-gradient(135deg,#1565c0,#1e88e5);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7z"/></svg></div><div><div style="font-size:18px;font-weight:800;color:#0d1b2e">Painel Administrativo</div><div style="font-size:12px;color:#9ca3af">Visão geral do FFinora SaaS</div></div></div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('Total',total+'','cadastros','#0d1b2e')+adminCard('Ativos',ativos+'','ok','#16a34a')+adminCard('Bloqueados',bloqueados+'','restritos','#dc2626')+adminCard('Pagantes',pro+'','pro+vitalício','#1565c0')+adminCard('MRR','R$ '+mrr.toFixed(2).replace('.',','),'mensal','#7c3aed')+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('Total',total+'','cadastros','#0d1b2e')+adminCard('Ativos',ativos+'','ok','#16a34a')+adminCard('Bloqueados',bloqueados+'','restritos','#dc2626')+adminCard('Pagantes',pro+'','pro+ultra','#1565c0')+adminCard('MRR','R$ '+mrr.toFixed(2).replace('.',','),'mensal','#7c3aed')+'</div>'
     +(total===0?'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center;color:#9ca3af"><div style="font-size:40px;margin-bottom:10px">👥</div><div style="font-size:15px;font-weight:700;color:#0d1b2e;margin-bottom:6px">Nenhum usuário ainda</div></div>'
     :'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px"><div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:700">Usuários recentes</div><button onclick="navigate(\'admin-usuarios\',null)" style="padding:5px 12px;background:#eff6ff;border:none;color:#1a6fc4;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">Ver todos →</button></div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:440px"><thead><tr style="background:#f8fafc"><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Usuário</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Plano</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Status</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Cadastro</th></tr></thead><tbody>'+recent+'</tbody></table></div></div>')
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:12px">Distribuição de Planos</div>'+planos+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;margin-bottom:12px">Status da Base</div>'+statuses+'</div></div>';
@@ -1392,12 +1483,12 @@ function renderAdminUsuarios(){
   var rows='';
   lista.forEach(function(u){
     var ne=u.nome.replace(/'/g,"\\'");
-    rows+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 14px"><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></td><td style="padding:12px 14px">'+adminPlanoBadge(u.plano)+'</td><td style="padding:12px 14px">'+adminStatusBadge(u.status)+'</td><td style="padding:12px 14px;font-size:12px;color:#6b7280">'+u.cadastro+'</td><td style="padding:12px 14px;font-weight:600;font-size:13px">'+u.pago+'</td><td style="padding:12px 14px"><div style="display:flex;gap:4px;flex-wrap:wrap"><select onchange="adminAlterarPlano(\''+u.id+'\',this.value)" style="padding:4px 7px;border:1px solid #e5e7eb;border-radius:7px;font-size:11px;cursor:pointer;background:#fff;color:#1a6fc4;font-weight:600"><option value="">Plano</option><option value="Free"'+(u.plano==='Free'?' selected':'')+'>Free</option><option value="Pro"'+(u.plano==='Pro'?' selected':'')+'>Pro</option><option value="Vitalício"'+(u.plano==='Vitalício'?' selected':'')+'>Vitalício</option></select>'+(u.status==='Ativo'?'<button onclick="adminBloquear(\''+u.id+'\')" style="padding:4px 9px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">🔒</button>':'<button onclick="adminDesbloquear(\''+u.id+'\')" style="padding:4px 9px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">🔓</button>')+'<button onclick="adminExcluir(\''+u.id+'\',\''+ne+'\')" style="padding:4px 9px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;font-size:11px;cursor:pointer">🗑️</button></div></td></tr>';
+    rows+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 14px"><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></td><td style="padding:12px 14px">'+adminPlanoBadge(u.plano)+'</td><td style="padding:12px 14px">'+adminStatusBadge(u.status)+'</td><td style="padding:12px 14px;font-size:12px;color:#6b7280">'+u.cadastro+'</td><td style="padding:12px 14px;font-weight:600;font-size:13px">'+u.pago+'</td><td style="padding:12px 14px"><div style="display:flex;gap:4px;flex-wrap:wrap"><select onchange="adminAlterarPlano(\''+u.id+'\',this.value)" style="padding:4px 7px;border:1px solid #e5e7eb;border-radius:7px;font-size:11px;cursor:pointer;background:#fff;color:#1a6fc4;font-weight:600"><option value="">Plano</option><option value="free"'+(u.plano==='free'?' selected':'')+'>Free</option><option value="pro"'+(u.plano==='pro'?' selected':'')+'>Pro</option><option value="ultra"'+(u.plano==='ultra'?' selected':'')+'>Ultra</option></select>'+(u.status==='Ativo'?'<button onclick="adminBloquear(\''+u.id+'\')" style="padding:4px 9px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">🔒</button>':'<button onclick="adminDesbloquear(\''+u.id+'\')" style="padding:4px 9px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">🔓</button>')+'<button onclick="adminExcluir(\''+u.id+'\',\''+ne+'\')" style="padding:4px 9px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;font-size:11px;cursor:pointer">🗑️</button></div></td></tr>';
   });
   document.getElementById('main-content').innerHTML=
     '<div class="page-header-row"><div class="page-header"><h1>Usuários</h1><p>'+adminUsers.length+' reais · '+adminUsers.filter(function(u){return u.status==='Ativo';}).length+' ativos</p></div><button onclick="pAdminUsuarios()" style="padding:7px 14px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">🔄 Atualizar</button></div>'
     +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><div style="display:flex;align-items:center;gap:8px;background:#f3f4f6;border-radius:8px;padding:7px 12px;flex:1;min-width:200px;max-width:320px"><svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input value="'+adminBusca+'" placeholder="Buscar..." oninput="adminBusca=this.value;renderAdminUsuarios()" style="border:none;background:none;outline:none;font-size:13px;width:100%"/></div>'
-    +'<div style="display:flex;gap:3px;background:#f3f4f6;border-radius:9px;padding:3px">'+tabBtn('all','Todos',adminFiltroPlano,'adminFiltroPlano')+tabBtn('Free','Free',adminFiltroPlano,'adminFiltroPlano')+tabBtn('Pro','Pro',adminFiltroPlano,'adminFiltroPlano')+tabBtn('Vitalício','Vitalício',adminFiltroPlano,'adminFiltroPlano')+'</div>'
+    +'<div style="display:flex;gap:3px;background:#f3f4f6;border-radius:9px;padding:3px">'+tabBtn('all','Todos',adminFiltroPlano,'adminFiltroPlano')+tabBtn('free','Free',adminFiltroPlano,'adminFiltroPlano')+tabBtn('pro','Pro',adminFiltroPlano,'adminFiltroPlano')+tabBtn('ultra','Ultra',adminFiltroPlano,'adminFiltroPlano')+'</div>'
     +'<div style="display:flex;gap:3px;background:#f3f4f6;border-radius:9px;padding:3px">'+tabBtn('all','Todos',adminFiltroStatus,'adminFiltroStatus')+tabBtn('Ativo','Ativos',adminFiltroStatus,'adminFiltroStatus')+tabBtn('Bloqueado','Bloqueados',adminFiltroStatus,'adminFiltroStatus')+'</div></div>'
     +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px"><thead><tr style="background:#f8fafc;border-bottom:1px solid #e5e7eb"><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Usuário</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Plano</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Status</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Cadastro</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Valor</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Ações</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" style="padding:40px;text-align:center;color:#9ca3af">'+( adminUsers.length===0?'👥 Nenhum usuário.':'🔍 Nenhum resultado.')+'</td></tr>')+'</tbody></table></div>';
 }
@@ -1405,19 +1496,19 @@ function renderAdminUsuarios(){
 async function adminBloquear(id){if(!id||!confirm('Bloquear?'))return;var r=await sb.from('profiles').update({status:'Bloqueado'}).eq('id',id);if(r.error){alert('Erro: '+r.error.message);return;}var u=adminUsers.find(function(u){return u.id===id;});if(u)u.status='Bloqueado';renderAdminUsuarios();}
 async function adminDesbloquear(id){if(!id)return;var r=await sb.from('profiles').update({status:'Ativo'}).eq('id',id);if(r.error){alert('Erro: '+r.error.message);return;}var u=adminUsers.find(function(u){return u.id===id;});if(u)u.status='Ativo';renderAdminUsuarios();}
 async function adminExcluir(id,nome){if(!id)return;if(!confirm('⚠️ Excluir "'+nome+'" permanentemente?'))return;var r=await sb.rpc('delete_user',{user_id:id});if(r.error){alert('Erro: '+r.error.message);return;}adminUsers=adminUsers.filter(function(u){return u.id!==id;});renderAdminUsuarios();}
-async function adminAlterarPlano(id,plano){if(!id||!plano)return;var r=await sb.from('profiles').update({plan:plano}).eq('id',id);if(r.error){alert('Erro: '+r.error.message);return;}var u=adminUsers.find(function(u){return u.id===id;});if(u){u.plano=plano;u.pago=plano==='Pro'?'R$ 47,90':plano==='Vitalício'?'R$ 197,00':'R$ 0,00';}renderAdminUsuarios();}
+async function adminAlterarPlano(id,plano){if(!id||!plano)return;var r=await sb.from('profiles').update({plan:plano}).eq('id',id);if(r.error){alert('Erro: '+r.error.message);return;}var u=adminUsers.find(function(u){return u.id===id;});if(u){u.plano=plano;u.pago=plano==='pro'?'R$ 19,90':plano==='ultra'?'R$ 39,90':'R$ 0,00';}renderAdminUsuarios();}
 
-function pAdminAssinaturas(){var free=adminUsers.filter(function(u){return u.plano==='Free';}).length;var pro=adminUsers.filter(function(u){return u.plano==='Pro';}).length;var vit=adminUsers.filter(function(u){return u.plano==='Vitalício';}).length;var mrr=pro*47.90+vit*(197/12);document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Assinaturas e Planos</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('MRR','R$ '+mrr.toFixed(2).replace('.',','),'mensal','#7c3aed')+adminCard('Free',free+'','usuários','#6b7280')+adminCard('Pro',pro+'','R$ 47,90/mês','#1565c0')+adminCard('Vitalício',vit+'','R$ 197,00','#16a34a')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden"><div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:700">Planos</div>'+[{nome:'Free',preco:'R$ 0,00',desc:'Acesso básico',cor:'#6b7280',n:free},{nome:'Pro',preco:'R$ 47,90/mês',desc:'Acesso completo',cor:'#1565c0',n:pro},{nome:'Vitalício',preco:'R$ 197,00 único',desc:'Acesso permanente',cor:'#7c3aed',n:vit}].map(function(p){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><div style="width:10px;height:10px;border-radius:50%;background:'+p.cor+'"></div><div><div style="font-weight:700;font-size:14px">'+p.nome+'</div><div style="font-size:12px;color:#9ca3af">'+p.desc+'</div></div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:'+p.cor+'">'+p.preco+'</div><div style="font-size:12px;color:#9ca3af">'+p.n+' usuário(s)</div></div></div>';}).join('')+'</div>';}
+function pAdminAssinaturas(){var free=adminUsers.filter(function(u){return u.plano==='free';}).length;var pro=adminUsers.filter(function(u){return u.plano==='pro';}).length;var vit=adminUsers.filter(function(u){return u.plano==='ultra';}).length;var mrr=pro*19.90+vit*39.90;document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Assinaturas e Planos</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('MRR','R$ '+mrr.toFixed(2).replace('.',','),'mensal','#7c3aed')+adminCard('Free',free+'','usuários','#6b7280')+adminCard('Pro',pro+'','R$ 19,90/mês','#1565c0')+adminCard('Ultra',vit+'','R$ 39,90/mês','#7c3aed')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden"><div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:700">Planos</div>'+[{nome:'Free',preco:'R$ 0,00',desc:'Acesso básico',cor:'#6b7280',n:free},{nome:'Pro',preco:'R$ 19,90/mês',desc:'Acesso completo',cor:'#1565c0',n:pro},{nome:'Ultra',preco:'R$ 39,90/mês',desc:'Com Inteligência Artificial',cor:'#7c3aed',n:vit}].map(function(p){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><div style="width:10px;height:10px;border-radius:50%;background:'+p.cor+'"></div><div><div style="font-weight:700;font-size:14px">'+p.nome+'</div><div style="font-size:12px;color:#9ca3af">'+p.desc+'</div></div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px;color:'+p.cor+'">'+p.preco+'</div><div style="font-size:12px;color:#9ca3af">'+p.n+' usuário(s)</div></div></div>';}).join('')+'</div>';}
 
-function pAdminPagamentos(){var pagantes=adminUsers.filter(function(u){return u.plano!=='Free';});var rows='';pagantes.forEach(function(u){rows+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 14px"><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></td><td style="padding:12px 14px">'+adminPlanoBadge(u.plano)+'</td><td style="padding:12px 14px;font-weight:700;color:#16a34a;font-size:13px">'+u.pago+'</td><td style="padding:12px 14px"><span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:#dcfce7;color:#15803d">Pago</span></td></tr>';});var mrrPro=adminUsers.filter(function(u){return u.plano==='Pro';}).length*47.90;document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Pagamentos</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px">'+adminCard('Pagantes',pagantes.length+'','pagos','#16a34a')+adminCard('MRR','R$ '+mrrPro.toFixed(2).replace('.',','),'estimado','#7c3aed')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:400px"><thead><tr style="background:#f8fafc;border-bottom:1px solid #e5e7eb"><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Usuário</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Plano</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Valor</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Situação</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" style="padding:28px;text-align:center;color:#9ca3af">Nenhum pagante.</td></tr>')+'</tbody></table></div>';}
+function pAdminPagamentos(){var pagantes=adminUsers.filter(function(u){return u.plano!=='free';});var rows='';pagantes.forEach(function(u){rows+='<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 14px"><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></td><td style="padding:12px 14px">'+adminPlanoBadge(u.plano)+'</td><td style="padding:12px 14px;font-weight:700;color:#16a34a;font-size:13px">'+u.pago+'</td><td style="padding:12px 14px"><span style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:#dcfce7;color:#15803d">Pago</span></td></tr>';});var mrrTotal=adminUsers.filter(function(u){return u.plano==='pro';}).length*19.90 + adminUsers.filter(function(u){return u.plano==='ultra';}).length*39.90;document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Pagamentos</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px">'+adminCard('Pagantes',pagantes.length+'','pagos','#16a34a')+adminCard('MRR','R$ '+mrrTotal.toFixed(2).replace('.',','),'estimado','#7c3aed')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:400px"><thead><tr style="background:#f8fafc;border-bottom:1px solid #e5e7eb"><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Usuário</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Plano</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Valor</th><th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#9ca3af">Situação</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" style="padding:28px;text-align:center;color:#9ca3af">Nenhum pagante.</td></tr>')+'</tbody></table></div>';}
 
 function pAdminAcessos(){var bloq=adminUsers.filter(function(u){return u.status==='Bloqueado';});var ativos=adminUsers.filter(function(u){return u.status==='Ativo';});var bloqRows='';bloq.forEach(function(u){var ne=u.nome.replace(/'/g,"\\'");bloqRows+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:8px"><div><div style="font-weight:600;font-size:13px">'+u.nome+'</div><div style="font-size:11px;color:#9ca3af">'+u.email+'</div></div><div style="display:flex;gap:6px"><button onclick="adminDesbloquear(\''+u.id+'\').then(function(){pAdminAcessos();})" style="padding:6px 12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">🔓 Desbloquear</button><button onclick="adminExcluir(\''+u.id+'\',\''+ne+'\').then(function(){pAdminAcessos();})" style="padding:6px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">🗑️ Excluir</button></div></div>';});var ops=ativos.map(function(u){return '<option value="'+u.id+'">'+u.nome+' ('+u.email+')</option>';}).join('');document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Acessos e Bloqueios</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px">'+adminCard('Ativos',ativos.length+'','ok','#16a34a')+adminCard('Bloqueados',bloq.length+'','restritos','#dc2626')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px"><div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:700">Bloqueados</div>'+(bloq.length?bloqRows:'<div style="padding:32px;text-align:center;color:#9ca3af;font-size:13px">✅ Nenhum bloqueado.</div>')+'</div>'+(ativos.length?'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">Bloquear usuário</div><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="admin-bloquear-sel" style="flex:1;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f9fafb;outline:none"><option value="">Selecionar...</option>'+ops+'</select><button onclick="adminBloquear(document.getElementById(\'admin-bloquear-sel\').value).then(function(){pAdminAcessos();})" style="padding:9px 16px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔒 Bloquear</button></div></div>':'');}
 
-function pAdminRelatorios(){var total=adminUsers.length;var pagantes=adminUsers.filter(function(u){return u.plano!=='Free';}).length;var conv=total?Math.round(pagantes/total*100):0;document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Relatórios</h1><p>Dados reais do Supabase</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('Usuários',total+'','total','#0d1b2e')+adminCard('Conversão',conv+'%','free→pago','#16a34a')+adminCard('Bloqueados',adminUsers.filter(function(u){return u.status==='Bloqueado';}).length+'','restritos','#dc2626')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px"><div style="font-size:13px;font-weight:700;margin-bottom:12px">Resumo</div><div style="font-size:13px;color:#6b7280;line-height:1.9">• Total: <strong style="color:#0d1b2e">'+total+'</strong><br>• Pagantes: <strong style="color:#1565c0">'+pagantes+'</strong><br>• Free: <strong>'+adminUsers.filter(function(u){return u.plano==='Free';}).length+'</strong><br>• Bloqueados: <strong style="color:#dc2626">'+adminUsers.filter(function(u){return u.status==='Bloqueado';}).length+'</strong><br>• Conversão: <strong style="color:#16a34a">'+conv+'%</strong></div><button onclick="adminExportarRelatorio()" style="margin-top:16px;padding:9px 18px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">📊 Exportar CSV</button></div>';}
+function pAdminRelatorios(){var total=adminUsers.length;var pagantes=adminUsers.filter(function(u){return u.plano!=='free';}).length;var conv=total?Math.round(pagantes/total*100):0;document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Relatórios</h1><p>Dados reais do Supabase</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px">'+adminCard('Usuários',total+'','total','#0d1b2e')+adminCard('Conversão',conv+'%','free→pago','#16a34a')+adminCard('Bloqueados',adminUsers.filter(function(u){return u.status==='Bloqueado';}).length+'','restritos','#dc2626')+'</div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px"><div style="font-size:13px;font-weight:700;margin-bottom:12px">Resumo</div><div style="font-size:13px;color:#6b7280;line-height:1.9">• Total: <strong style="color:#0d1b2e">'+total+'</strong><br>• Pagantes: <strong style="color:#1565c0">'+pagantes+'</strong><br>• Free: <strong>'+adminUsers.filter(function(u){return u.plano==='free';}).length+'</strong><br>• Bloqueados: <strong style="color:#dc2626">'+adminUsers.filter(function(u){return u.status==='Bloqueado';}).length+'</strong><br>• Conversão: <strong style="color:#16a34a">'+conv+'%</strong></div><button onclick="adminExportarRelatorio()" style="margin-top:16px;padding:9px 18px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">📊 Exportar CSV</button></div>';}
 
 function adminExportarRelatorio(){var csv='Nome,Email,Plano,Status,Cadastro,Valor Pago\n';adminUsers.forEach(function(u){csv+='"'+u.nome+'",'+u.email+','+u.plano+','+u.status+','+u.cadastro+','+u.pago+'\n';});var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download='ffinora-usuarios-'+new Date().toISOString().split('T')[0]+'.csv';a.click();}
 
-function pAdminConfig(){document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Configurações Admin</h1></div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">'+[{t:'Nome do App',v:'FFinora',tp:'text'},{t:'Email de suporte',v:'suporte@ffinora.com',tp:'email'},{t:'Preço Pro (R$)',v:'47.90',tp:'number'},{t:'Preço Vitalício (R$)',v:'197.00',tp:'number'}].map(function(f){return '<div style="padding:16px 18px;border-bottom:1px solid #f3f4f6"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#9ca3af;margin-bottom:6px">'+f.t+'</div><input type="'+f.tp+'" value="'+f.v+'" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;background:#f9fafb;outline:none;max-width:360px"/></div>';}).join('')+'<div style="padding:16px 18px"><button onclick="alert(\'Salvo!\')" style="padding:9px 20px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Salvar</button></div></div>';}
+function pAdminConfig(){document.getElementById('main-content').innerHTML='<div class="page-header"><h1>Configurações Admin</h1></div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">'+[{t:'Nome do App',v:'FFinora',tp:'text'},{t:'Email de suporte',v:'suporte@ffinora.com',tp:'email'},{t:'Preço Pro (R$)',v:'19.90',tp:'number'},{t:'Preço Ultra (R$)',v:'39.90',tp:'number'}].map(function(f){return '<div style="padding:16px 18px;border-bottom:1px solid #f3f4f6"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#9ca3af;margin-bottom:6px">'+f.t+'</div><input type="'+f.tp+'" value="'+f.v+'" style="width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;background:#f9fafb;outline:none;max-width:360px"/></div>';}).join('')+'<div style="padding:16px 18px"><button onclick="alert(\'Salvo!\')" style="padding:9px 20px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Salvar</button></div></div>';}
 
 function pAdminPainel(){pAdminVisaoGeral();}
 function pGestaoUsuarios(){pAdminUsuarios();}
