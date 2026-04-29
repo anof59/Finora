@@ -1356,7 +1356,55 @@ async function pMesAtual(){
 var AF2_KEY='finora_af2_v1';
 function af2Load(){try{return JSON.parse(localStorage.getItem(AF2_KEY)||'{"saldos":[],"dividas":[],"notas":""}');}catch(e){return{saldos:[],dividas:[],notas:''};}}
 function af2Save(d){localStorage.setItem(AF2_KEY,JSON.stringify(d));}
-function pAssistenteFinanceiro(){
+var g_af2_notas = "";
+
+async function af2LoadNotasSupabase() {
+  if(!currentUser) return;
+  var r = await sb.from('notes').select('*').eq('user_id', currentUser.id).order('created_at', {ascending: false});
+  var notes = r.data || [];
+  var c = document.getElementById('notas-list-container');
+  if(!c) return;
+  
+  if(notes && notes.length > 0) {
+    g_af2_notas = notes.map(n => n.content).join(" | ");
+    var h = '';
+    notes.forEach(n => {
+       var dt = new Date(n.created_at).toLocaleString('pt-BR');
+       h += `<div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+               <div>
+                 <div style="font-size:13px;color:#374151;font-weight:500">${n.content}</div>
+                 <div style="font-size:11px;color:#9ca3af;margin-top:4px">${dt}</div>
+               </div>
+               <button onclick="af2DelNotaSupabase('${n.id}')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;opacity:0.6;padding:0 5px" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">×</button>
+             </div>`;
+    });
+    c.innerHTML = h;
+  } else {
+    g_af2_notas = "";
+    c.innerHTML = '<div style="font-size:13px;color:#9ca3af;padding:20px;text-align:center">Nenhuma nota adicionada ainda.</div>';
+  }
+}
+
+async function af2SalvarNotaSupabase() {
+  var el = document.getElementById('af2-notas-input');
+  if(!el || !el.value.trim()) return;
+  var val = el.value.trim();
+  el.value = '';
+  el.disabled = true;
+  await sb.from('notes').insert({user_id: currentUser.id, content: val});
+  el.disabled = false;
+  el.focus();
+  af2LoadNotasSupabase();
+}
+
+async function af2DelNotaSupabase(id) {
+  if(confirm('Tem certeza que deseja excluir esta nota?')) {
+    await sb.from('notes').delete().eq('id', id);
+    af2LoadNotasSupabase();
+  }
+}
+
+async function pAssistenteFinanceiro(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
   if(plan !== 'ultra'){
     document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Essa função está disponível apenas no plano Ultra com IA. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
@@ -1367,23 +1415,88 @@ function pAssistenteFinanceiro(){
   var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
   var saldoReal=totalGuardado-totalDividas;
   
-  var html='<div style="font-size:20px;font-weight:700;margin-bottom:18px">Assistente Financeiro 🤖</div>'
-    +'<div class="cards-grid"><div class="card"><div class="card-label">Guardado</div><div class="card-value td-green">'+fmt(totalGuardado)+'</div></div><div class="card"><div class="card-label">Dívidas</div><div class="card-value td-red">'+fmt(totalDividas)+'</div></div><div class="card" style="background:'+(saldoReal>=0?'#1a6fc4':'#dc2626')+';border-color:transparent"><div class="card-label" style="color:rgba(255,255,255,.8)">Saldo Real</div><div class="card-value" style="color:#fff">'+fmt(saldoReal)+'</div></div></div>';
+  var notesHtml = '<div style="padding:20px;text-align:center"><div class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:#1a6fc4;border-radius:50%;animation:spin 1s linear infinite"></div></div>';
   
-  html+='<div id="ai-loading" style="background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:16px;margin-bottom:14px;text-align:center;color:#6b21a8;font-weight:600;font-size:13px"><div class="spinner" style="display:inline-block;width:14px;height:14px;border:2px solid rgba(124, 58, 237, 0.3);border-radius:50%;border-top-color:#7c3aed;animation:spin 1s ease-in-out infinite;margin-right:8px;vertical-align:middle"></div>A Inteligência Artificial está analisando seus dados...</div>';
-  html+='<div id="ai-output" style="display:none;background:#f8fafc;border-left:4px solid #7c3aed;border-radius:8px;padding:16px;margin-bottom:14px;font-size:14px;color:#333;line-height:1.5"></div>';
+  var html = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="font-size:24px;font-weight:800;color:#0d1b2e">Assistente Inteligente 🤖</div>
+    <div style="background:#dcfce7;color:#16a34a;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;border:1px solid #bbf7d0">
+      <div style="width:8px;height:8px;background:#16a34a;border-radius:50%;box-shadow:0 0 0 2px rgba(22,163,74,0.2)"></div> IA Ativa
+    </div>
+  </div>
   
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">🏦 Onde guardo dinheiro</div><button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
-  if(!d.saldos.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhum local cadastrado.</div>';
-  else d.saldos.forEach(function(s,si){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+s.local+'</div><div style="font-size:11px;color:#6b7280">'+s.tipo+'</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#16a34a">'+fmt(s.valor)+'</div><button onclick="af2DelSaldo('+si+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
-  html+='</div></div>';
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">📋 Dívidas</div><button onclick="af2OpenDivida()" style="padding:5px 12px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
-  if(!d.dividas.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhuma dívida.</div>';
-  else d.dividas.forEach(function(dv,di){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+dv.origem+'</div><div style="font-size:11px;color:#6b7280">Parcela: '+fmt(dv.parcela)+'/mês</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#dc2626">'+fmt(dv.total)+'</div><button onclick="af2DelDivida('+di+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
-  html+='</div></div>';
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📝 Notas</div><textarea id="af2-notas" rows="4" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f9fafb;resize:vertical;outline:none;box-sizing:border-box">'+d.notas+'</textarea><button onclick="af2SalvarNotas()" style="margin-top:8px;padding:7px 16px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button></div>';
-  document.getElementById('main-content').innerHTML=html;
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+      <div style="font-size:13px;color:#6b7280;font-weight:600;margin-bottom:8px">Guardado</div>
+      <div style="font-size:24px;font-weight:800;color:#16a34a">${fmt(totalGuardado)}</div>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+      <div style="font-size:13px;color:#6b7280;font-weight:600;margin-bottom:8px">Dívidas totais</div>
+      <div style="font-size:24px;font-weight:800;color:#dc2626">${fmt(totalDividas)}</div>
+    </div>
+    <div style="background:${saldoReal>=0?'linear-gradient(135deg, #1a6fc4, #2563eb)':'linear-gradient(135deg, #dc2626, #b91c1c)'};border-radius:12px;padding:20px;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1)">
+      <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:8px">Saldo Real</div>
+      <div style="font-size:24px;font-weight:800">${fmt(saldoReal)}</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+    <!-- Esquerda: AI e Notas -->
+    <div>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:20px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)">
+        <div style="background:linear-gradient(90deg, #7c3aed, #4f46e5);padding:16px;color:#fff;display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">✨</span>
+          <span style="font-weight:700;font-size:15px">Insights e Recomendações da IA</span>
+        </div>
+        <div style="padding:24px">
+           <div id="ai-loading" style="text-align:center;color:#7c3aed;font-weight:600;font-size:14px;padding:20px">
+             <div class="spinner" style="display:inline-block;width:18px;height:18px;border:3px solid rgba(124,58,237,0.3);border-radius:50%;border-top-color:#7c3aed;animation:spin 1s linear infinite;margin-right:8px;vertical-align:middle"></div>
+             A Inteligência Artificial está analisando seus dados...
+           </div>
+           <div id="ai-output" style="display:none;font-size:14px;color:#374151;line-height:1.6"></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+        <div style="font-size:14px;font-weight:700;color:#0d1b2e;margin-bottom:12px;display:flex;align-items:center;gap:8px">📝 Suas Notas Financeiras</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <input type="text" id="af2-notas-input" placeholder="Adicione um lembrete ou meta..." style="flex:1;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#f9fafb" onkeydown="if(event.key==='Enter')af2SalvarNotaSupabase()">
+          <button onclick="af2SalvarNotaSupabase()" style="padding:10px 20px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:0.2s" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Adicionar</button>
+        </div>
+        <div id="notas-list-container" style="max-height:300px;overflow-y:auto;border:1px solid #f3f4f6;border-radius:8px;background:#fafafa">
+           ${notesHtml}
+        </div>
+      </div>
+    </div>
+
+    <!-- Direita: Contas e Dívidas -->
+    <div>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:20px">
+        <div style="padding:16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:14px;font-weight:700;color:#0d1b2e">🏦 Contas e Guardados</div>
+          <button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Novo</button>
+        </div>
+        <div style="padding:10px 16px">
+          ${!d.saldos.length ? '<div style="color:#9ca3af;font-size:13px;text-align:center;padding:10px 0">Nenhum local cadastrado.</div>' : d.saldos.map((s,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f9fafb"><div style="font-size:13px;font-weight:600;color:#374151">${s.local}</div><div style="color:#16a34a;font-weight:700;font-size:13px">${fmt(s.valor)} <button onclick="af2DelSaldo(${i})" style="border:none;background:none;color:#9ca3af;cursor:pointer;margin-left:6px;font-weight:bold;font-size:16px;padding:0">×</button></div></div>`).join('')}
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px">
+        <div style="padding:16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:14px;font-weight:700;color:#0d1b2e">📋 Dívidas Ativas</div>
+          <button onclick="af2OpenDivida()" style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Nova</button>
+        </div>
+        <div style="padding:10px 16px">
+          ${!d.dividas.length ? '<div style="color:#9ca3af;font-size:13px;text-align:center;padding:10px 0">Nenhuma dívida.</div>' : d.dividas.map((dv,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f9fafb"><div style="font-size:13px;font-weight:600;color:#374151">${dv.origem}</div><div style="color:#dc2626;font-weight:700;font-size:13px">${fmt(dv.total)} <button onclick="af2DelDivida(${i})" style="border:none;background:none;color:#9ca3af;cursor:pointer;margin-left:6px;font-weight:bold;font-size:16px;padding:0">×</button></div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  document.getElementById('main-content').innerHTML = html;
   
+  await af2LoadNotasSupabase();
   fetchAIFinancialAdvice(d, totalGuardado, totalDividas);
 }
 
@@ -1394,8 +1507,11 @@ async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
       "Dívidas: R$ " + totalDividas.toFixed(2) + ". " +
       "Saldos detalhados: " + JSON.stringify(d.saldos) + ". " +
       "Dívidas detalhadas: " + JSON.stringify(d.dividas) + ". " +
-      "Anotações: " + d.notas + ". " +
-      "Seja um consultor financeiro inteligente. Analise meus gastos, identifique desperdícios, sugira onde posso economizar, e dê conselhos simples, práticos e diretos. Evite jargões técnicos complexos e respostas genéricas. Foco em ações fáceis de aplicar no meu dia a dia (1 a 2 parágrafos).";
+      "Anotações do usuário: " + (g_af2_notas || "Nenhuma") + ". " +
+      "Seja um consultor financeiro inteligente. Divida sua resposta claramente em 3 tópicos curtos (use HTML leve e listas para ficar bonito, com subtítulos em negrito ou cores): " +
+      "1) Análise de Gastos, " +
+      "2) Sugestões Automáticas, " +
+      "3) Recomendações Financeiras. Não use Markdown de código (```html). Apenas devolva as tags formatadas de forma direta para eu colocar num div.";
       
     var res = await fetch('api/ai/index.php', {
       method: 'POST',
@@ -1403,7 +1519,7 @@ async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
       body: JSON.stringify({
         model: 'gpt-4.1-mini',
         messages: [
-          { role: "system", content: "Você é um consultor financeiro inteligente que ajuda pessoas comuns a organizarem suas contas. Seja amigável, direto, simples e sempre procure identificar formas de otimização de dinheiro." },
+          { role: "system", content: "Você é um consultor financeiro inteligente que ajuda pessoas comuns a organizarem suas contas. Seja amigável, direto, simples e sempre procure identificar formas de otimização de dinheiro. Formate as respostas usando elementos HTML simples como <b>, <br>, <ul> e <li>." },
           { role: "user", content: prompt }
         ]
       })
@@ -1419,8 +1535,8 @@ async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
     
     if(data.choices && data.choices[0] && data.choices[0].message) {
        var text = data.choices[0].message.content;
-       text = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-       outDiv.innerHTML = '<div style="font-weight:700;color:#7c3aed;margin-bottom:8px">✨ Conselho da Inteligência Artificial:</div>' + text;
+       text = text.replace(/```html/g, '').replace(/```/g, ''); // limpa possiveis code blocks
+       outDiv.innerHTML = text;
     } else if(data.error) {
        outDiv.innerHTML = '<div style="color:#dc2626;font-weight:600">Erro na IA: ' + data.error + '</div>';
     } else {
@@ -1437,13 +1553,13 @@ async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
     console.error('AI Fetch Error:', e);
   }
 }
+
 function af2OpenSaldo(){mkModal('af2-saldo-modal','<div class="modal-title">🏦 Adicionar local</div><div class="modal-field"><label>Banco / Local</label><input id="af2-s-local" placeholder="Ex: Nubank"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Tipo</label><select id="af2-s-tipo"><option>Conta corrente</option><option>Poupança</option><option>Caixinha</option><option>Dinheiro físico</option><option>Investimento</option></select></div><div class="modal-field"><label>Valor (R$)</label><input type="number" id="af2-s-valor"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-saldo-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveSaldo()">Salvar</button></div>');}
 function af2SaveSaldo(){var local=(document.getElementById('af2-s-local').value||'').trim();var tipo=document.getElementById('af2-s-tipo').value;var valor=parseFloat(document.getElementById('af2-s-valor').value||0);if(!local||!valor){alert('Informe local e valor.');return;}var d=af2Load();d.saldos.push({local:local,tipo:tipo,valor:valor});af2Save(d);closeModal('af2-saldo-modal');pAssistenteFinanceiro();}
 function af2DelSaldo(i){var d=af2Load();d.saldos.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
 function af2OpenDivida(){mkModal('af2-divida-modal','<div class="modal-title">📋 Adicionar dívida</div><div class="modal-field"><label>Origem</label><input id="af2-d-orig" placeholder="Ex: Cartão"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Total (R$)</label><input type="number" id="af2-d-total"/></div><div class="modal-field"><label>Parcela (R$)</label><input type="number" id="af2-d-parcela"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-divida-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveDivida()">Salvar</button></div>');}
 function af2SaveDivida(){var origem=(document.getElementById('af2-d-orig').value||'').trim();var total=parseFloat(document.getElementById('af2-d-total').value||0);var parcela=parseFloat(document.getElementById('af2-d-parcela').value||0);if(!origem||!total){alert('Informe origem e total.');return;}var d=af2Load();d.dividas.push({origem:origem,total:total,parcela:parcela});af2Save(d);closeModal('af2-divida-modal');pAssistenteFinanceiro();}
 function af2DelDivida(i){var d=af2Load();d.dividas.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
-function af2SalvarNotas(){var v=document.getElementById('af2-notas').value;var d=af2Load();d.notas=v;af2Save(d);alert('Salvo!');}
 
 function pPlanos(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
