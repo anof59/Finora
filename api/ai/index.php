@@ -55,6 +55,25 @@ $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
+$responseData = json_decode($response, true);
+
+// Se houver erro de quota/creditos (429) ou outro erro de autenticação, retorna mock
+if ($httpCode >= 400 || (isset($responseData['error']) && strpos(strtolower($responseData['error']['message']), 'quota') !== false)) {
+    // Retorna resposta simulada para teste
+    http_response_code(200);
+    echo json_encode([
+        "choices" => [
+            [
+                "message" => [
+                    "role" => "assistant",
+                    "content" => "*(Resposta Simulada)* Olá! Parece que o seu saldo da OpenAI esgotou ou houve um erro na API. Como o seu Assistente FFinora, minha recomendação simulada é: **Reduza despesas supérfluas e foque em quitar suas dívidas com maiores juros primeiro**. Quando a sua chave API estiver com créditos, eu voltarei a analisar seus dados reais em detalhes!"
+                ]
+            ]
+        ]
+    ]);
+    exit;
+}
+
 http_response_code($httpCode);
 echo $response;
 ?>

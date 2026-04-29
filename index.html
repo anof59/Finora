@@ -1366,13 +1366,13 @@ function pAssistenteFinanceiro(){
   var totalGuardado=d.saldos.reduce(function(s,x){return s+parseFloat(x.valor||0);},0);
   var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
   var saldoReal=totalGuardado-totalDividas;
-  var recs=[];
-  if(totalGuardado===0&&totalDividas===0)recs.push({cor:'#1a6fc4',txt:'Adicione seus saldos e dívidas para receber recomendações.'});
-  if(totalDividas>totalGuardado&&totalDividas>0)recs.push({cor:'#dc2626',txt:'⚠️ Suas dívidas superam o valor guardado.'});
-  if(totalGuardado>0&&totalDividas===0)recs.push({cor:'#16a34a',txt:'✅ Sem dívidas! Considere investir o excedente.'});
+  
   var html='<div style="font-size:20px;font-weight:700;margin-bottom:18px">Assistente Financeiro 🤖</div>'
     +'<div class="cards-grid"><div class="card"><div class="card-label">Guardado</div><div class="card-value td-green">'+fmt(totalGuardado)+'</div></div><div class="card"><div class="card-label">Dívidas</div><div class="card-value td-red">'+fmt(totalDividas)+'</div></div><div class="card" style="background:'+(saldoReal>=0?'#1a6fc4':'#dc2626')+';border-color:transparent"><div class="card-label" style="color:rgba(255,255,255,.8)">Saldo Real</div><div class="card-value" style="color:#fff">'+fmt(saldoReal)+'</div></div></div>';
-  recs.forEach(function(r){html+='<div style="border-left:3px solid '+r.cor+';background:#f8fafc;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:8px">'+r.txt+'</div>';});
+  
+  html+='<div id="ai-loading" style="background:#f3e8ff;border:1px solid #d8b4fe;border-radius:8px;padding:16px;margin-bottom:14px;text-align:center;color:#6b21a8;font-weight:600;font-size:13px"><div class="spinner" style="display:inline-block;width:14px;height:14px;border:2px solid rgba(124, 58, 237, 0.3);border-radius:50%;border-top-color:#7c3aed;animation:spin 1s ease-in-out infinite;margin-right:8px;vertical-align:middle"></div>A Inteligência Artificial está analisando seus dados...</div>';
+  html+='<div id="ai-output" style="display:none;background:#f8fafc;border-left:4px solid #7c3aed;border-radius:8px;padding:16px;margin-bottom:14px;font-size:14px;color:#333;line-height:1.5"></div>';
+  
   html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">🏦 Onde guardo dinheiro</div><button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
   if(!d.saldos.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhum local cadastrado.</div>';
   else d.saldos.forEach(function(s,si){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+s.local+'</div><div style="font-size:11px;color:#6b7280">'+s.tipo+'</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#16a34a">'+fmt(s.valor)+'</div><button onclick="af2DelSaldo('+si+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
@@ -1383,6 +1383,58 @@ function pAssistenteFinanceiro(){
   html+='</div></div>';
   html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📝 Notas</div><textarea id="af2-notas" rows="4" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f9fafb;resize:vertical;outline:none;box-sizing:border-box">'+d.notas+'</textarea><button onclick="af2SalvarNotas()" style="margin-top:8px;padding:7px 16px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button></div>';
   document.getElementById('main-content').innerHTML=html;
+  
+  fetchAIFinancialAdvice(d, totalGuardado, totalDividas);
+}
+
+async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
+  try {
+    var prompt = "Atue como um consultor financeiro especialista. " +
+      "Meu total guardado é R$ " + totalGuardado.toFixed(2) + ". " +
+      "Minhas dívidas totais são R$ " + totalDividas.toFixed(2) + ". " +
+      "Saldos: " + JSON.stringify(d.saldos) + ". " +
+      "Dívidas: " + JSON.stringify(d.dividas) + ". " +
+      "Notas adicionais: " + d.notas + ". " +
+      "Forneça um conselho direto, prático e em português (1 a 2 parágrafos no máximo) de como organizar melhor minhas finanças hoje.";
+      
+    var res = await fetch('api/ai/index.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: "Você é um assistente financeiro direto e focado em resultados." },
+          { role: "user", content: prompt }
+        ]
+      })
+    });
+    
+    var data = await res.json();
+    var loadingDiv = document.getElementById('ai-loading');
+    if(loadingDiv) loadingDiv.style.display = 'none';
+    
+    var outDiv = document.getElementById('ai-output');
+    if(!outDiv) return;
+    outDiv.style.display = 'block';
+    
+    if(data.choices && data.choices[0] && data.choices[0].message) {
+       var text = data.choices[0].message.content;
+       text = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+       outDiv.innerHTML = '<div style="font-weight:700;color:#7c3aed;margin-bottom:8px">✨ Conselho da Inteligência Artificial:</div>' + text;
+    } else if(data.error) {
+       outDiv.innerHTML = '<div style="color:#dc2626;font-weight:600">Erro na IA: ' + data.error + '</div>';
+    } else {
+       outDiv.innerHTML = 'Resposta inesperada do assistente.';
+    }
+  } catch(e) {
+    var loadingDiv = document.getElementById('ai-loading');
+    if(loadingDiv) loadingDiv.style.display = 'none';
+    var outDiv = document.getElementById('ai-output');
+    if(outDiv) {
+      outDiv.style.display = 'block';
+      outDiv.innerHTML = '<div style="color:#dc2626;font-weight:600">Erro de conexão ao buscar o conselho da IA. Certifique-se de que o backend PHP está ativo.</div>';
+    }
+    console.error('AI Fetch Error:', e);
+  }
 }
 function af2OpenSaldo(){mkModal('af2-saldo-modal','<div class="modal-title">🏦 Adicionar local</div><div class="modal-field"><label>Banco / Local</label><input id="af2-s-local" placeholder="Ex: Nubank"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Tipo</label><select id="af2-s-tipo"><option>Conta corrente</option><option>Poupança</option><option>Caixinha</option><option>Dinheiro físico</option><option>Investimento</option></select></div><div class="modal-field"><label>Valor (R$)</label><input type="number" id="af2-s-valor"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-saldo-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveSaldo()">Salvar</button></div>');}
 function af2SaveSaldo(){var local=(document.getElementById('af2-s-local').value||'').trim();var tipo=document.getElementById('af2-s-tipo').value;var valor=parseFloat(document.getElementById('af2-s-valor').value||0);if(!local||!valor){alert('Informe local e valor.');return;}var d=af2Load();d.saldos.push({local:local,tipo:tipo,valor:valor});af2Save(d);closeModal('af2-saldo-modal');pAssistenteFinanceiro();}
