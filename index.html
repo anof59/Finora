@@ -348,15 +348,15 @@ var userNav=[
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
   {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
   {section:'Gestão'},
-  {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controle inteligente do seu dinheiro',badgeKey:'livre'},
-  {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Planeje seu futuro financeiro'},
-  {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Resumo do seu mês financeiro',badgeKey:'mes'},
+  {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controlar dinheiro disponível',badgeKey:'livre'},
+  {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Definir como usar o dinheiro'},
+  {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Prever saldo até o fim do mês',badgeKey:'mes'},
   {section:'Patrimônio'},
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
   {section:'Ferramentas'},
-  {id:'assistente-financeiro',label:'Assistente IA',icon:'plus-circle',badge:'Ultra',badgeStyle:'new',tooltip:'Inteligência Artificial conectada'},
+  {id:'assistente-financeiro',label:'Assistente IA',icon:'plus-circle',badge:'Ultra',badgeStyle:'new',tooltip:'Ajudar o usuário a tomar decisões financeiras'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
 var adminNav=[
@@ -1359,7 +1359,7 @@ function af2Save(d){localStorage.setItem(AF2_KEY,JSON.stringify(d));}
 function pAssistenteFinanceiro(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
   if(plan !== 'ultra'){
-    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">A Inteligência Artificial FFinora está disponível apenas no plano Ultra. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
+    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Essa função está disponível apenas no plano Ultra com IA. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
     return;
   }
   var d=af2Load();
@@ -1389,20 +1389,21 @@ function pAssistenteFinanceiro(){
 
 async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
   try {
-    var prompt = "Atue como um consultor financeiro especialista. " +
-      "Meu total guardado é R$ " + totalGuardado.toFixed(2) + ". " +
-      "Minhas dívidas totais são R$ " + totalDividas.toFixed(2) + ". " +
-      "Saldos: " + JSON.stringify(d.saldos) + ". " +
-      "Dívidas: " + JSON.stringify(d.dividas) + ". " +
-      "Notas adicionais: " + d.notas + ". " +
-      "Forneça um conselho direto, prático e em português (1 a 2 parágrafos no máximo) de como organizar melhor minhas finanças hoje.";
+    var prompt = "Análise os seguintes dados financeiros do usuário. " +
+      "Guardado: R$ " + totalGuardado.toFixed(2) + ". " +
+      "Dívidas: R$ " + totalDividas.toFixed(2) + ". " +
+      "Saldos detalhados: " + JSON.stringify(d.saldos) + ". " +
+      "Dívidas detalhadas: " + JSON.stringify(d.dividas) + ". " +
+      "Anotações: " + d.notas + ". " +
+      "Seja um consultor financeiro inteligente. Analise meus gastos, identifique desperdícios, sugira onde posso economizar, e dê conselhos simples, práticos e diretos. Evite jargões técnicos complexos e respostas genéricas. Foco em ações fáceis de aplicar no meu dia a dia (1 a 2 parágrafos).";
       
     var res = await fetch('api/ai/index.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        model: 'gpt-4.1-mini',
         messages: [
-          { role: "system", content: "Você é um assistente financeiro direto e focado em resultados." },
+          { role: "system", content: "Você é um consultor financeiro inteligente que ajuda pessoas comuns a organizarem suas contas. Seja amigável, direto, simples e sempre procure identificar formas de otimização de dinheiro." },
           { role: "user", content: prompt }
         ]
       })
@@ -1454,22 +1455,22 @@ function pPlanos(){
     +'<div style="background:#fff;border:2px solid '+(isPro?'#1a6fc4':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
     +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para controle completo</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Foco em controle financeiro</div>'
     +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 19,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
+    +'<div>✅ Organização de contas</div><div>✅ Planejamento detalhado</div><div>✅ Relatórios e gráficos</div><div>✅ Análise mensal manual</div><div style="color:#9ca3af;font-weight:600">❌ Sem Inteligência Artificial</div>'
     +'</div>'
     +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Plano Atual':'Assinar Pro')+'</button>'
     +'</div>'
 
-    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
-    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
+    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative;transform:scale(1.05);box-shadow:0 10px 25px -5px rgba(124,58,237,0.3);z-index:2">'
+    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">O Mais Completo</div>')
     +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
-    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Ultra</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder máximo com IA</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px;color:#7c3aed">Ultra</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Inteligência Financeira 24h</div>'
     +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros auto</div><div>✅ Análise de gastos inteligente</div>'
+    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial Financeira</div><div>✅ Sugestões automáticas</div><div>✅ Análise inteligente de gastos</div><div>✅ Recomendações personalizadas</div><div>✅ Assistente virtual 24h</div>'
     +'</div>'
     +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
     +'</div>'
