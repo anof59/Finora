@@ -308,10 +308,11 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<script src="config.php"></script>
 <script>
 /* ===== CONFIG ===== */
-var SB_URL='https://olkrpjewfwvnjzfdqwep.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sa3JwamV3Znd2bmp6ZmRxd2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTQ4NTMsImV4cCI6MjA5MTE3MDg1M30.pApauik3XsDqdxQbUQIg8LeNjLkOOMF4M6PgJEu3pKU';
+var SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+var SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 var sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 var currentUser=null,currentProfile=null,allCharts=[];
 
