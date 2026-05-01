@@ -1704,7 +1704,11 @@ async function adminCarregarUsuarios(){
       plano:(p.plan||'free').toLowerCase(),status:p.status||'Ativo',role:p.role||'user',
       cadastro:fmtD(p.created_at),ultimo:fmtD(p.created_at),
       pago:(p.plan||'').toLowerCase()==='pro'?'R$ 19,90':(p.plan||'').toLowerCase()==='ultra'?'R$ 39,90':'R$ 0,00'
-    };}).filter(function(u){ return currentUser && u.email !== currentUser.email; });
+    };}).filter(function(u){ 
+      var isCurrent = currentUser && u.email && currentUser.email && u.email.toLowerCase() === currentUser.email.toLowerCase();
+      var isAdminRole = u.role === 'admin';
+      return !isCurrent && !isAdminRole; 
+    });
   }catch(e){adminUsers=[];console.error('Erro admin:',e);}
 }
 
