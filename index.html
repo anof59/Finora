@@ -1349,45 +1349,6 @@ async function pMesAtual(){
   document.getElementById('main-content').innerHTML=html;
 }
 
-/* ===== ASSISTENTE FINANCEIRO ===== */
-var AF2_KEY='finora_af2_v1';
-function af2Load(){try{return JSON.parse(localStorage.getItem(AF2_KEY)||'{"saldos":[],"dividas":[],"notas":""}');}catch(e){return{saldos:[],dividas:[],notas:''};}}
-function af2Save(d){localStorage.setItem(AF2_KEY,JSON.stringify(d));}
-function pAssistenteFinanceiro(){
-  var plan=(currentProfile&&currentProfile.plan)||'free';
-  if(plan !== 'ultra'){
-    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">A Inteligência Artificial FFinora está disponível apenas no plano Ultra. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
-    return;
-  }
-  var d=af2Load();
-  var totalGuardado=d.saldos.reduce(function(s,x){return s+parseFloat(x.valor||0);},0);
-  var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
-  var saldoReal=totalGuardado-totalDividas;
-  var recs=[];
-  if(totalGuardado===0&&totalDividas===0)recs.push({cor:'#1a6fc4',txt:'Adicione seus saldos e dívidas para receber recomendações.'});
-  if(totalDividas>totalGuardado&&totalDividas>0)recs.push({cor:'#dc2626',txt:'⚠️ Suas dívidas superam o valor guardado.'});
-  if(totalGuardado>0&&totalDividas===0)recs.push({cor:'#16a34a',txt:'✅ Sem dívidas! Considere investir o excedente.'});
-  var html='<div style="font-size:20px;font-weight:700;margin-bottom:18px">Assistente Financeiro 🤖</div>'
-    +'<div class="cards-grid"><div class="card"><div class="card-label">Guardado</div><div class="card-value td-green">'+fmt(totalGuardado)+'</div></div><div class="card"><div class="card-label">Dívidas</div><div class="card-value td-red">'+fmt(totalDividas)+'</div></div><div class="card" style="background:'+(saldoReal>=0?'#1a6fc4':'#dc2626')+';border-color:transparent"><div class="card-label" style="color:rgba(255,255,255,.8)">Saldo Real</div><div class="card-value" style="color:#fff">'+fmt(saldoReal)+'</div></div></div>';
-  recs.forEach(function(r){html+='<div style="border-left:3px solid '+r.cor+';background:#f8fafc;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:8px">'+r.txt+'</div>';});
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">🏦 Onde guardo dinheiro</div><button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
-  if(!d.saldos.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhum local cadastrado.</div>';
-  else d.saldos.forEach(function(s,si){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+s.local+'</div><div style="font-size:11px;color:#6b7280">'+s.tipo+'</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#16a34a">'+fmt(s.valor)+'</div><button onclick="af2DelSaldo('+si+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
-  html+='</div></div>';
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">📋 Dívidas</div><button onclick="af2OpenDivida()" style="padding:5px 12px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
-  if(!d.dividas.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhuma dívida.</div>';
-  else d.dividas.forEach(function(dv,di){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+dv.origem+'</div><div style="font-size:11px;color:#6b7280">Parcela: '+fmt(dv.parcela)+'/mês</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#dc2626">'+fmt(dv.total)+'</div><button onclick="af2DelDivida('+di+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
-  html+='</div></div>';
-  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📝 Notas</div><textarea id="af2-notas" rows="4" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f9fafb;resize:vertical;outline:none;box-sizing:border-box">'+d.notas+'</textarea><button onclick="af2SalvarNotas()" style="margin-top:8px;padding:7px 16px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button></div>';
-  document.getElementById('main-content').innerHTML=html;
-}
-function af2OpenSaldo(){mkModal('af2-saldo-modal','<div class="modal-title">🏦 Adicionar local</div><div class="modal-field"><label>Banco / Local</label><input id="af2-s-local" placeholder="Ex: Nubank"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Tipo</label><select id="af2-s-tipo"><option>Conta corrente</option><option>Poupança</option><option>Caixinha</option><option>Dinheiro físico</option><option>Investimento</option></select></div><div class="modal-field"><label>Valor (R$)</label><input type="number" id="af2-s-valor"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-saldo-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveSaldo()">Salvar</button></div>');}
-function af2SaveSaldo(){var local=(document.getElementById('af2-s-local').value||'').trim();var tipo=document.getElementById('af2-s-tipo').value;var valor=parseFloat(document.getElementById('af2-s-valor').value||0);if(!local||!valor){alert('Informe local e valor.');return;}var d=af2Load();d.saldos.push({local:local,tipo:tipo,valor:valor});af2Save(d);closeModal('af2-saldo-modal');pAssistenteFinanceiro();}
-function af2DelSaldo(i){var d=af2Load();d.saldos.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
-function af2OpenDivida(){mkModal('af2-divida-modal','<div class="modal-title">📋 Adicionar dívida</div><div class="modal-field"><label>Origem</label><input id="af2-d-orig" placeholder="Ex: Cartão"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Total (R$)</label><input type="number" id="af2-d-total"/></div><div class="modal-field"><label>Parcela (R$)</label><input type="number" id="af2-d-parcela"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-divida-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveDivida()">Salvar</button></div>');}
-function af2SaveDivida(){var origem=(document.getElementById('af2-d-orig').value||'').trim();var total=parseFloat(document.getElementById('af2-d-total').value||0);var parcela=parseFloat(document.getElementById('af2-d-parcela').value||0);if(!origem||!total){alert('Informe origem e total.');return;}var d=af2Load();d.dividas.push({origem:origem,total:total,parcela:parcela});af2Save(d);closeModal('af2-divida-modal');pAssistenteFinanceiro();}
-function af2DelDivida(i){var d=af2Load();d.dividas.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
-function af2SalvarNotas(){var v=document.getElementById('af2-notas').value;var d=af2Load();d.notas=v;af2Save(d);alert('Salvo!');}
 
 function pPlanos(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
