@@ -8,36 +8,17 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter', -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
 @keyframes slideLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
 @keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes floatBubble{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.08) translate(8px,-8px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-:root{
-  --blue:#2563eb;
-  --blue-hover:#1d4ed8;
-  --green:#10b981;
-  --red:#ef4444;
-  --purple:#8b5cf6;
-
-  --sidebar-bg:#ffffff;
-  --sidebar-w:260px;
-  --sidebar-collapsed-w:72px;
-  --text:#0f172a;
-  --text-muted:#64748b;
-  --border:#f1f5f9;
-  --white:#fff;
-  --active-bg:rgba(37,99,235,0.06);
-  --active-color:#2563eb;
-  --nav-hover:rgba(241,245,249,0.8);
-}
-html,body{height:100%;overflow:hidden;background:#f8fafc}
-body{display:flex;color:var(--text)}
+:root{--blue:#1a6fc4;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--gray-bg:#f1f2f5;--sidebar-w:220px;--text:#1a1a2e;--text-muted:#6b7280;--border:#e5e7eb;--white:#fff}
+html,body{height:100%;overflow:hidden}
+body{display:flex;background:var(--gray-bg);color:var(--text)}
 #login-screen{position:fixed;inset:0;background:#f4f6f9;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
 .login-topbar{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .login-body{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -65,40 +46,41 @@ body{display:flex;color:var(--text)}
 .btn-cadastro{width:100%;padding:12px;background:white;color:var(--text);border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
 .login-error{display:none;align-items:center;gap:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--red)}
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none}
-#app{display:none;width:100%;height:100%;overflow:hidden;background:#f8fafc}
-.sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);z-index:50;flex-shrink:0;position:relative}
+#app{display:none;width:100%;height:100%;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:#f8fafc;border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;transition:transform .3s ease;z-index:50;flex-shrink:0}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100%}
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
-.topbar-title{font-size:16px;font-weight:700;flex:1;min-width:0;color:var(--text)}
-.icon-btn{width:38px;height:38px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);position:relative;transition:all 0.2s}
-.icon-btn:hover{background:#f1f5f9;color:var(--text);transform:translateY(-1px)}
-.badge{position:absolute;top:10px;right:10px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid white}
-.hamburger{display:none;width:38px;height:38px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.hamburger span{display:block;width:18px;height:2px;background:var(--text-muted);border-radius:2px}
-.content{flex:1;overflow-y:auto;padding:24px;-webkit-overflow-scrolling:touch}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);z-index:40}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.topbar-title{font-size:14px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);position:relative;flex-shrink:0}
+.badge{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1px solid white}
+.hamburger{display:none;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0}
+.hamburger span{display:block;width:16px;height:2px;background:var(--text-muted);border-radius:2px}
+.content{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
 .sidebar-overlay.active{display:block}
-.sidebar-logo{padding:24px 20px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,0.2)}
-.logo-text{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.5px}
-.logo-sub{font-size:11px;color:var(--text-muted);font-weight:500}
-.plan-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;background:rgba(37,99,235,0.08);color:var(--blue);margin-top:4px}
-nav{flex:1;padding:0 12px;overflow-y:auto;scrollbar-width:none}
-nav::-webkit-scrollbar{display:none}
-.nav-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:24px 12px 10px;opacity:0.8}
-.nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text-muted);border-radius:10px;margin-bottom:2px;transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);user-select:none;border-left:3px solid transparent}
-.nav-item:hover{background:var(--nav-hover);color:var(--text);padding-left:18px}
-.nav-item.active{background:var(--active-bg);color:var(--active-color);font-weight:600;border-left-color:var(--active-color)}
-.nav-item svg{width:18px;height:18px;transition:transform 0.2s}
-.nav-item:hover svg{transform:scale(1.1)}
-
-.nav-divider{height:1px;background:var(--border);margin:16px 12px}
-.sidebar-bottom{padding:12px;border-top:1px solid var(--border)}
-.sidebar-user{padding:8px 12px;display:flex;align-items:center;gap:12px;border-radius:12px;transition:background 0.2s;cursor:pointer}
-.sidebar-user:hover{background:var(--nav-hover)}
-.avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--blue),#60a5fa);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
-.uname{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.urole{font-size:11px;color:var(--text-muted);font-weight:500}
+.sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border)}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#1565c0,#1e88e5);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-text{font-size:17px;font-weight:800;color:#0d1b2e;letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:var(--text-muted);font-weight:500;margin-top:1px}
+.plan-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;background:#e0f2fe;color:#0369a1;margin-top:3px}
+nav{flex:1;padding:10px 0 6px;overflow-y:auto}
+.nav-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#b0bac5;padding:10px 18px 4px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#64748b;border-radius:10px;margin:1px 10px;transition:background .18s,color .18s;user-select:none}
+.nav-item:hover{background:#eef2f7;color:#1a1a2e}
+.nav-item.active{background:linear-gradient(135deg,#1565c0,#1e88e5);color:#fff;box-shadow:0 3px 10px rgba(30,136,229,.28)}
+.nav-item.active svg{stroke:#fff}
+.nav-item svg{flex-shrink:0;transition:stroke .18s}
+.nav-ai-badge{margin-left:auto;background:#10b981;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase}
+.nav-divider{height:1px;background:var(--border);margin:8px 14px}
+.sidebar-bottom{margin-top:auto}
+.sidebar-extra{padding:4px 10px 2px}
+.sidebar-extra .nav-item{color:#94a3b8;font-size:12px}
+.sidebar-extra .nav-item:hover{background:#f3f4f6;color:var(--text)}
+.nav-item.nav-logout:hover{background:#fee2e2;color:#dc2626}
+.sidebar-user{padding:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1565c0,#29b6f6);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.uname{font-size:13px;font-weight:700;color:#0d1b2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.urole{font-size:10px;color:#94a3b8;font-weight:500;margin-top:1px}
 .page-header h1{font-size:20px;font-weight:700}
 .page-header p{font-size:12px;color:var(--text-muted);margin-top:3px}
 .page-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap}
@@ -156,19 +138,7 @@ tr:last-child td{border-bottom:none}
 .search-bar input{border:none;background:none;outline:none;font-size:13px;width:100%}
 .progress-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden;margin-top:6px}
 .progress-fill{height:100%;border-radius:3px;background:var(--blue)}
-
-/* Scrollbar personalizada para a nav */
-nav::-webkit-scrollbar { width: 4px; }
-nav::-webkit-scrollbar-track { background: transparent; }
-nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
-
-.nav-item:focus-visible { outline: 2px solid var(--blue); outline-offset: -4px; }
-
-.nav-badge {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
+/* ── Sidebar v2 ── */
 .nav-item{position:relative}
 .nav-item:hover{background:#eef2f7;color:#1a1a2e;transform:translateX(2px)}
 .nav-item{transition:background .18s,color .18s,transform .15s}
@@ -205,32 +175,16 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
 [data-theme="dark"] .tab-btn.active{background:#1e293b}
 [data-theme="dark"] .search-bar{background:#334155;border-color:#334155}
 
-.sidebar.collapsed{width:var(--sidebar-collapsed-w)}
-.sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub, .sidebar.collapsed .plan-badge, .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-section-label, .sidebar.collapsed .uname, .sidebar.collapsed .urole, .sidebar.collapsed .nav-badge, .sidebar.collapsed .nav-tooltip-trigger::after{display:none}
-.sidebar.collapsed .sidebar-logo{padding:24px 0;justify-content:center}
-.sidebar.collapsed .nav-item{justify-content:center;padding:12px;margin:2px 10px}
-.sidebar.collapsed .nav-item:hover{padding-left:12px}
-.sidebar.collapsed .sidebar-user{padding:8px;justify-content:center}
-.sidebar.collapsed .nav-section-label{padding:10px 0;text-align:center}
-.sidebar.collapsed .nav-section-label::after{display:none}
-
-/* Badge variants */
-
+.sidebar.collapsed{width:70px}
+.sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub, .sidebar.collapsed .plan-badge, .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-section-label, .sidebar.collapsed .uname, .sidebar.collapsed .urole, .sidebar.collapsed .nav-item-badge{display:none}
+.sidebar.collapsed .sidebar-logo{padding:20px 10px 16px;justify-content:center}
+.sidebar.collapsed .nav-item{justify-content:center;padding:12px;margin:2px 6px}
+.sidebar.collapsed .sidebar-user{padding:14px 10px;justify-content:center}
+.sidebar.collapsed .nav-divider{margin:8px 6px}
 
 .desktop-toggle{display:flex;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
 @media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
-
-
-@media(max-width: 768px) {
-  .sidebar {
-    width: 280px;
-    box-shadow: 20px 0 50px rgba(0,0,0,0.1);
-  }
-  .sidebar-logo {
-    padding: 20px;
-  }
-}
 </style>
 </head>
 <body>
@@ -307,11 +261,12 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
   <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">
-        <i data-lucide="trending-up" style="color:white;width:22px;height:22px"></i>
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><path d="M7 18l4-5 4 5 5-9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div style="min-width:0">
-        <div class="logo-text">Finora</div>
-        <div class="plan-badge" id="sidebar-plan-badge">Premium</div>
+      <div>
+        <div class="logo-text">FFinora</div>
+        <div class="logo-sub" id="sidebar-role-label">User Panel</div>
+        <div class="plan-badge" id="sidebar-plan-badge">Free</div>
       </div>
     </div>
     <nav id="sidebar-nav"></nav>
@@ -323,15 +278,12 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
           Sair
         </div>
       </div>
-      <div class="sidebar-user" onclick="navigate('perfil', this)">
-        <div class="avatar" id="sidebar-avatar">U</div>
-        <div style="min-width:0; flex:1">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebar-avatar">A</div>
+        <div style="min-width:0">
           <div class="uname" id="sidebar-name">Usuário</div>
-          <div class="urole"><span id="sidebar-role-tag">Plano Free</span></div>
+          <div class="urole">Plano <span id="sidebar-role-tag">Free</span></div>
         </div>
-        <button onclick="doLogout(); event.stopPropagation();" style="background:none; border:none; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center" title="Sair">
-          <i data-lucide="log-out" style="width:16px; height:16px"></i>
-        </button>
       </div>
     </div>
   </div>
@@ -354,14 +306,12 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
     </div>
     <div class="content" id="main-content"></div>
   </div>
-
 </div>
 
-<script src="config.php"></script>
 <script>
 /* ===== CONFIG ===== */
-var SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-var SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+var SB_URL='https://olkrpjewfwvnjzfdqwep.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sa3JwamV3Znd2bmp6ZmRxd2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTQ4NTMsImV4cCI6MjA5MTE3MDg1M30.pApauik3XsDqdxQbUQIg8LeNjLkOOMF4M6PgJEu3pKU';
 var sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storage:window.localStorage}});
 var currentUser=null,currentProfile=null,allCharts=[];
 
@@ -386,14 +336,7 @@ function iconPath(n){
     trophy:'<path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/>',
     wallet:'<path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z"/><path d="M16 12a1 1 0 110 2 1 1 0 010-2z" fill="currentColor" stroke="none"/>',
     calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
-    'message-circle':'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
-    activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
-    lightbulb:'<line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/>',
-    bell:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>',
-    'book-open':'<path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>',
-    'user-check':'<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>',
-    zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'
+    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>'
   };
   return m[n]||'';
 }
@@ -404,15 +347,15 @@ var userNav=[
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
   {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
   {section:'Gestão'},
-  {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controlar dinheiro disponível',badgeKey:'livre'},
-  {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Definir como usar o dinheiro'},
-  {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Prever saldo até o fim do mês',badgeKey:'mes'},
+  {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controle inteligente do seu dinheiro',badgeKey:'livre'},
+  {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Planeje seu futuro financeiro'},
+  {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Resumo do seu mês financeiro',badgeKey:'mes'},
   {section:'Patrimônio'},
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
-
-  {section:'Conta'},
+  {section:'Ferramentas'},
+  {id:'assistente-financeiro',label:'Assistente IA',icon:'plus-circle',badge:'Ultra',badgeStyle:'new',tooltip:'Inteligência Artificial conectada'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
 var adminNav=[
@@ -429,7 +372,7 @@ var adminNav=[
 ];
 var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
-  analise:'Análise',tabelas:'Tabelas',
+  analise:'Análise',tabelas:'Tabelas','assistente-financeiro':'Assistente Financeiro',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   planos:'Planos e Assinatura',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
@@ -451,15 +394,8 @@ function setLoading(){document.getElementById('main-content').innerHTML='<div cl
 function devScreen(){document.getElementById('main-content').innerHTML='<div class="dev-screen"><h2>Em desenvolvimento</h2></div>';}
 
 function navigate(pageId,el){
-  window.currentView = pageId;
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  if(el) {
-    el.classList.add('active');
-  } else {
-    // Tenta encontrar o item pelo ID se o elemento não foi passado
-    var target = document.querySelector('[onclick*="\''+pageId+'\'"]');
-    if(target) target.classList.add('active');
-  }
+  if(el)el.classList.add('active');
   closeSidebar();
   allCharts.forEach(function(c){try{c.destroy();}catch(e){}});
   allCharts=[];
@@ -467,7 +403,7 @@ function navigate(pageId,el){
   setLoading();
   var map={
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
-    analise:pAnalise,tabelas:pTabelas,
+    analise:pAnalise,tabelas:pTabelas,'assistente-financeiro':pAssistenteFinanceiro,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     planos:pPlanos,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
@@ -599,17 +535,11 @@ function setupApp(){
   var nome=(currentProfile&&currentProfile.full_name)||(currentUser&&currentUser.email.split('@')[0])||'Usuário';
   var plan=(currentProfile&&currentProfile.plan)||'free';
   var planDisplay=plan.charAt(0).toUpperCase()+plan.slice(1);
-
-  var roleTagText = document.getElementById('sidebar-role-tag') ? document.getElementById('sidebar-role-tag').textContent : '';
-  var isUltra = (plan.toLowerCase() === 'ultra' || planDisplay.toLowerCase() === 'ultra' || roleTagText.toUpperCase() === 'ULTRA');
-  window.isUserUltra = isUltra;
-  
-
-
+  document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin':'User Panel';
+  document.getElementById('sidebar-role-tag').textContent=planDisplay;
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
   document.getElementById('sidebar-plan-badge').textContent=planDisplay;
-  document.getElementById('sidebar-role-tag').textContent='Plano ' + planDisplay;
 
   if(!isAdmin){
     refreshNavBadges().then(function(){renderSidebarNav(nav);});
@@ -619,34 +549,32 @@ function setupApp(){
 }
 
 function renderSidebarNav(nav){
-  console.log('Executando renderSidebarNav...', nav);
   var el=document.getElementById('sidebar-nav');
   var h='';
   var firstItem=null;
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
     if(n.section!=null){
-      var cls='nav-section-label'+(n.isAI?' ai-section':'');
-      h+='<div class="'+cls+'">'+n.section+'</div>';
+      h+='<div class="nav-section-label">'+n.section+'</div>';
       continue;
     }
     if(!firstItem)firstItem=n;
     var badgeHtml='';
     if(n.badge){
-      var bStyle=(n.badgeStyle||'new').toLowerCase();
-      badgeHtml='<span class="nav-badge '+bStyle+'">'+n.badge+'</span>';
+      var bStyle=n.badgeStyle||'new';
+      badgeHtml='<span class="nav-item-badge '+bStyle+'">'+n.badge+'</span>';
     } else if(n.badgeKey&&_navBadges[n.badgeKey]){
-      badgeHtml='<span class="nav-badge new" style="font-size:8px">'+_navBadges[n.badgeKey]+'</span>';
+      badgeHtml='<span class="nav-item-badge green">'+_navBadges[n.badgeKey]+'</span>';
     }
-    var cls = 'nav-item' + (n.isAI ? ' nav-ai-item' : '');
-    h+='<div class="'+cls+'" onclick="navigate(\''+n.id+'\',this)" title="'+(n.tooltip||'')+'">'
-      +'<i data-lucide="'+n.icon+'"></i>'
-      +'<span style="flex:1">'+n.label+'</span>'
+    var tooltipHtml=n.tooltip?'<span class="nav-tooltip">'+n.tooltip+'</span>':'';
+    h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="">'
+      +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'
+      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
       +badgeHtml
+      +tooltipHtml
       +'</div>';
   }
   el.innerHTML=h;
-  lucide.createIcons();
   var firstEl=el.querySelector('.nav-item');
   if(firstEl&&firstItem){firstEl.classList.add('active');navigate(firstItem.id,firstEl);}
 }
@@ -1427,223 +1355,41 @@ async function pMesAtual(){
 var AF2_KEY='finora_af2_v1';
 function af2Load(){try{return JSON.parse(localStorage.getItem(AF2_KEY)||'{"saldos":[],"dividas":[],"notas":""}');}catch(e){return{saldos:[],dividas:[],notas:''};}}
 function af2Save(d){localStorage.setItem(AF2_KEY,JSON.stringify(d));}
-var g_af2_notas = "";
-
-async function af2LoadNotasSupabase() {
-  if(!currentUser) return;
-  var r = await sb.from('notes').select('*').eq('user_id', currentUser.id).order('created_at', {ascending: false});
-  var notes = r.data || [];
-  var c = document.getElementById('notas-list-container');
-  if(!c) return;
-  
-  if(notes && notes.length > 0) {
-    g_af2_notas = notes.map(n => n.content).join(" | ");
-    var h = '';
-    notes.forEach(n => {
-       var dt = new Date(n.created_at).toLocaleString('pt-BR');
-       h += `<div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
-               <div>
-                 <div style="font-size:13px;color:#374151;font-weight:500">${n.content}</div>
-                 <div style="font-size:11px;color:#9ca3af;margin-top:4px">${dt}</div>
-               </div>
-               <button onclick="af2DelNotaSupabase('${n.id}')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;opacity:0.6;padding:0 5px" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">×</button>
-             </div>`;
-    });
-    c.innerHTML = h;
-  } else {
-    g_af2_notas = "";
-    c.innerHTML = '<div style="font-size:13px;color:#9ca3af;padding:20px;text-align:center">Nenhuma nota adicionada ainda.</div>';
-  }
-}
-
-async function af2SalvarNotaSupabase() {
-  var el = document.getElementById('af2-notas-input');
-  if(!el || !el.value.trim()) return;
-  var val = el.value.trim();
-  el.value = '';
-  el.disabled = true;
-  await sb.from('notes').insert({user_id: currentUser.id, content: val});
-  el.disabled = false;
-  el.focus();
-  af2LoadNotasSupabase();
-}
-
-async function af2DelNotaSupabase(id) {
-  if(confirm('Tem certeza que deseja excluir esta nota?')) {
-    await sb.from('notes').delete().eq('id', id);
-    af2LoadNotasSupabase();
-  }
-}
-
-async function pAssistenteFinanceiro(){
+function pAssistenteFinanceiro(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
   if(plan !== 'ultra'){
-    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Essa função está disponível apenas no plano Ultra com IA. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
+    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">Assistente IA Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">A Inteligência Artificial FFinora está disponível apenas no plano Ultra. Desbloqueie análises inteligentes, conselhos personalizados e projeções automáticas.</div><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
     return;
   }
   var d=af2Load();
   var totalGuardado=d.saldos.reduce(function(s,x){return s+parseFloat(x.valor||0);},0);
   var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
   var saldoReal=totalGuardado-totalDividas;
-  
-  var notesHtml = '<div style="padding:20px;text-align:center"><div class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:#1a6fc4;border-radius:50%;animation:spin 1s linear infinite"></div></div>';
-  
-  var html = `
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <div style="font-size:24px;font-weight:800;color:#0d1b2e">Assistente Inteligente 🤖</div>
-    <div style="background:#dcfce7;color:#16a34a;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;border:1px solid #bbf7d0">
-      <div style="width:8px;height:8px;background:#16a34a;border-radius:50%;box-shadow:0 0 0 2px rgba(22,163,74,0.2)"></div> IA Ativa
-    </div>
-  </div>
-  
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-      <div style="font-size:13px;color:#6b7280;font-weight:600;margin-bottom:8px">Guardado</div>
-      <div style="font-size:24px;font-weight:800;color:#16a34a">${fmt(totalGuardado)}</div>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-      <div style="font-size:13px;color:#6b7280;font-weight:600;margin-bottom:8px">Dívidas totais</div>
-      <div style="font-size:24px;font-weight:800;color:#dc2626">${fmt(totalDividas)}</div>
-    </div>
-    <div style="background:${saldoReal>=0?'linear-gradient(135deg, #1a6fc4, #2563eb)':'linear-gradient(135deg, #dc2626, #b91c1c)'};border-radius:12px;padding:20px;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,0.1)">
-      <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:8px">Saldo Real</div>
-      <div style="font-size:24px;font-weight:800">${fmt(saldoReal)}</div>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
-    <!-- Esquerda: AI e Notas -->
-    <div>
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:20px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)">
-        <div style="background:linear-gradient(90deg, #7c3aed, #4f46e5);padding:16px;color:#fff;display:flex;align-items:center;gap:10px">
-          <span style="font-size:20px">🤖</span>
-          <span style="font-weight:700;font-size:15px">Análise da IA</span>
-        </div>
-        <div style="padding:24px">
-           <button id="ai-btn-analisar" onclick="af2StartAnalysis()" style="width:100%;padding:14px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;transition:0.2s;box-shadow:0 4px 10px rgba(124,58,237,0.3)" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">✨ Analisar com IA</button>
-           
-           <div id="ai-loading" style="display:none;text-align:center;color:#7c3aed;font-weight:600;font-size:14px;padding:20px">
-             <div class="spinner" style="display:inline-block;width:18px;height:18px;border:3px solid rgba(124,58,237,0.3);border-radius:50%;border-top-color:#7c3aed;animation:spin 1s linear infinite;margin-right:8px;vertical-align:middle"></div>
-             A Inteligência Artificial está analisando seus dados...
-           </div>
-           <div id="ai-output" style="display:none;font-size:14px;color:#374151;line-height:1.6;background:#f9fafb;padding:16px;border-radius:8px;border:1px solid #e5e7eb"></div>
-        </div>
-      </div>
-
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-        <div style="font-size:14px;font-weight:700;color:#0d1b2e;margin-bottom:12px;display:flex;align-items:center;gap:8px">📝 Suas Notas Financeiras</div>
-        <div style="display:flex;gap:10px;margin-bottom:16px">
-          <input type="text" id="af2-notas-input" placeholder="Adicione um lembrete ou meta..." style="flex:1;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#f9fafb" onkeydown="if(event.key==='Enter')af2SalvarNotaSupabase()">
-          <button onclick="af2SalvarNotaSupabase()" style="padding:10px 20px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:0.2s" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Adicionar</button>
-        </div>
-        <div id="notas-list-container" style="max-height:300px;overflow-y:auto;border:1px solid #f3f4f6;border-radius:8px;background:#fafafa">
-           ${notesHtml}
-        </div>
-      </div>
-    </div>
-
-    <!-- Direita: Contas e Dívidas -->
-    <div>
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:20px">
-        <div style="padding:16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:14px;font-weight:700;color:#0d1b2e">🏦 Contas e Guardados</div>
-          <button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Novo</button>
-        </div>
-        <div style="padding:10px 16px">
-          ${!d.saldos.length ? '<div style="color:#9ca3af;font-size:13px;text-align:center;padding:10px 0">Nenhum local cadastrado.</div>' : d.saldos.map((s,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f9fafb"><div style="font-size:13px;font-weight:600;color:#374151">${s.local}</div><div style="color:#16a34a;font-weight:700;font-size:13px">${fmt(s.valor)} <button onclick="af2DelSaldo(${i})" style="border:none;background:none;color:#9ca3af;cursor:pointer;margin-left:6px;font-weight:bold;font-size:16px;padding:0">×</button></div></div>`).join('')}
-        </div>
-      </div>
-
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px">
-        <div style="padding:16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:14px;font-weight:700;color:#0d1b2e">📋 Dívidas Ativas</div>
-          <button onclick="af2OpenDivida()" style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Nova</button>
-        </div>
-        <div style="padding:10px 16px">
-          ${!d.dividas.length ? '<div style="color:#9ca3af;font-size:13px;text-align:center;padding:10px 0">Nenhuma dívida.</div>' : d.dividas.map((dv,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f9fafb"><div style="font-size:13px;font-weight:600;color:#374151">${dv.origem}</div><div style="color:#dc2626;font-weight:700;font-size:13px">${fmt(dv.total)} <button onclick="af2DelDivida(${i})" style="border:none;background:none;color:#9ca3af;cursor:pointer;margin-left:6px;font-weight:bold;font-size:16px;padding:0">×</button></div></div>`).join('')}
-        </div>
-      </div>
-    </div>
-  </div>
-  `;
-
-  document.getElementById('main-content').innerHTML = html;
-  
-  await af2LoadNotasSupabase();
+  var recs=[];
+  if(totalGuardado===0&&totalDividas===0)recs.push({cor:'#1a6fc4',txt:'Adicione seus saldos e dívidas para receber recomendações.'});
+  if(totalDividas>totalGuardado&&totalDividas>0)recs.push({cor:'#dc2626',txt:'⚠️ Suas dívidas superam o valor guardado.'});
+  if(totalGuardado>0&&totalDividas===0)recs.push({cor:'#16a34a',txt:'✅ Sem dívidas! Considere investir o excedente.'});
+  var html='<div style="font-size:20px;font-weight:700;margin-bottom:18px">Assistente Financeiro 🤖</div>'
+    +'<div class="cards-grid"><div class="card"><div class="card-label">Guardado</div><div class="card-value td-green">'+fmt(totalGuardado)+'</div></div><div class="card"><div class="card-label">Dívidas</div><div class="card-value td-red">'+fmt(totalDividas)+'</div></div><div class="card" style="background:'+(saldoReal>=0?'#1a6fc4':'#dc2626')+';border-color:transparent"><div class="card-label" style="color:rgba(255,255,255,.8)">Saldo Real</div><div class="card-value" style="color:#fff">'+fmt(saldoReal)+'</div></div></div>';
+  recs.forEach(function(r){html+='<div style="border-left:3px solid '+r.cor+';background:#f8fafc;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:8px">'+r.txt+'</div>';});
+  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">🏦 Onde guardo dinheiro</div><button onclick="af2OpenSaldo()" style="padding:5px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
+  if(!d.saldos.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhum local cadastrado.</div>';
+  else d.saldos.forEach(function(s,si){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+s.local+'</div><div style="font-size:11px;color:#6b7280">'+s.tipo+'</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#16a34a">'+fmt(s.valor)+'</div><button onclick="af2DelSaldo('+si+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
+  html+='</div></div>';
+  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">📋 Dívidas</div><button onclick="af2OpenDivida()" style="padding:5px 12px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">+ Adicionar</button></div><div style="padding:14px 16px">';
+  if(!d.dividas.length)html+='<div style="text-align:center;padding:20px;color:#9ca3af;font-size:13px">Nenhuma dívida.</div>';
+  else d.dividas.forEach(function(dv,di){html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6"><div><div style="font-size:13px;font-weight:600">'+dv.origem+'</div><div style="font-size:11px;color:#6b7280">Parcela: '+fmt(dv.parcela)+'/mês</div></div><div style="display:flex;align-items:center;gap:10px"><div style="font-size:14px;font-weight:700;color:#dc2626">'+fmt(dv.total)+'</div><button onclick="af2DelDivida('+di+')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:17px;padding:0">×</button></div></div>';});
+  html+='</div></div>';
+  html+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:10px">📝 Notas</div><textarea id="af2-notas" rows="4" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f9fafb;resize:vertical;outline:none;box-sizing:border-box">'+d.notas+'</textarea><button onclick="af2SalvarNotas()" style="margin-top:8px;padding:7px 16px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button></div>';
+  document.getElementById('main-content').innerHTML=html;
 }
-
-window.af2StartAnalysis = function() {
-  var btn = document.getElementById('ai-btn-analisar');
-  if(btn) btn.style.display = 'none';
-  var load = document.getElementById('ai-loading');
-  if(load) load.style.display = 'block';
-  var out = document.getElementById('ai-output');
-  if(out) out.style.display = 'none';
-  
-  var d=af2Load();
-  var totalGuardado=d.saldos.reduce(function(s,x){return s+parseFloat(x.valor||0);},0);
-  var totalDividas=d.dividas.reduce(function(s,x){return s+parseFloat(x.total||0);},0);
-  fetchAIFinancialAdvice(d, totalGuardado, totalDividas);
-};
-
-async function fetchAIFinancialAdvice(d, totalGuardado, totalDividas) {
-  try {
-    var prompt = "Análise os seguintes dados financeiros do usuário. " +
-      "Guardado: R$ " + totalGuardado.toFixed(2) + ". " +
-      "Dívidas: R$ " + totalDividas.toFixed(2) + ". " +
-      "Saldos detalhados: " + JSON.stringify(d.saldos) + ". " +
-      "Dívidas detalhadas: " + JSON.stringify(d.dividas) + ". " +
-      "Anotações do usuário: " + (g_af2_notas || "Nenhuma") + ". " +
-      "Seja um consultor financeiro inteligente. Divida sua resposta claramente em 3 tópicos curtos (use HTML leve e listas para ficar bonito, com subtítulos em negrito ou cores): " +
-      "1) Análise de Gastos, " +
-      "2) Sugestões Automáticas, " +
-      "3) Recomendações Financeiras. Não use Markdown de código (```html). Apenas devolva as tags formatadas de forma direta para eu colocar num div.";
-      
-    var res = await fetch('api/ai/index.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-4.1-mini',
-        messages: [
-          { role: "system", content: "Você é um consultor financeiro inteligente que ajuda pessoas comuns a organizarem suas contas. Seja amigável, direto, simples e sempre procure identificar formas de otimização de dinheiro. Formate as respostas usando elementos HTML simples como <b>, <br>, <ul> e <li>." },
-          { role: "user", content: prompt }
-        ]
-      })
-    });
-    
-    var data = await res.json();
-    var loadingDiv = document.getElementById('ai-loading');
-    if(loadingDiv) loadingDiv.style.display = 'none';
-    
-    var outDiv = document.getElementById('ai-output');
-    if(!outDiv) return;
-    outDiv.style.display = 'block';
-    
-    if(data.choices && data.choices[0] && data.choices[0].message) {
-       var text = data.choices[0].message.content;
-       text = text.replace(/```html/g, '').replace(/```/g, ''); // limpa possiveis code blocks
-       outDiv.innerHTML = text;
-    } else {
-       outDiv.innerHTML = '<div style="color:#7c3aed;font-weight:600;margin-bottom:12px">🤖 Modo de Simulação (IA offline/sem créditos)</div><div style="font-size:14px;color:#374151">Com base nos seus dados, você pode economizar reduzindo gastos em categorias desnecessárias.</div>';
-    }
-  } catch(e) {
-    var loadingDiv = document.getElementById('ai-loading');
-    if(loadingDiv) loadingDiv.style.display = 'none';
-    var outDiv = document.getElementById('ai-output');
-    if(outDiv) {
-      outDiv.style.display = 'block';
-      outDiv.innerHTML = '<div style="color:#7c3aed;font-weight:600;margin-bottom:12px">🤖 Modo de Simulação (IA offline/sem créditos)</div><div style="font-size:14px;color:#374151">Com base nos seus dados, você pode economizar reduzindo gastos em categorias desnecessárias.</div>';
-    }
-    console.error('AI Fetch Error:', e);
-  }
-}
-
 function af2OpenSaldo(){mkModal('af2-saldo-modal','<div class="modal-title">🏦 Adicionar local</div><div class="modal-field"><label>Banco / Local</label><input id="af2-s-local" placeholder="Ex: Nubank"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Tipo</label><select id="af2-s-tipo"><option>Conta corrente</option><option>Poupança</option><option>Caixinha</option><option>Dinheiro físico</option><option>Investimento</option></select></div><div class="modal-field"><label>Valor (R$)</label><input type="number" id="af2-s-valor"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-saldo-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveSaldo()">Salvar</button></div>');}
 function af2SaveSaldo(){var local=(document.getElementById('af2-s-local').value||'').trim();var tipo=document.getElementById('af2-s-tipo').value;var valor=parseFloat(document.getElementById('af2-s-valor').value||0);if(!local||!valor){alert('Informe local e valor.');return;}var d=af2Load();d.saldos.push({local:local,tipo:tipo,valor:valor});af2Save(d);closeModal('af2-saldo-modal');pAssistenteFinanceiro();}
 function af2DelSaldo(i){var d=af2Load();d.saldos.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
 function af2OpenDivida(){mkModal('af2-divida-modal','<div class="modal-title">📋 Adicionar dívida</div><div class="modal-field"><label>Origem</label><input id="af2-d-orig" placeholder="Ex: Cartão"/></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="modal-field"><label>Total (R$)</label><input type="number" id="af2-d-total"/></div><div class="modal-field"><label>Parcela (R$)</label><input type="number" id="af2-d-parcela"/></div></div><div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'af2-divida-modal\')">Cancelar</button><button class="btn-modal-save" onclick="af2SaveDivida()">Salvar</button></div>');}
 function af2SaveDivida(){var origem=(document.getElementById('af2-d-orig').value||'').trim();var total=parseFloat(document.getElementById('af2-d-total').value||0);var parcela=parseFloat(document.getElementById('af2-d-parcela').value||0);if(!origem||!total){alert('Informe origem e total.');return;}var d=af2Load();d.dividas.push({origem:origem,total:total,parcela:parcela});af2Save(d);closeModal('af2-divida-modal');pAssistenteFinanceiro();}
 function af2DelDivida(i){var d=af2Load();d.dividas.splice(i,1);af2Save(d);pAssistenteFinanceiro();}
+function af2SalvarNotas(){var v=document.getElementById('af2-notas').value;var d=af2Load();d.notas=v;af2Save(d);alert('Salvo!');}
 
 function pPlanos(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
@@ -1655,22 +1401,22 @@ function pPlanos(){
     +'<div style="background:#fff;border:2px solid '+(isPro?'#1a6fc4':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
     +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Foco em controle financeiro</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para controle completo</div>'
     +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 19,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Organização de contas</div><div>✅ Planejamento detalhado</div><div>✅ Relatórios e gráficos</div><div>✅ Análise mensal manual</div><div style="color:#9ca3af;font-weight:600">❌ Sem Inteligência Artificial</div>'
+    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
     +'</div>'
     +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Plano Atual':'Assinar Pro')+'</button>'
     +'</div>'
 
-    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative;transform:scale(1.05);box-shadow:0 10px 25px -5px rgba(124,58,237,0.3);z-index:2">'
-    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">O Mais Completo</div>')
+    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
+    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
-    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px;color:#7c3aed">Ultra</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Inteligência Financeira 24h</div>'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Ultra</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder máximo com IA</div>'
     +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial Financeira</div><div>✅ Sugestões automáticas</div><div>✅ Análise inteligente de gastos</div><div>✅ Recomendações personalizadas</div><div>✅ Assistente virtual 24h</div>'
+    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros auto</div><div>✅ Análise de gastos inteligente</div>'
     +'</div>'
     +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
     +'</div>'
@@ -1698,11 +1444,7 @@ async function adminCarregarUsuarios(){
       plano:(p.plan||'free').toLowerCase(),status:p.status||'Ativo',role:p.role||'user',
       cadastro:fmtD(p.created_at),ultimo:fmtD(p.created_at),
       pago:(p.plan||'').toLowerCase()==='pro'?'R$ 19,90':(p.plan||'').toLowerCase()==='ultra'?'R$ 39,90':'R$ 0,00'
-    };}).filter(function(u){ 
-      var isCurrent = currentUser && u.email && currentUser.email && u.email.toLowerCase() === currentUser.email.toLowerCase();
-      var isAdminRole = u.role === 'admin';
-      return !isCurrent && !isAdminRole; 
-    });
+    };});
   }catch(e){adminUsers=[];console.error('Erro admin:',e);}
 }
 
@@ -1771,302 +1513,6 @@ function pAdminConfig(){document.getElementById('main-content').innerHTML='<div 
 function pAdminPainel(){pAdminVisaoGeral();}
 function pGestaoUsuarios(){pAdminUsuarios();}
 function pAnaliseUsuarios(){pAdminRelatorios();}
-
-/* ===== AI PAGES ===== */
-function aiUltraWall(title,desc){
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:460px;margin:40px auto;text-align:center;padding:0 16px">'
-    +'<div style="width:72px;height:72px;background:linear-gradient(135deg,#7c3aed,#9333ea);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(124,58,237,0.35)"><svg width="30" height="30" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>'
-    +'<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">'+title+'</h2>'
-    +'<p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:24px">'+desc+'</p>'
-    +'<div style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(147,51,234,0.05));border:1px solid rgba(124,58,237,0.2);border-radius:16px;padding:20px;margin-bottom:20px">'
-    +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#7c3aed;margin-bottom:10px">Plano Ultra</div>'
-    +'<div style="font-size:26px;font-weight:800;color:#0d1b2e;margin-bottom:4px">R$ 39,90<span style="font-size:13px;font-weight:500;color:#9ca3af">/mês</span></div>'
-    +'<p style="font-size:12px;color:#6b7280">Todas as funcionalidades de IA desbloqueadas</p></div>'
-    +'<button onclick="navigate(\'planos\')" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
-    +'</div>';
-}
-
-async function pAiAnaliseMes(){
-  if(!window.isUserUltra){aiUltraWall('Análise do Mês IA','Análises inteligentes do seu mês financeiro com identificação de padrões e recomendações personalizadas.');return;}
-  var r=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var now=new Date();var mes=now.getMonth();var ano=now.getFullYear();
-  var doMes=all.filter(function(t){var d=new Date(t.date||'');return d.getMonth()===mes&&d.getFullYear()===ano;});
-  var inc=doMes.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var exp=doMes.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var bal=inc-exp;
-  var catMap={};doMes.filter(function(t){return isExpense(t.type);}).forEach(function(t){catMap[t.category||'Geral']=(catMap[t.category||'Geral']||0)+parseFloat(t.amount);});
-  var cats=Object.entries(catMap).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
-  var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:700px">'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px">'
-    +'<div class="card"><div class="card-label">Receitas</div><div class="card-value td-green">'+fmt(inc)+'</div></div>'
-    +'<div class="card"><div class="card-label">Despesas</div><div class="card-value td-red">'+fmt(exp)+'</div></div>'
-    +'<div class="card"><div class="card-label">Saldo</div><div class="card-value" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+fmt(bal)+'</div></div>'
-    +'<div class="card" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border-color:#7c3aed"><div class="card-label" style="color:rgba(255,255,255,0.8)">Situação</div><div class="card-value" style="color:#fff;font-size:16px">'+(bal>=0?'Positivo ✓':'Atenção !')+'</div></div>'
-    +'</div>'
-    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px">'
-    +'<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px">'
-    +'<div style="width:26px;height:26px;background:linear-gradient(135deg,#7c3aed,#9333ea);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>'
-    +'<span style="font-size:13px;font-weight:700">Análise IA — '+meses[mes]+'/'+ano+'</span>'
-    +'<span style="margin-left:auto;padding:2px 8px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase">Ultra</span></div>'
-    +'<div style="padding:16px 18px">'
-    +(doMes.length===0
-      ?'<p style="color:#9ca3af;font-size:13px">Nenhuma transação este mês. Adicione transações para gerar análise.</p>'
-      :'<p style="font-size:13px;color:#374151;line-height:1.75">'
-        +(bal>=0
-          ?'Seu mês está <strong style="color:#16a34a">positivo</strong>. Você recebeu <strong>'+fmt(inc)+'</strong> e gastou <strong>'+fmt(exp)+'</strong>, sobrando <strong style="color:#16a34a">'+fmt(bal)+'</strong>.'
-          :'Atenção: seu mês está <strong style="color:#dc2626">negativo</strong>. Suas despesas (<strong>'+fmt(exp)+'</strong>) superam sua receita (<strong>'+fmt(inc)+'</strong>) em <strong style="color:#dc2626">'+fmt(Math.abs(bal))+'</strong>.')
-        +(cats.length?'<br><br>Maiores gastos em: <strong>'+cats.slice(0,3).map(function(c){return c[0]+' ('+fmt(c[1])+')';}).join(', ')+'</strong>.'
-          +'<br><br>'+(bal>=0?'Recomendação: considere investir parte do saldo para fazer seu dinheiro crescer.':'Recomendação: analise seus gastos fixos e identifique onde pode cortar.'):'')
-        +'</p>'
-    )
-    +'</div></div>'
-    +(cats.length
-      ?'<div class="chart-card"><div class="chart-title">Gastos por Categoria</div><div class="chart-sub">Top categorias do mês</div>'
-        +'<div style="display:flex;flex-direction:column;gap:10px">'
-        +cats.map(function(c){var pct=exp>0?Math.round(c[1]/exp*100):0;return '<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:500">'+c[0]+'</span><span style="color:#6b7280">'+fmt(c[1])+' · '+pct+'%</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#7c3aed,#9333ea)"></div></div></div>';}).join('')
-        +'</div></div>'
-      :'')
-    +'</div>';
-}
-
-async function pAiPlanejamento(){
-  if(!window.isUserUltra){aiUltraWall('Planejamento Inteligente','A IA analisa sua renda e sugere a distribuição ideal do orçamento para o próximo mês usando a Regra 50-30-20.');return;}
-  var r=await sb.from('transactions').select('amount,type,date').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var incTx=all.filter(function(t){return isIncome(t.type);});
-  var mesesUniq=[...new Set(incTx.map(function(t){return String(t.date||'').substring(0,7);}))].length||1;
-  var totalInc=incTx.reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var avgInc=totalInc/mesesUniq;
-  var nec=avgInc*0.50,des=avgInc*0.30,inv=avgInc*0.20;
-  var itens=[
-    {label:'Necessidades',sub:'Moradia, alimentação, saúde, transporte',val:nec,pct:50,cor:'#1565c0'},
-    {label:'Desejos',sub:'Lazer, entretenimento, compras pessoais',val:des,pct:30,cor:'#16a34a'},
-    {label:'Investimentos',sub:'Poupança, tesouro, fundos, reserva',val:inv,pct:20,cor:'#7c3aed'}
-  ];
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:600px">'
-    +'<div style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(147,51,234,0.04));border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:18px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px">'
-    +'<div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#9333ea);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>'
-    +'<div><div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:4px">Regra 50-30-20 personalizada</div>'
-    +'<p style="font-size:13px;color:#374151;line-height:1.6">Baseada na sua renda média de <strong>'+fmt(avgInc)+'</strong>/mês, a IA sugere:</p></div></div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px">'
-    +itens.map(function(it){return '<div class="card" style="border-top:3px solid '+it.cor+';text-align:center"><div class="card-label">'+it.label+'</div><div style="font-size:20px;font-weight:800;margin:6px 0;color:'+it.cor+'">'+it.pct+'%</div><div style="font-size:13px;font-weight:700">'+fmt(it.val)+'</div></div>';}).join('')
-    +'</div>'
-    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">'
-    +'<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:700">Distribuição sugerida</div>'
-    +itens.map(function(it){return '<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:600;margin-bottom:2px">'+it.label+'</div><div style="font-size:11px;color:#9ca3af">'+it.sub+'</div></div><div style="font-size:14px;font-weight:700;color:'+it.cor+';white-space:nowrap;margin-left:12px">'+fmt(it.val)+'</div></div>';}).join('')
-    +'</div></div>';
-}
-
-async function pAiSugestoes(){
-  if(!window.isUserUltra){aiUltraWall('Sugestões de Economia','Receba dicas personalizadas baseadas no seu padrão de gastos para economizar mais todo mês.');return;}
-  var r=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var exp=all.filter(function(t){return isExpense(t.type);});
-  var catMap={};exp.forEach(function(t){catMap[t.category||'Geral']=(catMap[t.category||'Geral']||0)+parseFloat(t.amount);});
-  var cats=Object.entries(catMap).sort(function(a,b){return b[1]-a[1];});
-  var total=exp.reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var sugestoes=[
-    {icon:'☕',titulo:'Reduza alimentação fora de casa',desc:'Cozinhar em casa pode economizar até 40% dos gastos com alimentação. Tente preparar refeições semanais.',economia:'até 40%'},
-    {icon:'📱',titulo:'Revise assinaturas digitais',desc:'Muitas pessoas pagam serviços que mal usam. Faça um levantamento de todas as assinaturas mensais.',economia:'até R$ 80/mês'},
-    {icon:'🚗',titulo:'Otimize gastos com transporte',desc:'Considere caronas, bicicleta ou transporte público para trajetos curtos do dia a dia.',economia:'até 25%'},
-    {icon:'💡',titulo:'Economize energia em casa',desc:'Desligar aparelhos em standby e usar lâmpadas LED pode reduzir sua conta de luz significativamente.',economia:'até 15%'},
-    {icon:'🛒',titulo:'Compre com lista e planejamento',desc:'Compras sem lista geram gastos desnecessários. Compare preços e evite compras por impulso.',economia:'até 20%'}
-  ];
-  if(cats.length>0&&total>0&&cats[0][1]>total*0.3){
-    sugestoes.unshift({icon:'⚠️',titulo:'"'+cats[0][0]+'" representa '+Math.round(cats[0][1]/total*100)+'% dos seus gastos',desc:'Esta categoria está acima do recomendado. Analise se todos os gastos são necessários e busque alternativas mais econômicas.',economia:'potencial alto'});
-  }
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:640px">'
-    +'<div style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(147,51,234,0.04));border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:16px;margin-bottom:18px">'
-    +'<p style="font-size:13px;color:#374151;line-height:1.6">Baseado nos seus <strong>'+exp.length+' gastos</strong> registrados, a IA identificou as seguintes oportunidades:</p></div>'
-    +'<div style="display:flex;flex-direction:column;gap:10px">'
-    +sugestoes.map(function(s){return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;display:flex;gap:14px"><div style="font-size:22px;flex-shrink:0;width:40px;height:40px;background:#f8f9fa;border-radius:10px;display:flex;align-items:center;justify-content:center">'+s.icon+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:4px">'+s.titulo+'</div><div style="font-size:12px;color:#6b7280;line-height:1.55;margin-bottom:8px">'+s.desc+'</div><span style="padding:2px 8px;background:#dcfce7;color:#15803d;border-radius:20px;font-size:10px;font-weight:700">Economia: '+s.economia+'</span></div></div>';}).join('')
-    +'</div></div>';
-}
-
-async function pAiMetas(){
-  if(!window.isUserUltra){aiUltraWall('Metas Inteligentes','A IA cria e acompanha metas financeiras personalizadas com base no seu perfil e objetivos de vida.');return;}
-  var metas=JSON.parse(localStorage.getItem('metas_ia_'+currentUser.id)||'[]');
-  var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var inc=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var exp=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var saldo=inc-exp;
-  function saveMetas(){localStorage.setItem('metas_ia_'+currentUser.id,JSON.stringify(metas));}
-  function renderMetasPage(){
-    var metasHtml=metas.length===0
-      ?'<div style="padding:32px;text-align:center;color:#9ca3af;font-size:13px">Nenhuma meta criada. Adicione uma abaixo.</div>'
-      :metas.map(function(m,i){
-          var pct=Math.min(100,m.target>0?Math.round(m.current/m.target*100):0);
-          return '<div style="padding:14px 16px;border-bottom:1px solid #f3f4f6"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><div style="font-size:13px;font-weight:600">'+m.name+'</div><div style="font-size:11px;color:#9ca3af;margin-top:2px">'+fmt(m.current)+' de '+fmt(m.target)+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:700;color:#7c3aed">'+pct+'%</span><button onclick="aiMetaExcluir('+i+')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:16px;line-height:1;padding:0">×</button></div></div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#7c3aed,#9333ea)"></div></div></div>';
-        }).join('');
-    document.getElementById('main-content').innerHTML=
-      '<div style="max-width:600px">'
-      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px">'
-      +'<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:700">Metas Ativas <span style="color:#9ca3af;font-weight:400">('+metas.length+')</span></div>'
-      +metasHtml+'</div>'
-      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">'
-      +'<div style="font-size:13px;font-weight:700;margin-bottom:12px">Nova Meta</div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +'<input id="meta-ia-nome" placeholder="Ex: Viagem, Carro, Reserva" style="flex:1;min-width:160px;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none"/>'
-      +'<input id="meta-ia-val" type="number" placeholder="Valor total (R$)" style="width:150px;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none"/>'
-      +'<input id="meta-ia-atual" type="number" placeholder="Já tenho (R$)" style="width:140px;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none" value="0"/>'
-      +'<button onclick="aiMetaAdicionar()" style="padding:9px 16px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Criar Meta</button>'
-      +'</div>'
-      +(saldo>0?'<p style="font-size:12px;color:#6b7280;margin-top:10px;padding:8px 10px;background:#f8f9fa;border-radius:8px">💡 Com saldo disponível de <strong>'+fmt(saldo)+'</strong>, considere direcionar parte para suas metas.</p>':'')
-      +'</div></div>';
-  }
-  window.aiMetaAdicionar=function(){
-    var nome=document.getElementById('meta-ia-nome').value.trim();
-    var target=parseFloat(document.getElementById('meta-ia-val').value)||0;
-    var current=parseFloat(document.getElementById('meta-ia-atual').value)||0;
-    if(!nome||!target)return;
-    metas.push({name:nome,target:target,current:current});
-    saveMetas();renderMetasPage();
-  };
-  window.aiMetaExcluir=function(i){metas.splice(i,1);saveMetas();renderMetasPage();};
-  renderMetasPage();
-}
-
-async function pAiPrevisao(){
-  if(!window.isUserUltra){aiUltraWall('Previsão de Saldo','A IA calcula quanto você terá no fim do mês com base nos seus gastos e receitas do período atual.');return;}
-  var r=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var now=new Date();var mes=now.getMonth();var ano=now.getFullYear();
-  var diasMes=new Date(ano,mes+1,0).getDate();var diaAtual=now.getDate();var diasRestantes=diasMes-diaAtual;
-  var doMes=all.filter(function(t){var d=new Date(t.date||'');return d.getMonth()===mes&&d.getFullYear()===ano;});
-  var incMes=doMes.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var expMes=doMes.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var mediaGastoDia=diaAtual>0?expMes/diaAtual:0;
-  var gastoEstimado=mediaGastoDia*diasRestantes;
-  var saldoEstimado=incMes-expMes-gastoEstimado;
-  var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:600px">'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px">'
-    +'<div class="card"><div class="card-label">Progresso do Mês</div><div class="card-value" style="font-size:18px">'+diaAtual+'/'+diasMes+'</div><div style="font-size:11px;color:#6b7280;margin-top:4px">'+diasRestantes+' dias restantes</div></div>'
-    +'<div class="card"><div class="card-label">Receitas</div><div class="card-value td-green" style="font-size:18px">'+fmt(incMes)+'</div></div>'
-    +'<div class="card"><div class="card-label">Gastos Até Hoje</div><div class="card-value td-red" style="font-size:18px">'+fmt(expMes)+'</div></div>'
-    +'<div class="card" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border-color:#7c3aed"><div class="card-label" style="color:rgba(255,255,255,0.8)">Saldo Previsto</div><div class="card-value" style="color:#fff;font-size:18px">'+fmt(saldoEstimado)+'</div></div>'
-    +'</div>'
-    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">'
-    +'<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:8px">'
-    +'<div style="width:26px;height:26px;background:linear-gradient(135deg,#7c3aed,#9333ea);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>'
-    +'<span style="font-size:13px;font-weight:700">Previsão para '+meses[mes]+'/'+ano+'</span></div>'
-    +'<div style="padding:16px 18px">'
-    +'<p style="font-size:13px;color:#374151;line-height:1.75">Faltam <strong>'+diasRestantes+' dias</strong> para o fim do mês. Com gasto médio de <strong>'+fmt(mediaGastoDia)+'/dia</strong>, você deve gastar mais <strong style="color:#dc2626">'+fmt(gastoEstimado)+'</strong>.</p>'
-    +'<p style="font-size:13px;color:#374151;line-height:1.75;margin-top:10px">Saldo estimado ao fim do mês: <strong style="color:'+(saldoEstimado>=0?'#16a34a':'#dc2626')+'">'+fmt(saldoEstimado)+'</strong>. '
-    +(saldoEstimado>=0?'Você está no caminho certo! Continue assim.':'Atenção: seus gastos projetados superam as receitas. Considere reduzir despesas.')+'</p>'
-    +'<div style="margin-top:14px"><div style="font-size:11px;color:#9ca3af;margin-bottom:6px">Progresso do mês</div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:'+Math.round(diaAtual/diasMes*100)+'%"></div></div></div>'
-    +'</div></div></div>';
-}
-
-async function pAiAlertas(){
-  if(!window.isUserUltra){aiUltraWall('Alertas Inteligentes','Receba alertas automáticos quando detectarmos padrões preocupantes ou oportunidades de melhora.');return;}
-  var r=await sb.from('transactions').select('*').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var now=new Date();var mes=now.getMonth();var ano=now.getFullYear();
-  var mesAnt=mes===0?11:mes-1;var anoAnt=mes===0?ano-1:ano;
-  var doMes=all.filter(function(t){var d=new Date(t.date||'');return d.getMonth()===mes&&d.getFullYear()===ano;});
-  var doMesAnt=all.filter(function(t){var d=new Date(t.date||'');return d.getMonth()===mesAnt&&d.getFullYear()===anoAnt;});
-  var expMes=doMes.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var expAnt=doMesAnt.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var incMes=doMes.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var catMapMes={},catMapAnt={};
-  doMes.filter(function(t){return isExpense(t.type);}).forEach(function(t){catMapMes[t.category||'Geral']=(catMapMes[t.category||'Geral']||0)+parseFloat(t.amount);});
-  doMesAnt.filter(function(t){return isExpense(t.type);}).forEach(function(t){catMapAnt[t.category||'Geral']=(catMapAnt[t.category||'Geral']||0)+parseFloat(t.amount);});
-  var alertas=[];
-  if(expAnt>0&&expMes>expAnt*1.2)alertas.push({tipo:'danger',icon:'🚨',titulo:'Gastos aumentaram '+Math.round((expMes/expAnt-1)*100)+'% este mês',desc:'Seus gastos este mês ('+fmt(expMes)+') são significativamente maiores que o mês anterior ('+fmt(expAnt)+'). Analise onde está gastando mais.'});
-  Object.keys(catMapMes).forEach(function(cat){if(catMapAnt[cat]&&catMapMes[cat]>catMapAnt[cat]*1.3)alertas.push({tipo:'warning',icon:'⚠️',titulo:'Gasto em "'+cat+'" subiu '+Math.round((catMapMes[cat]/catMapAnt[cat]-1)*100)+'%',desc:'De '+fmt(catMapAnt[cat])+' para '+fmt(catMapMes[cat])+' este mês. Verifique se é necessário.'});});
-  if(incMes>0&&expMes>incMes*0.9)alertas.push({tipo:'danger',icon:'💸',titulo:'Gastos próximos do limite da renda',desc:'Seus gastos representam '+Math.round(expMes/incMes*100)+'% da sua renda do mês. Isso pode comprometer sua reserva.'});
-  if(alertas.length===0)alertas.push({tipo:'success',icon:'✅',titulo:'Nenhum alerta no momento',desc:'Seu padrão financeiro está saudável. Continue monitorando regularmente!'});
-  var temas={danger:{bg:'#fef2f2',bord:'#fecaca',cor:'#dc2626'},warning:{bg:'#fefce8',bord:'#fef08a',cor:'#854d0e'},success:{bg:'#f0fdf4',bord:'#bbf7d0',cor:'#15803d'}};
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:640px">'
-    +'<div style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(147,51,234,0.04));border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:16px;margin-bottom:18px">'
-    +'<p style="font-size:13px;color:#374151;line-height:1.6">A IA monitorou suas transações e gerou <strong>'+alertas.length+' alerta(s)</strong>:</p></div>'
-    +'<div style="display:flex;flex-direction:column;gap:10px">'
-    +alertas.map(function(a){var t=temas[a.tipo];return '<div style="background:'+t.bg+';border:1px solid '+t.bord+';border-radius:14px;padding:16px;display:flex;gap:12px"><div style="font-size:22px;flex-shrink:0">'+a.icon+'</div><div><div style="font-size:13px;font-weight:700;color:'+t.cor+';margin-bottom:4px">'+a.titulo+'</div><div style="font-size:12px;color:#374151;line-height:1.55">'+a.desc+'</div></div></div>';}).join('')
-    +'</div></div>';
-}
-
-function pAiInvestimentos(){
-  if(!window.isUserUltra){aiUltraWall('Investimentos Educativo','Aprenda sobre os principais tipos de investimento com guias práticos e personalizados pela IA.');return;}
-  var lista=[
-    {nome:'Tesouro Direto',risco:'Baixo',retorno:'~12% a.a.',cor:'#16a34a',desc:'Títulos do governo federal. Ideal para iniciantes e reserva de emergência. Alta liquidez e segurança garantida.'},
-    {nome:'CDB',risco:'Baixo',retorno:'~12-14% a.a.',cor:'#1565c0',desc:'Certificado de Depósito Bancário. Garantido pelo FGC até R$ 250 mil. Ótima alternativa à poupança.'},
-    {nome:'Fundos de Renda Fixa',risco:'Baixo-Médio',retorno:'~11-13% a.a.',cor:'#0ea5e9',desc:'Conjunto de ativos gerenciado por especialistas. Diversificação automática com gestão profissional.'},
-    {nome:'Fundos Imobiliários (FIIs)',risco:'Médio',retorno:'~8-12% a.a.',cor:'#7c3aed',desc:'Investimento em imóveis via bolsa. Distribuição mensal de dividendos. Ótimo para geração de renda passiva.'},
-    {nome:'Ações (Bolsa)',risco:'Alto',retorno:'Variável',cor:'#f59e0b',desc:'Participação em empresas listadas. Alto potencial de retorno no longo prazo, mas com volatilidade maior.'}
-  ];
-  var riscoColor={'Baixo':'#16a34a','Baixo-Médio':'#0ea5e9',Médio:'#f59e0b',Alto:'#dc2626'};
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:640px">'
-    +'<div style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(147,51,234,0.04));border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:16px;margin-bottom:18px">'
-    +'<p style="font-size:13px;color:#374151;line-height:1.6">Guia de investimentos para o mercado brasileiro. Entenda cada opção e escolha a que melhor se adapta ao seu perfil.</p></div>'
-    +'<div style="display:flex;flex-direction:column;gap:10px">'
-    +lista.map(function(inv){var rc=riscoColor[inv.risco]||'#6b7280';return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;border-left:4px solid '+inv.cor+'"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div style="font-size:14px;font-weight:700">'+inv.nome+'</div><div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:'+rc+'22;color:'+rc+'">'+inv.risco+'</span><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#dcfce7;color:#15803d">'+inv.retorno+'</span></div></div><p style="font-size:12px;color:#6b7280;line-height:1.55">'+inv.desc+'</p></div>';}).join('')
-    +'</div></div>';
-}
-
-async function pAiPerfil(){
-  if(!window.isUserUltra){aiUltraWall('Perfil Financeiro','Descubra seu perfil de investidor e receba um relatório completo da sua saúde financeira.');return;}
-  var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);
-  var all=r.data||[];
-  var inc=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var exp=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
-  var saldo=inc-exp;
-  var taxa=inc>0?Math.round(exp/inc*100):100;
-  var r2=await sb.from('investments').select('value').eq('user_id',currentUser.id);
-  var invested=(r2.data||[]).reduce(function(s,i){return s+parseFloat(i.value);},0);
-  var score=60;
-  if(taxa<=50)score+=20;else if(taxa<=70)score+=5;else score-=15;
-  if(invested>0)score+=10;
-  if(saldo>0)score+=10;
-  score=Math.max(20,Math.min(100,score));
-  var perfil=score>=80?{nome:'Saudável',cor:'#16a34a',emoji:'✅',desc:'Você mantém gastos sob controle e tem boa organização financeira.'}
-    :score>=55?{nome:'Em Desenvolvimento',cor:'#f59e0b',emoji:'📈',desc:'Você está no caminho certo, mas há espaço para melhorar.'}
-    :{nome:'Precisa de Atenção',cor:'#dc2626',emoji:'⚠️',desc:'Seus gastos comprometem sua saúde financeira. Revise seu orçamento.'};
-  var indicadores=[
-    {label:'Taxa de comprometimento',val:taxa+'% da renda',status:taxa<=50?'ok':taxa<=70?'avg':'bad'},
-    {label:'Patrimônio investido',val:fmt(invested),status:invested>0?'ok':'avg'},
-    {label:'Saldo disponível',val:fmt(Math.max(0,saldo)),status:saldo>=0?'ok':'bad'},
-    {label:'Total de transações',val:all.length+' registros',status:all.length>10?'ok':'avg'}
-  ];
-  var temaStatus={ok:{bg:'#dcfce7',c:'#15803d',l:'Bom'},avg:{bg:'#fef3c7',c:'#92400e',l:'Regular'},bad:{bg:'#fef2f2',c:'#dc2626',l:'Atenção'}};
-  document.getElementById('main-content').innerHTML=
-    '<div style="max-width:560px">'
-    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;text-align:center;margin-bottom:18px">'
-    +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#9333ea);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 24px rgba(124,58,237,0.3)">'
-    +'<span style="font-size:26px;font-weight:800;color:#fff">'+score+'</span></div>'
-    +'<div style="font-size:18px;font-weight:800;margin-bottom:6px;color:'+perfil.cor+'">'+perfil.emoji+' '+perfil.nome+'</div>'
-    +'<p style="font-size:13px;color:#6b7280;line-height:1.6">'+perfil.desc+'</p></div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">'
-    +'<div class="card"><div class="card-label">Total Ganhos</div><div class="card-value td-green" style="font-size:18px">'+fmt(inc)+'</div></div>'
-    +'<div class="card"><div class="card-label">Total Gastos</div><div class="card-value td-red" style="font-size:18px">'+fmt(exp)+'</div></div>'
-    +'<div class="card"><div class="card-label">Saldo Líquido</div><div class="card-value" style="font-size:18px;color:'+(saldo>=0?'var(--green)':'var(--red)')+'">'+fmt(saldo)+'</div></div>'
-    +'<div class="card"><div class="card-label">Investido</div><div class="card-value" style="font-size:18px;color:#7c3aed">'+fmt(invested)+'</div></div>'
-    +'</div>'
-    +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">'
-    +'<div style="padding:14px 18px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:700">Indicadores Financeiros</div>'
-    +indicadores.map(function(ind){var t=temaStatus[ind.status];return '<div style="padding:12px 18px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:600;color:#374151">'+ind.label+'</div><div style="font-size:13px;font-weight:700;margin-top:2px">'+ind.val+'</div></div><span style="padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;background:'+t.bg+';color:'+t.c+';white-space:nowrap;margin-left:8px">'+t.l+'</span></div>';}).join('')
-    +'</div></div>';
-}
-
-
-
-// Garantir renderização da sidebar no carregamento
-window.onload = function() {
-  console.log('Janela carregada, verificando sidebar...');
-  if (typeof renderSidebarNav === 'function' && typeof userNav !== 'undefined') {
-    renderSidebarNav(userNav);
-  }
-};
 </script>
 </body>
 </html>
