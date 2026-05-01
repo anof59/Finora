@@ -423,7 +423,12 @@ function iconPath(n){
     trophy:'<path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/>',
     wallet:'<path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z"/><path d="M16 12a1 1 0 110 2 1 1 0 010-2z" fill="currentColor" stroke="none"/>',
     calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>'
+    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
+    activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    lightbulb:'<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A6 6 0 1 0 7.5 11.5c.76.76 1.23 1.52 1.41 2.5"/>',
+    bell:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+    sparkles:'<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>',
+    'file-text':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>'
   };
   return m[n]||'';
 }
@@ -441,6 +446,17 @@ var userNav=[
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
+  {section:'Financeiro Inteligente', isPro:true},
+  {id:'fi-analise', label:'Análise do Mês', icon:'activity', isPro:true},
+  {id:'fi-sugestoes', label:'Sugestões de Economia', icon:'lightbulb', isPro:true},
+  {id:'fi-diagnostico', label:'Diagnóstico Financeiro', icon:'shield', isPro:true},
+  {id:'fi-metas', label:'Metas Inteligentes', icon:'target', isPro:true},
+  {id:'fi-previsao', label:'Previsão de Saldo', icon:'trending-up', isPro:true},
+  {id:'fi-alertas', label:'Alertas', icon:'bell', isPro:true},
+  {id:'fi-planejamento', label:'Planejamento Mensal', icon:'calendar', isPro:true},
+  {id:'fi-evolucao', label:'Evolução Financeira', icon:'bar-chart', isPro:true},
+  {id:'fi-dicas', label:'Dicas Personalizadas', icon:'sparkles', isPro:true},
+  {id:'fi-relatorio', label:'Relatório Semanal', icon:'file-text', isPro:true},
   {section:'Ferramentas'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
@@ -454,13 +470,18 @@ var adminNav=[
   {section:'Controle'},
   {id:'admin-acessos',label:'Acessos e Bloqueios',icon:'shield',tooltip:'Bloquear e desbloquear acesso'},
   {id:'admin-relatorios',label:'Relatórios',icon:'table',tooltip:'Exportar dados'},
-  {id:'admin-config',label:'Configurações',icon:'bar-chart',tooltip:'Configurações do sistema'}
+  {id:'admin-config',label:'Configurações Admin',icon:'bar-chart',tooltip:'Configurações do sistema'}
 ];
 var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
   analise:'Análise',tabelas:'Tabelas',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   planos:'Planos e Assinatura',
+  'fi-analise':'Análise do Mês','fi-sugestoes':'Sugestões de Economia',
+  'fi-diagnostico':'Diagnóstico Financeiro','fi-metas':'Metas Inteligentes',
+  'fi-previsao':'Previsão de Saldo','fi-alertas':'Alertas',
+  'fi-planejamento':'Planejamento Mensal','fi-evolucao':'Evolução Financeira',
+  'fi-dicas':'Dicas Personalizadas','fi-relatorio':'Relatório Semanal',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -479,6 +500,11 @@ window.addEventListener('DOMContentLoaded',function(){if(localStorage.getItem('t
 function setLoading(){document.getElementById('main-content').innerHTML='<div class="loading-card"><div class="spin-lg"></div><span>Carregando...</span></div>';}
 function devScreen(){document.getElementById('main-content').innerHTML='<div class="dev-screen"><h2>Em desenvolvimento</h2></div>';}
 
+function pFinanceiroInteligente(pageId){
+  var title = pageTitles[pageId] || 'Financeiro Inteligente';
+  document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:24px">Funcionalidade disponível no plano PRO. Em breve com análises inteligentes baseadas nos seus dados.</p></div>';
+}
+
 function navigate(pageId,el){
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   if(el)el.classList.add('active');
@@ -492,12 +518,26 @@ function navigate(pageId,el){
     analise:pAnalise,tabelas:pTabelas,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     planos:pPlanos,
+    'fi-analise':pFinanceiroInteligente,'fi-sugestoes':pFinanceiroInteligente,
+    'fi-diagnostico':pFinanceiroInteligente,'fi-metas':pFinanceiroInteligente,
+    'fi-previsao':pFinanceiroInteligente,'fi-alertas':pFinanceiroInteligente,
+    'fi-planejamento':pFinanceiroInteligente,'fi-evolucao':pFinanceiroInteligente,
+    'fi-dicas':pFinanceiroInteligente,'fi-relatorio':pFinanceiroInteligente,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
     'admin-config':pAdminConfig,configuracoes:pCfg
   };
-  (map[pageId]||devScreen)();
+  
+  if(pageId.startsWith('fi-')){
+    var plan=(currentProfile&&currentProfile.plan)||'free';
+    if(plan!=='pro'&&plan!=='ultra'){
+      document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:400px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h2 style="font-size:20px;color:var(--text);margin-bottom:12px">Acesso Restrito</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.5;margin-bottom:24px">Essa funcionalidade é exclusiva para o plano PRO.</p><button onclick="navigate(\'planos\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Fazer Upgrade</button></div>';
+      return;
+    }
+  }
+
+  (map[pageId]||devScreen)(pageId);
 }
 
 /* ===== AUTH ===== */
@@ -638,8 +678,11 @@ function renderSidebarNav(nav){
   var el=document.getElementById('sidebar-nav');
   var h='';
   var firstItem=null;
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var isProOrUltra=(plan==='pro'||plan==='ultra');
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
+    if(n.isPro && !isProOrUltra) continue;
     if(n.section!=null){
       h+='<div class="nav-section-label">'+n.section+'</div>';
       continue;
