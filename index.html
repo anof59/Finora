@@ -263,7 +263,7 @@ tr:last-child td{border-bottom:none}
 }
 
 .sidebar.collapsed{width:70px}
-.sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub, .sidebar.collapsed .plan-badge, .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-section-label, .sidebar.collapsed .uname, .sidebar.collapsed .urole, .sidebar.collapsed .nav-item-badge{display:none}
+.sidebar.collapsed .logo-text, .sidebar.collapsed .logo-sub, .sidebar.collapsed .plan-badge, .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-section-label, .sidebar.collapsed .uname, .sidebar.collapsed .urole, .sidebar.collapsed .nav-item-badge, .sidebar.collapsed .sidebar-pro-title{display:none}
 .sidebar.collapsed .sidebar-logo{padding:20px 10px 16px;justify-content:center}
 .sidebar.collapsed .nav-item{justify-content:center;padding:12px;margin:2px 6px}
 .sidebar.collapsed .sidebar-user{padding:14px 10px;justify-content:center}
@@ -446,17 +446,6 @@ var userNav=[
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
-  {section:'Financeiro Inteligente', isPro:true},
-  {id:'fi-analise', label:'Análise do Mês', icon:'activity', isPro:true},
-  {id:'fi-sugestoes', label:'Sugestões de Economia', icon:'lightbulb', isPro:true},
-  {id:'fi-diagnostico', label:'Diagnóstico Financeiro', icon:'shield', isPro:true},
-  {id:'fi-metas', label:'Metas Inteligentes', icon:'target', isPro:true},
-  {id:'fi-previsao', label:'Previsão de Saldo', icon:'trending-up', isPro:true},
-  {id:'fi-alertas', label:'Alertas', icon:'bell', isPro:true},
-  {id:'fi-planejamento', label:'Planejamento Mensal', icon:'calendar', isPro:true},
-  {id:'fi-evolucao', label:'Evolução Financeira', icon:'bar-chart', isPro:true},
-  {id:'fi-dicas', label:'Dicas Personalizadas', icon:'sparkles', isPro:true},
-  {id:'fi-relatorio', label:'Relatório Semanal', icon:'file-text', isPro:true},
   {section:'Ferramentas'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
@@ -502,7 +491,7 @@ function devScreen(){document.getElementById('main-content').innerHTML='<div cla
 
 function pFinanceiroInteligente(pageId){
   var title = pageTitles[pageId] || 'Financeiro Inteligente';
-  document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:24px">Funcionalidade disponível no plano PRO. Em breve com análises inteligentes baseadas nos seus dados.</p></div>';
+  document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:24px">Disponível no plano PRO. Em breve com inteligência financeira avançada.</p></div>';
 }
 
 function navigate(pageId,el){
@@ -679,10 +668,39 @@ function renderSidebarNav(nav){
   var h='';
   var firstItem=null;
   var plan=(currentProfile&&currentProfile.plan)||'free';
-  var isProOrUltra=(plan==='pro'||plan==='ultra');
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
-    if(n.isPro && !isProOrUltra) continue;
+    
+    if(n.section === 'Ferramentas' && plan === 'pro'){
+      h+='<div class="sidebar-pro-block" style="margin:24px 12px 16px;padding:12px 6px;background:linear-gradient(145deg, rgba(139,92,246,0.05), transparent);border:1px solid rgba(139,92,246,0.15);border-radius:16px;box-shadow:inset 0 2px 10px rgba(255,255,255,0.5)">';
+      h+='<div class="sidebar-pro-title" style="display:flex;align-items:center;gap:6px;margin-bottom:14px;color:var(--purple);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:0 8px">';
+      h+='<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+      h+='<span>Fin. Inteligente</span>';
+      h+='<span style="background:var(--purple);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:auto">PRO</span>';
+      h+='</div>';
+      
+      var proItems = [
+        {id:'fi-analise', label:'Análise do Mês', icon:'activity'},
+        {id:'fi-sugestoes', label:'Sugestões de Economia', icon:'lightbulb'},
+        {id:'fi-diagnostico', label:'Diagnóstico Financeiro', icon:'shield'},
+        {id:'fi-metas', label:'Metas Inteligentes', icon:'target'},
+        {id:'fi-previsao', label:'Previsão de Saldo', icon:'trending-up'},
+        {id:'fi-alertas', label:'Alertas Inteligentes', icon:'bell'},
+        {id:'fi-planejamento', label:'Planejamento Mensal', icon:'calendar'},
+        {id:'fi-evolucao', label:'Evolução Financeira', icon:'bar-chart'},
+        {id:'fi-dicas', label:'Dicas Personalizadas', icon:'sparkles'},
+        {id:'fi-relatorio', label:'Relatório Semanal', icon:'file-text'}
+      ];
+      
+      proItems.forEach(function(pi){
+        h+='<div class="nav-item pro-item" onclick="navigate(\''+pi.id+'\',this)" title="">'
+          +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(pi.icon)+'</svg>'
+          +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+pi.label+'</span>'
+          +'</div>';
+      });
+      h+='</div>';
+    }
+    
     if(n.section!=null){
       h+='<div class="nav-section-label">'+n.section+'</div>';
       continue;
