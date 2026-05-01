@@ -24,7 +24,7 @@
   --green:#10b981;
   --red:#ef4444;
   --purple:#8b5cf6;
-  --ai-glow:rgba(139,92,246,0.15);
+
   --sidebar-bg:#ffffff;
   --sidebar-w:260px;
   --sidebar-collapsed-w:72px;
@@ -91,15 +91,7 @@ nav::-webkit-scrollbar{display:none}
 .nav-item.active{background:var(--active-bg);color:var(--active-color);font-weight:600;border-left-color:var(--active-color)}
 .nav-item svg{width:18px;height:18px;transition:transform 0.2s}
 .nav-item:hover svg{transform:scale(1.1)}
-.nav-ai-item{position:relative;background:rgba(139,92,246,0.03);margin-top:2px}
-.nav-ai-item:hover{background:rgba(139,92,246,0.08)}
-.nav-ai-item.active{background:rgba(139,92,246,0.1);color:var(--purple);border-left-color:var(--purple)}
-.nav-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase}
-.nav-badge.ai{background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff;box-shadow:0 2px 8px rgba(139,92,246,0.3)}
-.nav-badge.ia{background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff;box-shadow:0 2px 8px rgba(139,92,246,0.3)}
-.nav-badge.ultra{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff}
-.nav-badge.new{background:var(--green);color:#fff}
-.nav-badge.edu{background:#fef3c7;color:#92400e}
+
 .nav-divider{height:1px;background:var(--border);margin:16px 12px}
 .sidebar-bottom{padding:12px;border-top:1px solid var(--border)}
 .sidebar-user{padding:8px 12px;display:flex;align-items:center;gap:12px;border-radius:12px;transition:background 0.2s;cursor:pointer}
@@ -164,32 +156,7 @@ tr:last-child td{border-bottom:none}
 .search-bar input{border:none;background:none;outline:none;font-size:13px;width:100%}
 .progress-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden;margin-top:6px}
 .progress-fill{height:100%;border-radius:3px;background:var(--blue)}
-.nav-section-label.ai-section{
-  color:var(--purple);
-  background:linear-gradient(90deg, rgba(139,92,246,0.1), transparent);
-  margin:16px 8px 8px;
-  padding:10px 12px;
-  border-radius:8px;
-  border-left:2px solid var(--purple);
-  display:flex;
-  align-items:center;
-  gap:8px;
-  box-shadow: 0 4px 12px rgba(139,92,246,0.05);
-}
-.nav-section-label.ai-section::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--purple);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--purple);
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-  100% { transform: scale(1); opacity: 1; }
-}
+
 /* Scrollbar personalizada para a nav */
 nav::-webkit-scrollbar { width: 4px; }
 nav::-webkit-scrollbar-track { background: transparent; }
@@ -248,38 +215,12 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
 .sidebar.collapsed .nav-section-label::after{display:none}
 
 /* Badge variants */
-.nav-item-badge.ultra{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;text-transform:uppercase;letter-spacing:.3px}
-.nav-item-badge.ai{background:linear-gradient(90deg,#0ea5e9,#7c3aed);color:#fff;text-transform:uppercase;letter-spacing:.3px}
-.nav-item-badge.edu{background:#fef3c7;color:#92400e}
-/* AI section label */
-.nav-section-label.ai-section{color:#7c3aed;background:linear-gradient(90deg,rgba(124,58,237,0.07),transparent);border-radius:8px;margin:8px 10px 2px;padding:8px 8px 4px;letter-spacing:.5px}
-.nav-section-label.ai-section::after{background:linear-gradient(90deg,rgba(124,58,237,0.3),transparent)}
-[data-theme="dark"] .nav-section-label.ai-section{background:linear-gradient(90deg,rgba(124,58,237,0.18),transparent)}
+
 
 .desktop-toggle{display:flex;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
 @media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
-.ai-fab { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, #7c3aed, #9333ea); color: #fff; border: none; border-radius: 50px; padding: 12px 20px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(124,58,237,0.3); z-index: 9999; transition: transform 0.2s; }
-.ai-fab:hover { transform: scale(1.05); }
-.ai-fab-badge { font-size: 9px; text-transform: uppercase; background: #fff; color: #7c3aed; padding: 2px 6px; border-radius: 10px; font-weight: 800; }
-.ai-chat-panel { position: fixed; bottom: 80px; right: 24px; width: 340px; height: 500px; max-height: calc(100vh - 100px); background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; flex-direction: column; z-index: 9998; overflow: hidden; }
-.ai-chat-panel.open { display: flex; }
-.ai-chat-header { background: #0d1b2e; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-.ai-chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
-.ai-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
-.ai-msg-bot { background: #fff; border: 1px solid #e5e7eb; color: #374151; align-self: flex-start; border-bottom-left-radius: 4px; }
-.ai-msg-user { background: #7c3aed; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-.ai-chat-input { padding: 12px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; }
-.ai-chat-input input { flex: 1; border: 1px solid #e5e7eb; border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; }
-.ai-chat-input input:focus { border-color: #7c3aed; }
-.ai-chat-input button { width: 36px; height: 36px; border-radius: 50%; background: #7c3aed; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.ai-chat-typing { font-size: 12px; color: #9ca3af; padding: 4px 10px; font-style: italic; }
-[data-theme="dark"] .ai-chat-panel { background: var(--bg-card); border-color: var(--border-color); }
-[data-theme="dark"] .ai-chat-header { background: var(--bg-main); border-bottom: 1px solid var(--border-color); }
-[data-theme="dark"] .ai-chat-messages { background: var(--bg-main); }
-[data-theme="dark"] .ai-msg-bot { background: var(--bg-card); border-color: var(--border-color); color: var(--text-main); }
-[data-theme="dark"] .ai-chat-input { background: var(--bg-card); border-color: var(--border-color); }
-[data-theme="dark"] .ai-chat-input input { background: var(--bg-main); border-color: var(--border-color); color: var(--text-main); }
+
 
 @media(max-width: 768px) {
   .sidebar {
@@ -413,38 +354,7 @@ nav:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
     </div>
     <div class="content" id="main-content"></div>
   </div>
-  <div id="global-ai-chat" style="display:block">
-    <div id="ai-test-badge" style="display:none; position:fixed; bottom: 80px; right: 24px; background: #16a34a; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size: 13px;">
-      ✅ Chat IA Ultra carregado
-    </div>
-    <button class="ai-fab" onclick="toggleGlobalAiChat()" id="ai-fab-btn">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>
-      <span>Chat IA</span>
-      <div class="ai-fab-badge" id="ai-fab-badge-txt">Ultra</div>
-    </button>
-    <div class="ai-chat-panel" id="ai-chat-panel">
-      <div class="ai-chat-header">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#9333ea);border-radius:6px;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7z"/></svg></div>
-          <span style="font-weight:700;font-size:14px;color:#fff">Assistente IA Finora</span>
-        </div>
-        <button onclick="toggleGlobalAiChat()" style="background:none;border:none;color:#fff;cursor:pointer;opacity:0.8"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
-      </div>
-      <div class="ai-chat-messages" id="ai-chat-messages">
-        <div class="ai-msg ai-msg-bot">Olá! Sou seu assistente financeiro Ultra. Como posso ajudar você hoje?</div>
-      </div>
-      <div class="ai-chat-suggestions" style="padding:0 12px 12px; display:flex; gap:6px; overflow-x:auto; white-space:nowrap; border-bottom:1px solid #e5e7eb; background:#f8fafc;">
-        <button onclick="fillGlobalAiChat('Como economizar este mês?')" style="padding:6px 10px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; font-size:11px; color:#374151; cursor:pointer;">Como economizar este mês?</button>
-        <button onclick="fillGlobalAiChat('Onde estou gastando mais?')" style="padding:6px 10px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; font-size:11px; color:#374151; cursor:pointer;">Onde estou gastando mais?</button>
-        <button onclick="fillGlobalAiChat('Posso investir quanto?')" style="padding:6px 10px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; font-size:11px; color:#374151; cursor:pointer;">Posso investir quanto?</button>
-        <button onclick="fillGlobalAiChat('Meu mês vai fechar positivo?')" style="padding:6px 10px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; font-size:11px; color:#374151; cursor:pointer;">Meu mês vai fechar positivo?</button>
-      </div>
-      <div class="ai-chat-input">
-        <input type="text" id="ai-chat-input-field" placeholder="Pergunte algo..." onkeydown="if(event.key==='Enter')sendGlobalAiChat()"/>
-        <button onclick="sendGlobalAiChat()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
-      </div>
-    </div>
-  </div>
+
 </div>
 
 <script src="config.php"></script>
@@ -501,16 +411,7 @@ var userNav=[
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
-  {section:'✦ Assistente IA',isAI:true},
-  {id:'assistente-financeiro',label:'Chat com IA',icon:'message-circle',badge:'IA',badgeStyle:'ai',tooltip:'Converse com seu assistente financeiro'},
-  {id:'ai-analise-mes',label:'Análise do Mês',icon:'activity',badge:'Ultra',badgeStyle:'ultra',tooltip:'Análise inteligente do seu mês'},
-  {id:'ai-planejamento',label:'Planejamento Inteligente',icon:'zap',badge:'Novo',badgeStyle:'new',tooltip:'IA planeja seu orçamento ideal'},
-  {id:'ai-sugestoes',label:'Sugestões de Economia',icon:'lightbulb',tooltip:'Dicas personalizadas para economizar'},
-  {id:'ai-metas',label:'Metas Inteligentes',icon:'target',tooltip:'Metas criadas com inteligência artificial'},
-  {id:'ai-previsao',label:'Previsão de Saldo',icon:'trending-up',tooltip:'Veja quanto terá no fim do mês'},
-  {id:'ai-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Alertas automáticos sobre seus gastos'},
-  {id:'ai-investimentos',label:'Investimentos',icon:'book-open',badge:'Edu',badgeStyle:'edu',tooltip:'Aprenda a investir melhor'},
-  {id:'ai-perfil',label:'Perfil Financeiro',icon:'user-check',tooltip:'Descubra seu perfil de investidor'},
+
   {section:'Conta'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
@@ -528,13 +429,9 @@ var adminNav=[
 ];
 var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
-  analise:'Análise',tabelas:'Tabelas','assistente-financeiro':'Chat com IA',
+  analise:'Análise',tabelas:'Tabelas',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   planos:'Planos e Assinatura',
-  'ai-analise-mes':'Análise do Mês IA','ai-planejamento':'Planejamento Inteligente',
-  'ai-sugestoes':'Sugestões de Economia','ai-metas':'Metas Inteligentes',
-  'ai-previsao':'Previsão de Saldo','ai-alertas':'Alertas Inteligentes',
-  'ai-investimentos':'Investimentos Educativo','ai-perfil':'Perfil Financeiro',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -570,13 +467,9 @@ function navigate(pageId,el){
   setLoading();
   var map={
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
-    analise:pAnalise,tabelas:pTabelas,'assistente-financeiro':pAssistenteFinanceiro,
+    analise:pAnalise,tabelas:pTabelas,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     planos:pPlanos,
-    'ai-analise-mes':pAiAnaliseMes,'ai-planejamento':pAiPlanejamento,
-    'ai-sugestoes':pAiSugestoes,'ai-metas':pAiMetas,
-    'ai-previsao':pAiPrevisao,'ai-alertas':pAiAlertas,
-    'ai-investimentos':pAiInvestimentos,'ai-perfil':pAiPerfil,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
@@ -711,23 +604,7 @@ function setupApp(){
   var isUltra = (plan.toLowerCase() === 'ultra' || planDisplay.toLowerCase() === 'ultra' || roleTagText.toUpperCase() === 'ULTRA');
   window.isUserUltra = isUltra;
   
-  var globalChat = document.getElementById('global-ai-chat');
-  var testBadge = document.getElementById('ai-test-badge');
-  var fabBtn = document.getElementById('ai-fab-btn');
-  var fabBadgeTxt = document.getElementById('ai-fab-badge-txt');
-  
-  if (globalChat) {
-    globalChat.style.display = 'block';
-    if (isUltra) {
-      if(testBadge) testBadge.style.display = 'block';
-      if(fabBtn) { fabBtn.style.background = 'linear-gradient(135deg, #7c3aed, #9333ea)'; fabBtn.style.opacity = '1'; }
-      if(fabBadgeTxt) fabBadgeTxt.textContent = 'Ultra';
-    } else {
-      if(testBadge) testBadge.style.display = 'none';
-      if(fabBtn) { fabBtn.style.background = '#9ca3af'; fabBtn.style.opacity = '0.9'; }
-      if(fabBadgeTxt) fabBadgeTxt.textContent = 'Bloqueado';
-    }
-  }
+
 
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
@@ -2181,64 +2058,7 @@ async function pAiPerfil(){
     +'</div></div>';
 }
 
-function toggleGlobalAiChat(){
-  if (!window.isUserUltra) {
-    alert('O Chat IA Global é exclusivo do Plano Ultra. Faça o upgrade na tela de Planos e Assinatura para desbloquear!');
-    if(typeof navigate === 'function') navigate('planos');
-    return;
-  }
-  document.getElementById('ai-chat-panel').classList.toggle('open');
-}
-function fillGlobalAiChat(txt){
-  var inp = document.getElementById('ai-chat-input-field');
-  inp.value = txt;
-  sendGlobalAiChat();
-}
-async function sendGlobalAiChat(){
-  var inp = document.getElementById('ai-chat-input-field');
-  var txt = inp.value.trim();
-  if(!txt) return;
-  inp.value = '';
-  var msgs = document.getElementById('ai-chat-messages');
-  msgs.innerHTML += '<div class="ai-msg ai-msg-user">'+txt+'</div>';
-  var typ = document.createElement('div');
-  typ.className = 'ai-chat-typing';
-  typ.textContent = 'Ultra IA digitando...';
-  msgs.appendChild(typ);
-  msgs.scrollTop = msgs.scrollHeight;
 
-  var context = 'O usuário está na tela: ' + (window.currentView || 'Desconhecida') + '. ';
-  if(window.currentView==='transacoes') context+='Ajude-o com dúvidas sobre gastos e organização.';
-  else if(window.currentView==='planejamento') context+='Sugira estratégias para atingir as metas financeiras.';
-  else if(window.currentView==='investimentos') context+='Explique conceitos de investimentos e juros compostos.';
-  else if(window.currentView==='assistente-financeiro') context+='Aprofunde as recomendações financeiras.';
-
-  try {
-    var payload = {
-      messages: [
-        {role:'system',content:'Você é um assistente financeiro ultra premium e especialista do FFinora. ' + context},
-        {role:'user',content:txt}
-      ]
-    };
-    var r = await fetch('api/ai/index.php',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    msgs.removeChild(typ);
-    if(r.ok){
-      var d = await r.json();
-      var respTxt = d.analysis || 'Desculpe, não consegui processar sua mensagem agora.';
-      msgs.innerHTML += '<div class="ai-msg ai-msg-bot">'+respTxt+'</div>';
-    } else {
-      msgs.innerHTML += '<div class="ai-msg ai-msg-bot">Estou em modo teste. Assim que a IA estiver ativa, vou analisar seus dados e gerar recomendações personalizadas.</div>';
-    }
-  }catch(e){
-    msgs.removeChild(typ);
-    msgs.innerHTML += '<div class="ai-msg ai-msg-bot">Estou em modo teste. Assim que a IA estiver ativa, vou analisar seus dados e gerar recomendações personalizadas.</div>';
-  }
-  msgs.scrollTop = msgs.scrollHeight;
-}
 
 // Garantir renderização da sidebar no carregamento
 window.onload = function() {
