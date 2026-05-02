@@ -621,7 +621,15 @@ async function pFiAnalise(){
   // Format date of insight
   var insightDate = insight.created_at ? new Date(insight.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : 'hoje';
 
-  var html = '<div class="page-header-row"><div class="page-header"><h1>Análise do Mês 🤖</h1><p>Gerada por IA com base nas suas transações reais</p></div></div>';
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var isUltra=plan==='ultra';
+  
+  var html = '<div class="page-header-row" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px"><div class="page-header" style="margin-bottom:0"><h1>' + (isUltra ? 'Análise Ultra IA ✨' : 'Análise do Mês 📊') + '</h1><p>' + (isUltra ? 'Gerada por Inteligência Artificial (gpt-4o-mini) com base nas suas transações reais.' : 'Análise prévia baseada nos seus dados.') + '</p></div>';
+  
+  if (!isUltra) {
+    html += '<button onclick="navigate(\'planos\')" style="padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.2)">🚀 Fazer Upgrade para Ultra</button>';
+  }
+  html += '</div>';
 
   // Status bar: cached or fresh
   if(cached){
@@ -630,7 +638,7 @@ async function pFiAnalise(){
       +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>'
       +'Análise de hoje carregada</div>'
       +'<div style="text-align:right">'
-      +'<button disabled style="padding:8px 16px;background:#e5e7eb;color:#9ca3af;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:not-allowed">🔒 Atualizar análise</button>'
+      +'<button disabled style="padding:8px 16px;background:#e5e7eb;color:#9ca3af;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:not-allowed">↻ Atualizar análise</button>'
       +'<div style="font-size:11px;color:#6b7280;margin-top:4px">Nova análise disponível amanhã</div></div></div>';
   } else {
     html += '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1d4ed8;font-weight:600">'
@@ -815,6 +823,7 @@ function setupApp(){
   var nome=(currentProfile&&currentProfile.full_name)||(currentUser&&currentUser.email.split('@')[0])||'Usuário';
   var plan=(currentProfile&&currentProfile.plan)||'free';
   var planDisplay=plan.charAt(0).toUpperCase()+plan.slice(1);
+  if (plan === 'ultra') planDisplay = 'ULTRA / IA';
   document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin':'User Panel';
   document.getElementById('sidebar-role-tag').textContent=planDisplay;
   document.getElementById('sidebar-name').textContent=nome;

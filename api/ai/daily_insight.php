@@ -128,7 +128,7 @@ if (!empty($existing) && is_array($existing) && count($existing) > 0) {
     exit;
 }
 
-// No cached insight — call OpenAI
+// No cached insight — prepare generation
 if (empty($openAiKey)) {
     echo json_encode(['error' => 'OpenAI not configured on server']);
     http_response_code(500);
@@ -149,73 +149,79 @@ foreach ($transactions as $t) {
 }
 $txText = implode("\n", $txLines) ?: 'Nenhuma transação registrada.';
 
-$prompt = "Analise os dados financeiros do usuário e retorne APENAS um JSON válido (sem markdown, sem texto antes ou depois), com estes campos:\n"
-    . "- summary: string com resumo em 2-3 frases diretas e motivadoras\n"
-    . "- recommendations: array com exatamente 3 recomendações práticas (strings curtas)\n"
-    . "- alerts: array com até 3 alertas importantes (strings curtas, pode ser vazio [])\n\n"
-    . "Dados:\n"
-    . "Entradas totais: R$" . number_format($income, 2, ',', '.') . "\n"
-    . "Saídas totais: R$" . number_format($expense, 2, ',', '.') . "\n"
-    . "Saldo livre: R$" . number_format($balance, 2, ',', '.') . "\n\n"
-    . "Transações recentes:\n" . $txText;
+if ($userPlan === 'ultra') {
+    $prompt = "Analise os dados financeiros do usuário e retorne APENAS um JSON válido (sem markdown, sem texto antes ou depois), com estes campos:\n"
+        . "- summary: string com resumo detalhado, inteligente e de alto valor em 3 frases\n"
+        . "- recommendations: array com exatamente 3 recomendações financeiras super estratégicas (strings)\n"
+        . "- alerts: array com até 3 alertas importantes (strings curtas, pode ser vazio [])\n\n"
+        . "Dados:\n"
+        . "Entradas totais: R$" . number_format($income, 2, ',', '.') . "\n"
+        . "Saídas totais: R$" . number_format($expense, 2, ',', '.') . "\n"
+        . "Saldo livre: R$" . number_format($balance, 2, ',', '.') . "\n\n"
+        . "Transações recentes:\n" . $txText;
 
-$messages = [
-    ['role' => 'system', 'content' => 'Você é um consultor financeiro pessoal especializado. Responda sempre em português brasileiro. Retorne APENAS JSON válido, sem nenhum texto adicional.'],
-    ['role' => 'user',   'content' => $prompt],
-];
-
-$ch = curl_init('https://api.openai.com/v1/chat/completions');
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => json_encode([
-        'model'       => 'gpt-3.5-turbo',
-        'messages'    => $messages,
-        'max_tokens'  => 500,
-        'temperature' => 0.6,
-    ]),
-    CURLOPT_HTTPHEADER => [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $openAiKey,
-    ],
-]);
-$aiResponse = curl_exec($ch);
-$aiCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-$aiData = json_decode($aiResponse, true);
-
-if ($aiCode >= 400 || empty($aiData['choices'][0]['message']['content'])) {
-    // Fallback mock — still save so user doesn't retry endlessly
-    $parsed = [
-        'summary'         => 'Análise baseada nos seus dados financeiros. Continue registrando suas transações para obter insights cada vez mais precisos.',
-        'recommendations' => [
-            'Mantenha um registro diário das suas despesas',
-            'Separe pelo menos 20% da renda para poupança',
-            'Revise assinaturas e gastos recorrentes mensalmente',
-        ],
-        'alerts' => $balance < 0 ? ['Seu saldo está negativo — revise seus gastos urgentemente'] : [],
+    $messages = [
+        ['role' => 'system', 'content' => 'Você é um consultor financeiro Premium. Responda sempre em português brasileiro. Retorne APENAS JSON válido, sem nenhum texto adicional.'],
+        ['role' => 'user',   'content' => $prompt],
     ];
-} else {
-    $content = trim($aiData['choices'][0]['message']['content']);
-    // Strip markdown code fences if present
-    $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
-    $content = preg_replace('/\s*```$/', '', $content);
-    $parsed  = json_decode($content, true);
 
-    if (!$parsed || !isset($parsed['summary'])) {
-        // Try extracting JSON block
-        preg_match('/\{.*\}/s', $content, $m);
-        $parsed = isset($m[0]) ? json_decode($m[0], true) : null;
-    }
+    $ch = curl_init('https://api.openai.com/v1/chat/completions');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode([
+            'model'       => 'gpt-4o-mini',
+            'messages'    => $messages,
+            'max_tokens'  => 600,
+            'temperature' => 0.5,
+        ]),
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $openAiKey,
+        ],
+    ]);
+    $aiResponse = curl_exec($ch);
+    $aiCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-    if (!$parsed) {
+    $aiData = json_decode($aiResponse, true);
+
+    if ($aiCode >= 400 || empty($aiData['choices'][0]['message']['content'])) {
         $parsed = [
-            'summary'         => $content,
-            'recommendations' => [],
-            'alerts'          => [],
+            'summary'         => 'Análise baseada nos seus dados financeiros via IA. Continue registrando suas transações para insights detalhados.',
+            'recommendations' => [
+                'Mantenha um registro diário das despesas',
+                'Avalie seus gastos desta semana',
+                'Identifique oportunidades de corte de custos'
+            ],
+            'alerts' => $balance < 0 ? ['Seu saldo está negativo — atenção aos juros'] : [],
         ];
+    } else {
+        $content = trim($aiData['choices'][0]['message']['content']);
+        $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
+        $content = preg_replace('/\s*```$/', '', $content);
+        $parsed  = json_decode($content, true);
+
+        if (!$parsed || !isset($parsed['summary'])) {
+            preg_match('/\{.*\}/s', $content, $m);
+            $parsed = isset($m[0]) ? json_decode($m[0], true) : null;
+        }
+
+        if (!$parsed) {
+            $parsed = ['summary' => $content, 'recommendations' => [], 'alerts' => []];
+        }
     }
+} else {
+    // PRO plan fallback - no OpenAI call
+    $parsed = [
+        'summary'         => 'Análise prévia e básica dos seus dados. Para desbloquear análises super inteligentes e personalizadas geradas por IA, atualize para o plano Ultra.',
+        'recommendations' => [
+            'Revise suas despesas do mês atual',
+            'Mantenha seu saldo em controle',
+            'Faça upgrade para Ultra e obtenha dicas da Inteligência Artificial'
+        ],
+        'alerts' => $balance < 0 ? ['Seu saldo atual está negativo.'] : [],
+    ];
 }
 
 // Ensure array types
