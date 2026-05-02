@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "curl -s -o /dev/null -X POST -H \"Content-Type: application/json\" -d \"{}\" \"https://webhooks.hostinger.com/deploy/20d0f3611f464f673845e9376cf03197\" 2>/dev/null || true",
+            "async": true,
+            "statusMessage": "Implantando no Hostinger..."
+          }
+        ]
+      }
+    ]
+  }
+}

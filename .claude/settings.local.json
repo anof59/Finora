@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|vue|html\\)$\")",
+      "Bash(git stash *)",
+      "Bash(git pull *)"
+    ]
+  }
+}
