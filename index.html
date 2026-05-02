@@ -509,6 +509,21 @@ function pFinanceiroInteligente(pageId){
   document.getElementById('main-content').innerHTML='<div style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:24px">Esta funcionalidade estará disponível em breve nesta seção.<br>Use <strong>Análise do Mês</strong> para sua análise de IA diária.</p><button onclick="navigate(\'fi-analise\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Ir para Análise do Mês</button></div>';
 }
 
+function renderUpsellPage() {
+  document.getElementById('topbar-title').textContent = 'Ativar Inteligência Artificial';
+  document.getElementById('main-content').innerHTML = 
+    '<div style="text-align:center;padding:50px 30px;max-width:640px;margin:30px auto;background:var(--white);border-radius:24px;box-shadow:0 20px 40px rgba(124,58,237,0.08);border:1px solid rgba(139,92,246,0.2);position:relative;overflow:hidden;animation:fadeIn 0.8s ease-out">'
+    + '<div style="width:88px;height:88px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 25px rgba(124,58,237,0.3)">'
+    + '<svg width="44" height="44" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg></div>'
+    + '<h2 style="font-size:26px;color:var(--text);margin-bottom:12px;font-weight:800">Recurso Ultra Ativado por IA 💎</h2>'
+    + '<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px">Esta funcionalidade avançada está disponível exclusivamente no plano <strong>Ultra</strong>.<br>Desbloqueie o poder da IA para transformar seus números em decisões inteligentes.</p>'
+    + '<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
+    + '<div style="margin-top:32px; border-top:1px solid rgba(139,92,246,0.1); padding-top:32px">'
+    + '<img src="assets/comparativo-ia.png" alt="Comparativo IA" loading="lazy" style="width:100%; max-width:100%; border-radius:16px; box-shadow:0 10px 30px rgba(124,58,237,0.1); border:1px solid rgba(139,92,246,0.05);">'
+    + '</div></div>';
+}
+
+
 function pAssistente(){
   if(typeof pAiChat==='function'){pAiChat();return;}
   var plan=(currentProfile&&currentProfile.plan)||'free';
@@ -580,7 +595,7 @@ function navigate(pageId,el){
     if(pageId.startsWith('fi-')){
       var plan=(currentProfile&&currentProfile.plan)||'free';
       if(plan!=='pro'&&plan!=='ultra'){
-        document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:400px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h2 style="font-size:20px;color:var(--text);margin-bottom:12px">Acesso Restrito</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.5;margin-bottom:24px">Essa funcionalidade é exclusiva para o plano PRO.</p><button onclick="navigate(\'planos\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Fazer Upgrade</button></div>';
+        renderUpsellPage();
         _isNavigating = false;
         return;
       }
@@ -1646,7 +1661,8 @@ function pPlanos(){
     +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
     +'</div>'
     
-    +'</div>';
+    +'</div>'
+    + (plan !== 'ultra' ? '<div style="margin-top:48px; text-align:center; max-width:800px; margin-left:auto; margin-right:auto; animation: fadeIn 0.8s ease-out"> <h3 style="font-size:20px; color:var(--text); margin-bottom:24px; font-weight:800">Por que escolher o Plano Ultra com IA? 🚀</h3> <img src="assets/comparativo-ia.png" alt="Comparativo IA" style="width:100%; border-radius:20px; box-shadow:0 20px 50px rgba(124,58,237,0.15); border:1px solid rgba(139,92,246,0.1);"> </div>' : '');
   document.getElementById('main-content').innerHTML=html;
 }
 
