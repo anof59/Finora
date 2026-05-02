@@ -491,7 +491,7 @@ function devScreen(){document.getElementById('main-content').innerHTML='<div cla
 
 function pFinanceiroInteligente(pageId){
   var title = pageTitles[pageId] || 'Financeiro Inteligente';
-  document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:24px">Disponível no plano PRO. Em breve com inteligência financeira avançada.</p></div>';
+  document.getElementById('main-content').innerHTML='<div style="text-align:center;padding:60px 20px;max-width:500px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg><h2 style="font-size:22px;color:var(--text);margin-bottom:12px">'+title+'</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:24px">Esta funcionalidade estará disponível em breve nesta seção.<br>Use <strong>Análise do Mês</strong> para sua análise de IA diária.</p><button onclick="navigate(\'fi-analise\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Ir para Análise do Mês</button></div>';
 }
 
 function navigate(pageId,el){
@@ -507,7 +507,7 @@ function navigate(pageId,el){
     analise:pAnalise,tabelas:pTabelas,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     planos:pPlanos,
-    'fi-analise':pFinanceiroInteligente,'fi-sugestoes':pFinanceiroInteligente,
+    'fi-analise':pFiAnalise,'fi-sugestoes':pFinanceiroInteligente,
     'fi-diagnostico':pFinanceiroInteligente,'fi-metas':pFinanceiroInteligente,
     'fi-previsao':pFinanceiroInteligente,'fi-alertas':pFinanceiroInteligente,
     'fi-planejamento':pFinanceiroInteligente,'fi-evolucao':pFinanceiroInteligente,
@@ -527,6 +527,127 @@ function navigate(pageId,el){
   }
 
   (map[pageId]||devScreen)(pageId);
+}
+
+/* ===== FINANCEIRO INTELIGENTE — ANÁLISE DO MÊS ===== */
+async function pFiAnalise(){
+  // Fetch transactions
+  var r = await sb.from('transactions').select('*').eq('user_id', currentUser.id);
+  var all = r.data || [];
+  var income  = all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+  var expense = all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
+
+  // Get access token for backend call
+  var sess = await sb.auth.getSession();
+  var accessToken = sess && sess.data && sess.data.session ? sess.data.session.access_token : null;
+
+  if(!accessToken){
+    document.getElementById('main-content').innerHTML='<div style="padding:40px;text-align:center;color:var(--text-muted)">Sessão expirada. Faça login novamente.</div>';
+    return;
+  }
+
+  var resp, data;
+  try{
+    resp = await fetch('/api/ai/daily_insight.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
+      body: JSON.stringify({transactions: all.slice(0,30), summary:{income:income, expense:expense}})
+    });
+    data = await resp.json();
+  }catch(e){
+    data = {error: 'Falha na conexão com o servidor.'};
+  }
+
+  if(data && data.error){
+    document.getElementById('main-content').innerHTML='<div style="text-align:center;padding:60px 20px;max-width:480px;margin:40px auto;background:var(--white);border-radius:20px;border:1px solid var(--border)">'
+      +'<div style="font-size:40px;margin-bottom:16px">⚠️</div>'
+      +'<h2 style="font-size:18px;margin-bottom:10px">Não foi possível carregar a análise</h2>'
+      +'<p style="color:var(--text-muted);font-size:13px;line-height:1.6">'+data.error+'</p></div>';
+    return;
+  }
+
+  var insight  = data.insight;
+  var cached   = data.cached;
+  var recs     = Array.isArray(insight.recommendations) ? insight.recommendations : [];
+  var alerts   = Array.isArray(insight.alerts)           ? insight.alerts           : [];
+  var summary  = insight.summary || '';
+  var balance  = income - expense;
+  var scoreColor = balance >= 0 ? '#16a34a' : '#dc2626';
+
+  // Format date of insight
+  var insightDate = insight.created_at ? new Date(insight.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : 'hoje';
+
+  var html = '<div class="page-header-row"><div class="page-header"><h1>Análise do Mês 🤖</h1><p>Gerada por IA com base nas suas transações reais</p></div></div>';
+
+  // Status bar: cached or fresh
+  if(cached){
+    html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
+      +'<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#15803d;font-weight:600">'
+      +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>'
+      +'Análise de hoje carregada</div>'
+      +'<div style="text-align:right">'
+      +'<button disabled style="padding:8px 16px;background:#e5e7eb;color:#9ca3af;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:not-allowed">🔒 Atualizar análise</button>'
+      +'<div style="font-size:11px;color:#6b7280;margin-top:4px">Nova análise disponível amanhã</div></div></div>';
+  } else {
+    html += '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1d4ed8;font-weight:600">'
+      +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>'
+      +'✨ Nova análise gerada com sucesso para hoje!</div>';
+  }
+
+  // Summary card
+  html += '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:16px;padding:24px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden">'
+    +'<div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+    +'<div style="width:42px;height:42px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🤖</div>'
+    +'<div><div style="font-size:14px;font-weight:700;color:#cbd5e1">Diagnóstico de '+insightDate+'</div>'
+    +'<div style="font-size:11px;color:#64748b;margin-top:2px">Análise automática diária</div></div></div>'
+    +'<p style="font-size:14px;line-height:1.7;color:#e2e8f0;margin:0">'+summary+'</p></div>';
+
+  // Financial overview
+  html += '<div class="cards-grid" style="margin-bottom:20px">'
+    +'<div class="card"><div class="card-label">Entradas Totais</div><div class="card-value td-green">'+fmt(income)+'</div></div>'
+    +'<div class="card"><div class="card-label">Saídas Totais</div><div class="card-value td-red">'+fmt(expense)+'</div></div>'
+    +'<div class="card" style="border-left:4px solid '+scoreColor+'"><div class="card-label">Saldo Livre</div><div class="card-value" style="color:'+scoreColor+'">'+fmt(balance)+'</div></div>'
+    +'</div>';
+
+  // Recommendations
+  if(recs.length){
+    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">'
+      +'<svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A6 6 0 1 0 7.5 11.5c.76.76 1.23 1.52 1.41 2.5"/></svg>'
+      +'<div style="font-size:14px;font-weight:700">Recomendações Personalizadas</div></div>';
+    recs.forEach(function(rec, i){
+      html += '<div style="display:flex;align-items:flex-start;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border)">'
+        +'<div style="width:26px;height:26px;border-radius:50%;background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'+(i+1)+'</div>'
+        +'<div style="font-size:13px;line-height:1.55;color:var(--text)">'+rec+'</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // Alerts
+  if(alerts.length){
+    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">'
+      +'<svg width="16" height="16" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+      +'<div style="font-size:14px;font-weight:700;color:#92400e">Alertas</div></div>';
+    alerts.forEach(function(alert){
+      html += '<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:#fffbeb">'
+        +'<span style="font-size:16px;flex-shrink:0">⚠️</span>'
+        +'<div style="font-size:13px;line-height:1.55;color:#92400e">'+alert+'</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // No transactions empty state
+  if(!all.length){
+    html += '<div style="background:var(--white);border:1px dashed #d1d5db;border-radius:16px;padding:48px;text-align:center;margin-top:16px">'
+      +'<div style="font-size:40px;margin-bottom:12px">📭</div>'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:8px">Nenhuma transação encontrada</div>'
+      +'<div style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Adicione suas transações para receber uma análise mais detalhada.</div>'
+      +'<button onclick="navigate(\'transacoes\')" class="btn-primary">Adicionar Transação</button></div>';
+  }
+
+  document.getElementById('main-content').innerHTML = html;
 }
 
 /* ===== AUTH ===== */
