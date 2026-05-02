@@ -448,7 +448,18 @@ var userNav=[
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
   {section:'Ferramentas'},
   {id:'assistente',label:'Assistente IA',icon:'sparkles',tooltip:'Seu assistente financeiro',badgeClass:'nav-ai-badge',badgeText:'IA'},
-  {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
+  {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'},
+  {section:'Fin. Inteligente',isPro:true},
+  {id:'fi-analise',label:'Análise do Mês',icon:'activity',tooltip:'Diagnóstico diário'},
+  {id:'fi-sugestoes',label:'Sugestões',icon:'lightbulb',tooltip:'Dicas de economia'},
+  {id:'fi-diagnostico',label:'Diagnóstico Financeiro',icon:'file-text',tooltip:'Saúde da conta'},
+  {id:'fi-metas',label:'Metas Inteligentes',icon:'target',tooltip:'Acompanhe objetivos'},
+  {id:'fi-previsao',label:'Previsão de Saldo',icon:'trending-up',tooltip:'Veja o futuro'},
+  {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Avisos importantes'},
+  {id:'fi-planejamento',label:'Planejamento Inteligente',icon:'compass',tooltip:'Crie um plano'},
+  {id:'fi-evolucao',label:'Evolução Financeira',icon:'bar-chart',tooltip:'Histórico'},
+  {id:'fi-dicas',label:'Dicas Personalizadas',icon:'sparkles',tooltip:'Dicas sob medida'},
+  {id:'fi-relatorio',label:'Relatório Semanal',icon:'table',tooltip:'Fechamento da semana'}
 ];
 var adminNav=[
   {section:'Painel'},
@@ -809,13 +820,35 @@ function renderSidebarNav(nav){
   var h='';
   var firstItem=null;
   var plan=(currentProfile&&currentProfile.plan)||'free';
+
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
+
     if(n.section!=null){
-      h+='<div class="nav-section-label">'+n.section+'</div>';
+      // Seção Fin. Inteligente: mostra para pro e ultra com bloco especial
+      if(n.isPro){
+        if(plan==='pro'||plan==='ultra'){
+          h+='<div class="nav-section-label" style="color:var(--purple);">';
+          h+='<svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" style="margin-right:4px"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+          h+=n.section;
+          h+='<span style="background:var(--purple);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:6px;letter-spacing:0.5px">PRO</span>';
+          h+='</div>';
+        }
+        // Para planos free: mostra o label mas itens bloqueados
+        else {
+          h+='<div class="nav-section-label" style="opacity:0.5;">';
+          h+='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:4px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+          h+=n.section;
+          h+='</div>';
+        }
+      } else {
+        h+='<div class="nav-section-label">'+n.section+'</div>';
+      }
       continue;
     }
+
     if(!firstItem)firstItem=n;
+
     var badgeHtml='';
     if(n.badgeText&&n.badgeClass){
       badgeHtml='<span class="'+n.badgeClass+'">'+n.badgeText+'</span>';
@@ -825,40 +858,27 @@ function renderSidebarNav(nav){
     } else if(n.badgeKey&&_navBadges[n.badgeKey]){
       badgeHtml='<span class="nav-item-badge green">'+_navBadges[n.badgeKey]+'</span>';
     }
+
     var tooltipHtml=n.tooltip?'<span class="nav-tooltip">'+n.tooltip+'</span>':'';
-    h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="">'
-      +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'
-      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
-      +badgeHtml+tooltipHtml
-      +'</div>';
-  }
-  // Bloco Fin. Inteligente com fundo roxo — visível apenas para pro e ultra
-  if(plan==='pro'||plan==='ultra'){
-    h+='<div class="sidebar-pro-block" style="margin:24px 12px 16px;padding:12px 6px;background:linear-gradient(145deg,rgba(139,92,246,0.05),transparent);border:1px solid rgba(139,92,246,0.15);border-radius:16px;box-shadow:inset 0 2px 10px rgba(255,255,255,0.5)">';
-    h+='<div class="sidebar-pro-title" style="display:flex;align-items:center;gap:6px;margin-bottom:14px;color:var(--purple);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:0 8px">';
-    h+='<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-    h+='<span>Fin. Inteligente</span>';
-    h+='<span style="background:var(--purple);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:auto">PRO</span>';
-    h+='</div>';
-    var proItems=[
-      {id:'fi-analise',label:'Análise do Mês',icon:'activity'},
-      {id:'fi-sugestoes',label:'Sugestões de Economia',icon:'lightbulb'},
-      {id:'fi-diagnostico',label:'Diagnóstico Financeiro',icon:'shield'},
-      {id:'fi-metas',label:'Metas Inteligentes',icon:'target'},
-      {id:'fi-previsao',label:'Previsão de Saldo',icon:'trending-up'},
-      {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell'},
-      {id:'fi-planejamento',label:'Planejamento Mensal',icon:'calendar'},
-      {id:'fi-evolucao',label:'Evolução Financeira',icon:'bar-chart'},
-      {id:'fi-dicas',label:'Dicas Personalizadas',icon:'sparkles'},
-      {id:'fi-relatorio',label:'Relatório Semanal',icon:'file-text'}
-    ];
-    proItems.forEach(function(pi){
-      h+='<div class="nav-item pro-item" onclick="navigate(\''+pi.id+'\',this)" title="">'
-        +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(pi.icon)+'</svg>'
-        +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+pi.label+'</span>'
+
+    // Itens fi-* bloqueados para free
+    var isFiItem=n.id&&n.id.startsWith('fi-');
+    var isLocked=isFiItem&&(plan!=='pro'&&plan!=='ultra');
+
+    if(isLocked){
+      h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="" style="opacity:0.45;">'
+        +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+        +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
+        +tooltipHtml
         +'</div>';
-    });
-    h+='</div>';
+    } else {
+      h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="">'
+        +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'
+        +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
+        +badgeHtml
+        +tooltipHtml
+        +'</div>';
+    }
   }
   el.innerHTML=h;
   var firstEl=el.querySelector('.nav-item');
