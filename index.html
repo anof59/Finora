@@ -434,6 +434,12 @@ function iconPath(n){
 }
 
 /* ===== NAV ===== */
+/* =========================================================
+   ⚠️ ATENÇÃO: SIDEBAR BLOQUEADA
+   NÃO FAÇA NENHUMA ALTERAÇÃO NA ESTRUTURA DA SIDEBAR,
+   ITENS, OU LAYOUT SEM CONFIRMAÇÃO EXPLÍCITA DO USUÁRIO.
+   O design atual com Fin. Inteligente em roxo deve ser mantido.
+   ========================================================= */
 var userNav=[
   {section:'Visão Geral'},
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
@@ -499,19 +505,37 @@ function pAssistente(){
   if(typeof pAiChat==='function'){pAiChat();return;}
   var plan=(currentProfile&&currentProfile.plan)||'free';
   var isUltra=plan==='ultra';
-  document.getElementById('main-content').innerHTML=
-    '<div style="text-align:center;padding:60px 20px;max-width:520px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)">'
-    +'<div style="width:72px;height:72px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">'
-    +'<svg width="36" height="36" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>'
-    +'</div>'
-    +'<h2 style="font-size:22px;color:var(--text);margin-bottom:8px">Assistente IA</h2>'
-    +'<p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:24px">'
-    +(isUltra?'Seu assistente financeiro está ativo. Use a análise do mês para insights detalhados gerados por IA.':'Esta funcionalidade é exclusiva para usuários Ultra. Faça upgrade para ter acesso ao assistente financeiro pessoal.')
-    +'</p>'
-    +(isUltra
-      ?'<button onclick="navigate(\'fi-analise\')" style="padding:12px 28px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer">Acessar Análise IA</button>'
-      :'<button onclick="navigate(\'planos\')" style="padding:12px 28px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer">Fazer Upgrade para Ultra</button>')
-    +'</div>';
+  
+  if(isUltra){
+    document.getElementById('main-content').innerHTML=
+      '<div style="text-align:center;padding:60px 20px;max-width:520px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)">'
+      +'<div style="width:72px;height:72px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">'
+      +'<svg width="36" height="36" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>'
+      +'</div>'
+      +'<h2 style="font-size:22px;color:var(--text);margin-bottom:8px">Assistente IA</h2>'
+      +'<p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:24px">Seu assistente financeiro está ativo. Use a análise do mês para insights detalhados gerados por IA.</p>'
+      +'<button onclick="navigate(\'fi-analise\')" style="padding:12px 28px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer">Acessar Análise IA</button>'
+      +'</div>';
+  } else {
+    document.getElementById('main-content').innerHTML=
+      '<div style="text-align:center;padding:50px 30px;max-width:540px;margin:30px auto;background:var(--white);border-radius:24px;box-shadow:0 20px 40px rgba(124,58,237,0.08);border:1px solid rgba(139,92,246,0.2);position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:-50px;right:-50px;width:150px;height:150px;background:rgba(139,92,246,0.1);filter:blur(40px);border-radius:50%"></div>'
+      +'<div style="position:absolute;bottom:-50px;left:-50px;width:150px;height:150px;background:rgba(139,92,246,0.05);filter:blur(40px);border-radius:50%"></div>'
+      +'<div style="width:88px;height:88px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 25px rgba(124,58,237,0.3);position:relative;z-index:1">'
+      +'<svg width="44" height="44" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>'
+      +'</div>'
+      +'<h2 style="font-size:26px;color:var(--text);margin-bottom:12px;font-weight:800;position:relative;z-index:1">Desbloqueie sua Inteligência Financeira 💡</h2>'
+      +'<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px;position:relative;z-index:1">Descubra para onde seu dinheiro está indo e o que fazer para melhorar seu saldo todos os meses.</p>'
+      +'<div style="text-align:left;background:rgba(139,92,246,0.03);padding:24px;border-radius:16px;margin-bottom:30px;position:relative;z-index:1;border:1px solid rgba(139,92,246,0.1)">'
+      +'<div style="display:flex;align-items:flex-start;margin-bottom:16px"><svg width="20" height="20" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-right:12px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:14px;color:var(--text);font-weight:500">IA analisa seus gastos automaticamente</span></div>'
+      +'<div style="display:flex;align-items:flex-start;margin-bottom:16px"><svg width="20" height="20" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-right:12px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:14px;color:var(--text);font-weight:500">Descubra onde você está perdendo dinheiro</span></div>'
+      +'<div style="display:flex;align-items:flex-start;margin-bottom:16px"><svg width="20" height="20" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-right:12px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:14px;color:var(--text);font-weight:500">Receba sugestões práticas todos os dias</span></div>'
+      +'<div style="display:flex;align-items:flex-start"><svg width="20" height="20" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-right:12px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size:14px;color:var(--text);font-weight:500">Previsão do seu saldo antes do fim do mês</span></div>'
+      +'</div>'
+      +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
+      +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
+      +'</div>';
+  }
 }
 
 function navigate(pageId,el){
@@ -804,6 +828,12 @@ function setupApp(){
   }
 }
 
+/* =========================================================
+   ⚠️ ATENÇÃO: RENDERIZAÇÃO DA SIDEBAR BLOQUEADA
+   A LÓGICA DO BLOCO "FIN. INTELIGENTE" (FUNDO ROXO) E
+   DOS ITENS DO MENU ESTÁ CONGELADA. NÃO ALTERE SEM A
+   CONFIRMAÇÃO EXPRESSA DO USUÁRIO.
+   ========================================================= */
 function renderSidebarNav(nav){
   var el=document.getElementById('sidebar-nav');
   var h='';
