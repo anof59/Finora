@@ -11,24 +11,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
-@keyframes slideLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
-  /* Animações otimizadas */
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .fade-in { animation: fadeIn 0.3s ease-out; }
-  
-  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes slideLeft{from{opacity:0}to{opacity:1}}
+@keyframes slideRight{from{opacity:0}to{opacity:1}}
+@keyframes floatBubble{0%,100%{opacity:1}50%{opacity:0.9}}
+@keyframes spin{to{transform:rotate(360deg)}}
+img { max-width: 100%; height: auto; }
+.loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.error-fallback { padding: 40px; text-align: center; background: #fff; border-radius: 16px; border: 1px solid var(--border); margin-top: 20px; }
+.error-fallback h2 { color: var(--red); margin-bottom: 12px; }
+.error-fallback button { padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 16px; }
 
   /* Erro Fallback */
   .error-fallback { padding: 40px; text-align: center; background: #fff; border-radius: 16px; border: 1px solid var(--border); margin-top: 20px; }
   .error-fallback h2 { color: var(--red); margin-bottom: 12px; }
   .error-fallback button { padding: 10px 20px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 16px; }
 
-  img { max-width: 100%; height: auto; }
-@keyframes floatBubble{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.08) translate(8px,-8px)}}
-@keyframes spin{to{transform:rotate(360deg)}}
+
 :root{--blue:#1a6fc4;--green:#16a34a;--red:#dc2626;--purple:#7c3aed;--gray-bg:#f1f2f5;--sidebar-w:220px;--text:#1a1a2e;--text-muted:#6b7280;--border:#e5e7eb;--white:#fff}
 html,body{height:100%;overflow:hidden}
 body{display:flex;background:var(--gray-bg);color:var(--text)}
@@ -541,43 +542,57 @@ function pAssistente(){
       +'</div>'
       +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
       +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
+      +'<div style="margin-top:24px; margin-bottom:24px; text-align:center; animation: fadeIn 0.8s ease-out; position:relative; z-index:1">'
+      +'<img src="assets/comparativo-ia.png" alt="Comparativo Antes vs Depois IA" loading="lazy" style="width:100%; max-width:100%; border-radius:16px; box-shadow:0 10px 30px rgba(124,58,237,0.15); object-fit:contain; border:1px solid rgba(139,92,246,0.1);">'
+      +'</div>'
       +'</div>';
   }
 }
 
+var _isNavigating = false;
 function navigate(pageId,el){
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  if(el)el.classList.add('active');
-  closeSidebar();
-  allCharts.forEach(function(c){try{c.destroy();}catch(e){}});
-  allCharts=[];
-  document.getElementById('topbar-title').textContent=pageTitles[pageId]||pageId;
-  setLoading();
-  var map={
-    dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
-    analise:pAnalise,tabelas:pTabelas,
-    organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
-    planos:pPlanos,assistente:pAssistente,
-    'fi-analise':pFiAnalise,'fi-sugestoes':pFinanceiroInteligente,
-    'fi-diagnostico':pFinanceiroInteligente,'fi-metas':pFinanceiroInteligente,
-    'fi-previsao':pFinanceiroInteligente,'fi-alertas':pFinanceiroInteligente,
-    'fi-planejamento':pFinanceiroInteligente,'fi-evolucao':pFinanceiroInteligente,
-    'fi-dicas':pFinanceiroInteligente,'fi-relatorio':pFinanceiroInteligente,
-    'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
-    'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
-    'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
-    'admin-config':pAdminConfig,configuracoes:pCfg
-  };
-  
-  if(pageId.startsWith('fi-')){
-    var plan=(currentProfile&&currentProfile.plan)||'free';
-    if(plan!=='pro'&&plan!=='ultra'){
-      document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:400px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h2 style="font-size:20px;color:var(--text);margin-bottom:12px">Acesso Restrito</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.5;margin-bottom:24px">Essa funcionalidade é exclusiva para o plano PRO.</p><button onclick="navigate(\'planos\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Fazer Upgrade</button></div>';
-      return;
+  if(_isNavigating) return;
+  _isNavigating = true;
+  try {
+    document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+    if(el)el.classList.add('active');
+    closeSidebar();
+    allCharts.forEach(function(c){try{c.destroy();}catch(e){}});
+    allCharts=[];
+    document.getElementById('topbar-title').textContent=pageTitles[pageId]||pageId;
+    setLoading();
+    var map={
+      dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
+      analise:pAnalise,tabelas:pTabelas,
+      organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
+      planos:pPlanos,assistente:pAssistente,
+      'fi-analise':pFiAnalise,'fi-sugestoes':pFinanceiroInteligente,
+      'fi-diagnostico':pFinanceiroInteligente,'fi-metas':pFinanceiroInteligente,
+      'fi-previsao':pFinanceiroInteligente,'fi-alertas':pFinanceiroInteligente,
+      'fi-planejamento':pFinanceiroInteligente,'fi-evolucao':pFinanceiroInteligente,
+      'fi-dicas':pFinanceiroInteligente,'fi-relatorio':pFinanceiroInteligente,
+      'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
+      'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
+      'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
+      'admin-config':pAdminConfig,configuracoes:pCfg
+    };
+    
+    if(pageId.startsWith('fi-')){
+      var plan=(currentProfile&&currentProfile.plan)||'free';
+      if(plan!=='pro'&&plan!=='ultra'){
+        document.getElementById('main-content').innerHTML='<div class="dev-screen" style="text-align:center;padding:60px 20px;max-width:400px;margin:40px auto;background:var(--white);border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);border:1px solid var(--border)"><svg width="48" height="48" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h2 style="font-size:20px;color:var(--text);margin-bottom:12px">Acesso Restrito</h2><p style="color:var(--text-muted);font-size:14px;line-height:1.5;margin-bottom:24px">Essa funcionalidade é exclusiva para o plano PRO.</p><button onclick="navigate(\'planos\')" style="padding:10px 24px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer">Fazer Upgrade</button></div>';
+        _isNavigating = false;
+        return;
+      }
     }
-  }
 
-  (map[pageId]||devScreen)(pageId);
+    (map[pageId]||devScreen)(pageId);
+  } catch(e) {
+    console.error('Erro de navegação:', e);
+    document.getElementById('main-content').innerHTML='<div class="error-fallback"><h2>Ops! Algo deu errado</h2><p>Houve um erro ao carregar esta página. Por favor, tente recarregar ou volte ao início.</p><button onclick="location.reload()">Recarregar App</button></div>';
+  } finally {
+    _isNavigating = false;
+  }
 }
 
 /* ===== FINANCEIRO INTELIGENTE — ANÁLISE DO MÊS ===== */
