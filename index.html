@@ -286,7 +286,34 @@ tr:last-child td{border-bottom:none}
 .desktop-toggle{display:flex;width:34px;height:34px;border-radius:8px;background:var(--gray-bg);border:none;cursor:pointer;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
 @media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
+
+.ultra-preview-wrapper {
+  margin-top: 32px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.ultra-preview-image {
+  width: 100%;
+  max-width: 980px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .ultra-preview-wrapper {
+    margin-top: 24px;
+  }
+
+  .ultra-preview-image {
+    max-width: 100%;
+    border-radius: 14px;
+  }
+}
 </style>
+
 </head>
 <body>
 
@@ -518,9 +545,10 @@ function renderUpsellPage() {
     + '<h2 style="font-size:26px;color:var(--text);margin-bottom:12px;font-weight:800">Recurso Ultra Ativado por IA 💎</h2>'
     + '<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px">Esta funcionalidade avançada está disponível exclusivamente no plano <strong>Ultra</strong>.<br>Desbloqueie o poder da IA para transformar seus números em decisões inteligentes.</p>'
     + '<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
-    + '<div style="margin-top:32px; border-top:1px solid rgba(139,92,246,0.1); padding-top:32px">'
-    + '<img src="assets/comparativo-ia.png" alt="Comparativo IA" loading="lazy" style="width:100%; max-width:100%; border-radius:16px; box-shadow:0 10px 30px rgba(124,58,237,0.1); border:1px solid rgba(139,92,246,0.05);">'
-    + '</div></div>';
+    + '<div class="ultra-preview-wrapper">'
+    + '  <img src="/assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
+    + '</div>'
+    + '</div>';
 }
 
 
@@ -557,8 +585,8 @@ function pAssistente(){
       +'</div>'
       +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
       +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
-      +'<div style="margin-top:24px; margin-bottom:24px; text-align:center; animation: fadeIn 0.8s ease-out; position:relative; z-index:1">'
-      +'<img src="assets/comparativo-ia.png" alt="Comparativo Antes vs Depois IA" loading="lazy" style="width:100%; max-width:100%; border-radius:16px; box-shadow:0 10px 30px rgba(124,58,237,0.15); object-fit:contain; border:1px solid rgba(139,92,246,0.1);">'
+      +'<div class="ultra-preview-wrapper">'
+      +'  <img src="/assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
       +'</div>'
       +'</div>';
   }
@@ -1662,7 +1690,7 @@ function pPlanos(){
     +'</div>'
     
     +'</div>'
-    + (plan !== 'ultra' ? '<div style="margin-top:48px; text-align:center; max-width:800px; margin-left:auto; margin-right:auto; animation: fadeIn 0.8s ease-out"> <h3 style="font-size:20px; color:var(--text); margin-bottom:24px; font-weight:800">Por que escolher o Plano Ultra com IA? 🚀</h3> <img src="assets/comparativo-ia.png" alt="Comparativo IA" style="width:100%; border-radius:20px; box-shadow:0 20px 50px rgba(124,58,237,0.15); border:1px solid rgba(139,92,246,0.1);"> </div>' : '');
+    + (plan !== 'ultra' ? '<div class="ultra-preview-wrapper"> <img src="/assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" /> </div>' : '');
   document.getElementById('main-content').innerHTML=html;
 }
 
