@@ -546,7 +546,7 @@ function renderUpsellPage() {
     + '<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px">Esta funcionalidade avançada está disponível exclusivamente no plano <strong>Ultra</strong>.<br>Desbloqueie o poder da IA para transformar seus números em decisões inteligentes.</p>'
     + '<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
     + '<div class="ultra-preview-wrapper">'
-    + '  <img src="assets/images/upgrade-ultra-preview.png?v=2" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
+    + '  <img src="assets/comparativo-ia.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
     + '</div>'
     + '</div>';
 }
@@ -585,7 +585,7 @@ function pAssistente(){
       +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
       +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
       +'<div class="ultra-preview-wrapper">'
-      +'  <img src="assets/images/upgrade-ultra-preview.png?v=2" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
+      +'  <img src="assets/comparativo-ia.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" />'
       +'</div>'
       +'</div>';
   }
@@ -1660,11 +1660,25 @@ async function pMesAtual(){
 
 function pPlanos(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
+  var isFree=plan==='free';
   var isPro=plan==='pro';
   var isUltra=plan==='ultra';
   var html='<div class="page-header"><h1>Assinatura e Planos</h1><p>Escolha o melhor plano para o seu bolso</p></div>'
     +'<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:20px">'
-    
+
+    // --- Free ---
+    +'<div style="background:var(--white);border:2px solid '+(isFree?'#16a34a':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
+    +(isFree?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Free</div>'
+    +'<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Para começar sem gastar nada</div>'
+    +'<div style="font-size:28px;font-weight:800;color:var(--text);margin-bottom:20px">R$ 0<span style="font-size:14px;color:var(--text-muted);font-weight:600">/mês</span></div>'
+    +'<div style="margin-bottom:24px;font-size:13px;color:var(--text-muted);display:flex;flex-direction:column;gap:10px">'
+    +'<div>✅ Até 30 transações/mês</div><div>✅ 1 conta bancária</div><div>✅ Dashboard básico</div><div style="color:var(--text-muted)">❌ Sem relatórios avançados</div><div style="color:var(--text-muted)">❌ Sem Inteligência Artificial</div>'
+    +'</div>'
+    +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isFree?'#e5e7eb':'#16a34a')+';color:'+(isFree?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isFree?'default':'pointer')+'">'+(isFree?'Plano Atual':'Começar Grátis')+'</button>'
+    +'</div>'
+
+    // --- Pro ---
     +'<div style="background:var(--white);border:2px solid '+(isPro?'#1a6fc4':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
     +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
@@ -1676,6 +1690,7 @@ function pPlanos(){
     +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Plano Atual':'Assinar Pro')+'</button>'
     +'</div>'
 
+    // --- Ultra ---
     +'<div style="background:var(--white);border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:24px;width:280px;position:relative">'
     +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
@@ -1687,9 +1702,9 @@ function pPlanos(){
     +'</div>'
     +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
     +'</div>'
-    
+
     +'</div>'
-    + (plan !== 'ultra' ? '<div class="ultra-preview-wrapper"> <img src="assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" /> </div>' : '');
+    + ((isFree || isPro) ? '<div class="ultra-preview-wrapper"><img src="assets/comparativo-ia.png" alt="Antes e depois usando a IA financeira da FFinora" class="ultra-preview-image" loading="lazy" /></div>' : '');
   document.getElementById('main-content').innerHTML=html;
 }
 
