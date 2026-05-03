@@ -15,7 +15,7 @@
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes slideLeft{from{opacity:0}to{opacity:1}}
 @keyframes slideRight{from{opacity:0}to{opacity:1}}
-@keyframes floatBubble{0%,100%{opacity:1}50%{opacity:0.9}}
+@keyframes floatBubble{0%,100%{opacity:1}50%{opacity:0.9}}h
 @keyframes spin{to{transform:rotate(360deg)}}
 img { max-width: 100%; height: auto; }
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -546,7 +546,7 @@ function renderUpsellPage() {
     + '<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px">Esta funcionalidade avançada está disponível exclusivamente no plano <strong>Ultra</strong>.<br>Desbloqueie o poder da IA para transformar seus números em decisões inteligentes.</p>'
     + '<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
     + '<div class="ultra-preview-wrapper">'
-    + '  <img src="assets/assistente-ia-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" />'
+    + '  <img src="/assets/images/upgrade-ultra-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" />'
     + '</div>'
     + '</div>';
 }
@@ -585,7 +585,7 @@ function pAssistente(){
       +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
       +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
       +'<div class="ultra-preview-wrapper">'
-      +'  <img src="assets/assistente-ia-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" />'
+      +'  <img src="/assets/images/upgrade-ultra-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" />'
       +'</div>'
       +'</div>';
   }
@@ -1704,7 +1704,7 @@ function pPlanos(){
     +'</div>'
 
     +'</div>'
-    + ((isFree || isPro) ? '<div class="ultra-preview-wrapper"><img src="assets/assistente-ia-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" /></div>' : '');
+    + ((isFree || isPro) ? '<div class="ultra-preview-wrapper"><img src="/assets/images/upgrade-ultra-preview.png" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.style.display=\'none\'" /></div>' : '');
   document.getElementById('main-content').innerHTML=html;
 }
 
