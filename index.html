@@ -541,9 +541,7 @@ function renderUpsellPage() {
     + '<h2 style="font-size:26px;color:var(--text);margin-bottom:12px;font-weight:800">Recurso Ultra Ativado por IA 💎</h2>'
     + '<p style="color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:30px">Esta funcionalidade avançada está disponível exclusivamente no plano <strong>Ultra</strong>.<br>Desbloqueie o poder da IA para transformar seus números em decisões inteligentes.</p>'
     + '<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3)">Fazer Upgrade para Ultra</button>'
-    + '<div class="ultra-preview-wrapper">'
-    + '  <img src="/assets/images/upgrade-ultra-preview.png?v=2" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.onerror=null" />'
-    + '</div>'
+    + '<img src="/assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" style="width:100%; max-width:1000px; margin:20px auto; display:block; border-radius:16px;" />'
     + '</div>';
 }
 
@@ -580,9 +578,7 @@ function pAssistente(){
       +'</div>'
       +'<div style="font-size:15px;color:var(--purple);font-weight:600;font-style:italic;margin-bottom:30px;line-height:1.5;position:relative;z-index:1">"Você não precisa só ver seus números… você precisa entender o que fazer com eles."</div>'
       +'<button onclick="navigate(\'planos\')" style="padding:16px 36px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(124,58,237,0.3);transition:all 0.2s;position:relative;z-index:1" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 12px 24px rgba(124,58,237,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 8px 20px rgba(124,58,237,0.3)\'">🚀 Ativar IA agora</button>'
-      +'<div class="ultra-preview-wrapper">'
-      +'  <img src="/assets/images/upgrade-ultra-preview.png?v=2" alt="Prévia do Assistente IA FFinora" class="ultra-preview-image" loading="lazy" onerror="this.onerror=null" />'
-      +'</div>'
+      +'<img src="/assets/images/upgrade-ultra-preview.png" alt="Antes e depois usando a IA financeira da FFinora" style="width:100%; max-width:1000px; margin:20px auto; display:block; border-radius:16px;" />'
       +'</div>';
   }
 }
@@ -850,11 +846,11 @@ function renderSidebarNav(nav){
       +'</div>';
   }
   if(plan==='pro'||plan==='ultra'){
-    h+='<div class="sidebar-pro-block" style="margin:24px 12px 16px;padding:12px 6px;background:linear-gradient(145deg,rgba(139,92,246,0.05),transparent);border:1px solid rgba(139,92,246,0.15);border-radius:16px;box-shadow:inset 0 2px 10px rgba(255,255,255,0.5)">';
-    h+='<div class="sidebar-pro-title" style="display:flex;align-items:center;gap:6px;margin-bottom:14px;color:var(--purple);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:0 8px">';
+    h+='<div class="sidebar-pro-block" style="margin:16px 12px;padding:12px 4px;background:rgba(124, 58, 237, 0.08);border:1px solid rgba(124, 58, 237, 0.15);border-radius:16px;">';
+    h+='<div class="sidebar-pro-title" style="display:flex;align-items:center;gap:6px;margin-bottom:12px;color:var(--purple);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:0 12px">';
     h+='<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
     h+='<span>Fin. Inteligente</span>';
-    h+='<span style="background:var(--purple);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:auto">PRO</span>';
+    h+='<span style="background:var(--purple);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;margin-left:auto">'+plan.toUpperCase()+'</span>';
     h+='</div>';
     var proItems=[
       {id:'fi-analise',label:'Análise do Mês',icon:'activity'},
@@ -869,7 +865,7 @@ function renderSidebarNav(nav){
       {id:'fi-relatorio',label:'Relatório Semanal',icon:'file-text'}
     ];
     proItems.forEach(function(pi){
-      h+='<div class="nav-item pro-item" onclick="navigate(\''+pi.id+'\',this)" title="">'
+      h+='<div class="nav-item pro-item" onclick="navigate(\''+pi.id+'\',this)" title="" style="margin: 2px 8px; padding: 8px 12px;">'
         +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(pi.icon)+'</svg>'
         +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+pi.label+'</span>'
         +'</div>';
