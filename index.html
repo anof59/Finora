@@ -351,9 +351,17 @@ var userNav=[
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
-  {section:'Ferramentas'},
-  {id:'fin-inteligente',label:'FIN. INTELIGENTE',icon:'sparkles',badge:'IA',badgeStyle:'new',tooltip:'Financeiro Inteligente'},
-  {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
+  {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'},
+  {section:'● FIN. INTELIGENTE  [ULTRA]'},
+  {id:'fi-chat',label:'Chat com IA',icon:'sparkles',tooltip:'Seu assistente financeiro'},
+  {id:'fi-analise',label:'Análise do Mês',icon:'activity',tooltip:'Insight detalhado do mês'},
+  {id:'fi-planejamento',label:'Planejamento Inteligente',icon:'compass',tooltip:'Planejamento usando IA'},
+  {id:'fi-sugestoes',label:'Sugestões de Economia',icon:'lightbulb',tooltip:'Dicas de economia'},
+  {id:'fi-metas',label:'Metas Inteligentes',icon:'target',tooltip:'Metas projetadas por IA'},
+  {id:'fi-previsao',label:'Previsão de Saldo',icon:'trending-up',tooltip:'Previsão do saldo'},
+  {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Alertas gerados pela IA'},
+  {id:'fi-investimentos',label:'Investimentos IA',icon:'bar-chart',tooltip:'Análise de investimentos'},
+  {id:'fi-perfil',label:'Perfil Financeiro',icon:'users',tooltip:'Perfil comportamental'}
 ];
 var adminNav=[
   {section:'Painel'},
@@ -369,9 +377,14 @@ var adminNav=[
 ];
 var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
-  analise:'Análise',tabelas:'Tabelas','fin-inteligente':'FIN. INTELIGENTE',
+  analise:'Análise',tabelas:'Tabelas',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   planos:'Planos e Assinatura',
+  'fi-chat':'Chat com IA','fi-analise':'Análise do Mês',
+  'fi-planejamento':'Planejamento Inteligente','fi-sugestoes':'Sugestões de Economia',
+  'fi-metas':'Metas Inteligentes','fi-previsao':'Previsão de Saldo',
+  'fi-alertas':'Alertas Inteligentes','fi-investimentos':'Investimentos IA',
+  'fi-perfil':'Perfil Financeiro',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -400,9 +413,14 @@ function navigate(pageId,el){
   setLoading();
   var map={
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
-    analise:pAnalise,tabelas:pTabelas,'fin-inteligente':pFinInteligente,
+    analise:pAnalise,tabelas:pTabelas,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     planos:pPlanos,
+    'fi-chat':pFinInteligente,'fi-analise':pFinInteligente,
+    'fi-planejamento':pFinInteligente,'fi-sugestoes':pFinInteligente,
+    'fi-metas':pFinInteligente,'fi-previsao':pFinInteligente,
+    'fi-alertas':pFinInteligente,'fi-investimentos':pFinInteligente,
+    'fi-perfil':pFinInteligente,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
