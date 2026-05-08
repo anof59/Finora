@@ -333,14 +333,14 @@ function iconPath(n){
     trophy:'<path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/>',
     wallet:'<path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5z"/><path d="M16 12a1 1 0 110 2 1 1 0 010-2z" fill="currentColor" stroke="none"/>',
     calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>'
+    compass:'<circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>',
+    sparkles:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+    activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+    lightbulb:'<path d="M9 18h6m-3-1v4m-4.5-9A4.5 4.5 0 1112 3a4.5 4.5 0 01-1.5 8.74v2.76h3v-2.76A4.5 4.5 0 0116.5 12z"/>',
+    bell:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9m-4 13a2 2 0 01-4 0"/>'
   };
-  return m[n]||'';
-}
-
-/* ===== NAV ===== */
-var userNav=[
-h  {section:'Visão Geral'},
+  revar userNav=[
+  {section:'Visão Geral'},
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
   {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
   {section:'Gestão'},
@@ -352,16 +352,17 @@ h  {section:'Visão Geral'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'},
-  {section:' FIN. INTELIGENTE a'},
-  {id:'fi-chat',label:'Chat com IA',icon:'sparkles',tooltip:'Seu assistente financeiro'},
-  {id:'fi-analise',label:'Análise do Mês',icon:'activity',tooltip:'Insight detalhado do mês'},
-  {id:'fi-planejamento',label:'Planejamento Inteligente',icon:'compass',tooltip:'Planejamento usando IA'},
-  {id:'fi-sugestoes',label:'Sugestões de Economia',icon:'lightbulb',tooltip:'Dicas de economia'},
-  {id:'fi-metas',label:'Metas Inteligentes',icon:'target',tooltip:'Metas projetadas por IA'},
-  {id:'fi-previsao',label:'Previsão de Saldo',icon:'trending-up',tooltip:'Previsão do saldo'},
-  {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Alertas gerados pela IA'},
-  {id:'fi-investimentos',label:'Investimentos IA',icon:'bar-chart',tooltip:'Análise de investimentos'},
-  {id:'fi-perfil',label:'Perfil Financeiro',icon:'users',tooltip:'Perfil comportamental'}
+  {isPremiumSection:true,title:'FIN. INTELIGENTE'},
+  {id:'fi-chat',label:'Chat com IA',icon:'sparkles',tooltip:'Seu assistente financeiro',premiumItem:true},
+  {id:'fi-analise',label:'Análise do Mês',icon:'activity',tooltip:'Insight detalhado do mês',premiumItem:true},
+  {id:'fi-planejamento',label:'Planejamento Inteligente',icon:'compass',tooltip:'Planejamento usando IA',premiumItem:true},
+  {id:'fi-sugestoes',label:'Sugestões de Economia',icon:'lightbulb',tooltip:'Dicas de economia',premiumItem:true},
+  {id:'fi-metas',label:'Metas Inteligentes',icon:'target',tooltip:'Metas projetadas por IA',premiumItem:true},
+  {id:'fi-previsao',label:'Previsão de Saldo',icon:'trending-up',tooltip:'Previsão do saldo',premiumItem:true},
+  {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Alertas gerados pela IA',premiumItem:true},
+  {id:'fi-investimentos',label:'Investimentos IA',icon:'bar-chart',tooltip:'Análise de investimentos',premiumItem:true},
+  {id:'fi-perfil',label:'Perfil Financeiro',icon:'users',tooltip:'Perfil comportamental',premiumItem:true}
+];rfil Financeiro',icon:'users',tooltip:'Perfil comportamental'}
 ];
 var adminNav=[
   {section:'Painel'},
@@ -567,13 +568,37 @@ function renderSidebarNav(nav){
   var el=document.getElementById('sidebar-nav');
   var h='';
   var firstItem=null;
+  var inPremium=false;
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
+
+    if(n.isPremiumSection) {
+      if(plan === 'free') continue; // Hide visually for Free
+      if(inPremium){h+='</div>';inPremium=false;}
+      inPremium=true;
+      h+='<div style="background: linear-gradient(135deg, #581c87, #7c3aed, #8b5cf6); border-radius: 14px; padding: 12px 0 6px; margin: 16px 12px 10px; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25); position: relative; overflow: hidden;" class="nav-premium-container">';
+      h+='<div style="position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; pointer-events: none;"></div>';
+      h+='<div style="display: flex; justify-content: space-between; align-items: center; padding: 0 14px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 6px;">';
+      h+='<span style="font-size: 10px; font-weight: 800; color: #fff; letter-spacing: 0.6px;">'+n.title+'</span>';
+      h+='<span style="background: #fff; color: #7c3aed; font-size: 8px; font-weight: 800; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">ULTRA</span>';
+      h+='</div>';
+      continue;
+    }
+
+    if(n.premiumItem && plan === 'free') {
+      continue;
+    }
+
     if(n.section!=null){
+      if(inPremium){h+='</div>';inPremium=false;}
       h+='<div class="nav-section-label">'+n.section+'</div>';
       continue;
     }
-    if(!firstItem)firstItem=n;
+
+    if(!firstItem && (!n.premiumItem || plan === 'ultra')) firstItem=n;
+
     var badgeHtml='';
     if(n.badge){
       var bStyle=n.badgeStyle||'new';
@@ -582,7 +607,11 @@ function renderSidebarNav(nav){
       badgeHtml='<span class="nav-item-badge green">'+_navBadges[n.badgeKey]+'</span>';
     }
     var tooltipHtml=n.tooltip?'<span class="nav-tooltip">'+n.tooltip+'</span>':'';
-    h+='<div class="nav-item" onclick="navigate(\''+n.id+'\',this)" title="">'
+    
+    var styleOverrides = inPremium ? 'color: rgba(255, 255, 255, 0.85); margin: 2px 8px; border-radius: 10px;' : '';
+    var hoverClass = inPremium ? ' premium-item' : '';
+    
+    h+='<div class="nav-item'+hoverClass+'" style="'+styleOverrides+'" onclick="navigate(\''+n.id+'\',this)" title="">'
       +'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">'+iconPath(n.icon)+'</svg>'
       +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+n.label+'</span>'
       +badgeHtml
@@ -593,7 +622,17 @@ function renderSidebarNav(nav){
       h += '<div style="padding:4px 16px 8px 16px;"><img src="/assets/images/imagem..jpg" style="width:100%; border-radius:12px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.1); border:1px solid var(--border);" onclick="navigate(\'planos\')" alt="Banner Premium"/></div>';
     }
   }
+  if(inPremium) h+='</div>';
   el.innerHTML=h;
+  
+  // Inject hover style for premium items since we used inline styles
+  if(!document.getElementById('premium-nav-style')){
+    var s = document.createElement('style');
+    s.id = 'premium-nav-style';
+    s.innerHTML = '.nav-item.premium-item:hover { background: rgba(255, 255, 255, 0.15) !important; color: #fff !important; transform: translateX(3px) !important; } .nav-item.premium-item.active { background: #fff !important; color: #7c3aed !important; box-shadow: 0 3px 12px rgba(0,0,0,0.15) !important; } .nav-item.premium-item.active svg { stroke: #7c3aed !important; }';
+    document.head.appendChild(s);
+  }
+  
   var firstEl=el.querySelector('.nav-item');
   if(firstEl&&firstItem){firstEl.classList.add('active');navigate(firstItem.id,firstEl);}
 }
@@ -1368,6 +1407,15 @@ async function pMesAtual(){
   }
 
   document.getElementById('main-content').innerHTML=html;
+}
+
+function pFinInteligente(){
+  var plan=(currentProfile&&currentProfile.plan)||'free';
+  if(plan !== 'ultra'){
+    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">FIN. INTELIGENTE Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Todas as ferramentas avançadas de IA estão disponíveis apenas no plano Ultra. Mude agora e ative o poder da OpenAI na sua conta FFinora.</div><img src="/assets/images/upgrade-ultra-preview.png" style="max-width:100%;border-radius:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" onerror="this.style.display=\'none\'"/><br><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 24px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
+    return;
+  }
+  document.getElementById('main-content').innerHTML='<div class="page-header"><h1>FIN. INTELIGENTE</h1><p>Com OpenAI Ativada</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px"><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">📊 Análise de Gastos</div><div style="font-size:12px;color:var(--text-muted)">Visão mensal</div></div><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">💡 Sugestões</div><div style="font-size:12px;color:var(--text-muted)">Dicas personalizadas</div></div><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">🎯 Metas</div><div style="font-size:12px;color:var(--text-muted)">Acompanhe suas metas</div></div></div><div style="background:var(--white);border:1.5px solid #7c3aed;border-radius:14px;padding:20px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">✨</span><div><div style="font-size:14px;font-weight:700">OpenAI Ativada</div><div style="font-size:12px;color:#7c3aed">IA conectada ao seu perfil</div></div></div><div style="border:1px solid var(--border);border-radius:10px;padding:16px;min-height:120px;background:var(--gray-bg);font-size:13px;color:var(--text-muted);display:flex;align-items:center;justify-content:center">Faça perguntas sobre suas finanças...</div></div>';
 }
 
 function pPlanos(){
