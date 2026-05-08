@@ -1,2 +1,39 @@
 .env*
 !.env.example
+
+# ============================================================
+# PROTEÇÃO CONTRA BACKUPS E ARQUIVOS TEMPORÁRIOS
+# Evita que arquivos de backup sejam commitados acidentalmente
+# ============================================================
+
+# Backups de HTML (qualquer variação de nome)
+*-backup.html
+*_backup.html
+*-bak.html
+*_bak*.html
+*-backup*.html
+layout-versao-*.html
+sidebar-backup*.html
+
+# Backups com data no nome (padrão: nome_YYYYMMDD.html)
+*_20[0-9][0-9][0-9][0-9][0-9][0-9].html
+index_bak_*.html
+*_bak_*.html
+
+# Arquivos de output de ferramentas online
+output-*.txt
+output-*.png
+output-onlinepngtools*.txt
+
+# Arquivos temporários do sistema
+*.tmp
+*.temp
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node modules (caso use no futuro)
+node_modules/
