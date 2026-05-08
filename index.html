@@ -339,7 +339,11 @@ function iconPath(n){
     lightbulb:'<path d="M9 18h6m-3-1v4m-4.5-9A4.5 4.5 0 1112 3a4.5 4.5 0 01-1.5 8.74v2.76h3v-2.76A4.5 4.5 0 0116.5 12z"/>',
     bell:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9m-4 13a2 2 0 01-4 0"/>'
   };
-  revar userNav=[
+  return m[n]||'';
+}
+
+/* ===== NAV ===== */
+var userNav=[
   {section:'Visão Geral'},
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
   {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
@@ -362,7 +366,6 @@ function iconPath(n){
   {id:'fi-alertas',label:'Alertas Inteligentes',icon:'bell',tooltip:'Alertas gerados pela IA',premiumItem:true},
   {id:'fi-investimentos',label:'Investimentos IA',icon:'bar-chart',tooltip:'Análise de investimentos',premiumItem:true},
   {id:'fi-perfil',label:'Perfil Financeiro',icon:'users',tooltip:'Perfil comportamental',premiumItem:true}
-];rfil Financeiro',icon:'users',tooltip:'Perfil comportamental'}
 ];
 var adminNav=[
   {section:'Painel'},
