@@ -83,11 +83,11 @@ function updateSupabaseProfile($user_id, $updates) {
     curl_close($ch);
 }
 
-function updateSupabaseByCustomerOrSub($customer_id, $sub_id, $updates) {
+function updateSupabaseByCustomerOrSub($customer_id, $sub_id, $updates, $user_id_fallback = null) {
     global $supabaseUrl, $supabaseServiceKey;
     if (!$supabaseServiceKey || !$customer_id) return;
 
-    // Achar id do user
+    // Achar id do user pelo customer_id
     $url = $supabaseUrl . '/rest/v1/profiles?stripe_customer_id=eq.' . urlencode($customer_id) . '&select=id';
     
     $ch = curl_init($url);
@@ -102,6 +102,8 @@ function updateSupabaseByCustomerOrSub($customer_id, $sub_id, $updates) {
     $res = json_decode($response, true);
     if (!empty($res) && isset($res[0]['id'])) {
         updateSupabaseProfile($res[0]['id'], $updates);
+    } else if ($user_id_fallback) {
+        updateSupabaseProfile($user_id_fallback, $updates);
     }
 }
 
@@ -136,20 +138,22 @@ switch ($type) {
             if ($price_id === $PRICE_ULTRA) $plan = 'ultra';
         }
         
+        $user_id_meta = isset($data['metadata']['user_id']) ? $data['metadata']['user_id'] : null;
         updateSupabaseByCustomerOrSub($customer_id, $subscription_id, [
             'stripe_subscription_id' => $subscription_id,
             'subscription_status' => $status,
             'plan' => $plan,
             'subscription_end' => date('c', $current_period_end)
-        ]);
+        ], $user_id_meta);
         break;
 
     case 'customer.subscription.deleted':
         $customer_id = $data['customer'];
+        $user_id_meta = isset($data['metadata']['user_id']) ? $data['metadata']['user_id'] : null;
         updateSupabaseByCustomerOrSub($customer_id, $data['id'], [
             'subscription_status' => 'canceled',
             'plan' => 'free'
-        ]);
+        ], $user_id_meta);
         break;
         
     case 'invoice.paid':

@@ -39,6 +39,11 @@ $data = [
     'cancel_url' => $app_url,
     'mode' => 'subscription',
     'client_reference_id' => $user_id,
+    'subscription_data' => [
+        'metadata' => [
+            'user_id' => $user_id
+        ]
+    ],
     'line_items' => [
         0 => [
             'price' => $price_id,
