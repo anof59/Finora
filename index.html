@@ -1451,8 +1451,38 @@ function pPlanos(){
   document.getElementById('main-content').innerHTML=html;
 }
 
-function assinarPlano(tipo){
-  alert('Integração de pagamento com a Stripe em breve!');
+async function assinarPlano(tipo){
+  var btn = event.currentTarget;
+  var txt = btn.textContent;
+  btn.textContent = 'Aguarde...';
+  btn.disabled = true;
+
+  try {
+    var precoId = tipo === 'pro' ? 'price_1TVHThILykQlxpCuY4bT6jVA' : 'price_1TVHTrILykQlxpCutQwYwX2K';
+    
+    var response = await fetch('/api/stripe/checkout.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: precoId,
+        user_id: currentUser.id,
+        email: currentUser.email
+      })
+    });
+    
+    var data = await response.json();
+    if(data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Erro ao redirecionar para pagamento: ' + (data.error || 'Erro desconhecido.'));
+      btn.textContent = txt;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Erro de comunicação. Tente novamente.');
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
 }
 
 /* ===== ADMIN ===== */
