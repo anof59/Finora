@@ -41,11 +41,12 @@ $priceMap = [
 // ── Ler e validar body ─────────────────────────────────────────────────────
 $input = json_decode(file_get_contents('php://input'), true);
 
-// Suporte a dois modos: {plan, user_id} OU {price_id, user_id} (legado)
+// Suporte a landing page (sem user_id) e app (com user_id)
 $plan    = strtolower(trim($input['plan']     ?? ''));
 $priceId = trim($input['price_id']            ?? '');
 $userId  = trim($input['user_id']             ?? '');
 $email   = trim($input['email']               ?? '');
+$source  = trim($input['source']              ?? 'app'); // 'app' ou 'landing'
 
 // Resolver price_id
 if (!empty($plan) && isset($priceMap[$plan])) {
@@ -56,24 +57,51 @@ if (!empty($plan) && isset($priceMap[$plan])) {
     exit;
 }
 
-if (empty($userId)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'user_id é obrigatório.']);
-    exit;
+// Validações por origem
+if ($source === 'landing') {
+    if (empty($email)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'email é obrigatório para checkout pela landing.']);
+        exit;
+    }
+} else {
+    if (empty($userId)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'user_id é obrigatório.']);
+        exit;
+    }
+}
+
+$planFinal = $plan ?: 'pro';
+
+// success_url depende da origem
+if ($source === 'landing') {
+    $successUrl = 'https://ffinora.com.br/login?payment=success&plan=' . urlencode($planFinal);
+} else {
+    $successUrl = $appUrl . '?session_id={CHECKOUT_SESSION_ID}&plan=' . urlencode($planFinal);
 }
 
 // ── Montar payload para Stripe Checkout ────────────────────────────────────
 $postData = [
-    'mode'                            => 'subscription',
-    'client_reference_id'             => $userId,
-    'success_url'                     => $appUrl . '?session_id={CHECKOUT_SESSION_ID}&plan=' . urlencode($plan ?: 'pro'),
-    'cancel_url'                      => $appUrl . '?checkout=cancelado',
-    'subscription_data[metadata][user_id]' => $userId,
-    'subscription_data[metadata][plan]'    => $plan ?: 'pro',
-    'line_items[0][price]'            => $priceId,
-    'line_items[0][quantity]'         => 1,
-    'payment_method_types[0]'         => 'card',
+    'mode'                              => 'subscription',
+    'success_url'                       => $successUrl,
+    'cancel_url'                        => $appUrl . '?checkout=cancelado',
+    'subscription_data[metadata][plan]' => $planFinal,
+    'line_items[0][price]'              => $priceId,
+    'line_items[0][quantity]'           => 1,
+    'payment_method_types[0]'           => 'card',
 ];
+
+// client_reference_id e metadata user_id apenas quando existir userId
+if (!empty($userId)) {
+    $postData['client_reference_id']             = $userId;
+    $postData['subscription_data[metadata][user_id]'] = $userId;
+}
+
+if ($source === 'landing') {
+    $postData['subscription_data[metadata][source]'] = 'landing';
+    $postData['subscription_data[metadata][email]']  = $email;
+}
 
 if (!empty($email)) {
     $postData['customer_email'] = $email;
