@@ -1,5 +1,15 @@
 <?php
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// ── Carregar .env.local ─────────────────────────────────────────────────────
 $envFile = __DIR__ . '/../../.env.local';
 $env = [];
 if (file_exists($envFile)) {
@@ -13,61 +23,96 @@ if (file_exists($envFile)) {
     }
 }
 
-$stripe_secret = isset($env['STRIPE_SECRET_KEY']) ? $env['STRIPE_SECRET_KEY'] : '';
-$app_url = isset($env['NEXT_PUBLIC_APP_URL']) ? $env['NEXT_PUBLIC_APP_URL'] : 'http://localhost:3000'; // fallback se não configurado
+$stripeSecret = $env['STRIPE_SECRET_KEY']    ?? '';
+$appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? 'https://ffinora.com.br';
 
-$input = json_decode(file_get_contents('php://input'), true);
-if (!$input || empty($input['price_id']) || empty($input['user_id'])) {
-    echo json_encode(['error' => 'Parâmetros inválidos']);
+if (empty($stripeSecret)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Stripe não configurado no servidor.']);
     exit;
 }
 
-$price_id = $input['price_id'];
-$user_id = $input['user_id'];
-$email = isset($input['email']) ? $input['email'] : '';
+// ── Mapeamento plano → price_id (IDs Live da Stripe) ──────────────────────
+$priceMap = [
+    'pro'   => 'price_1TVHThILykQlxpCuY4bT6jVA',
+    'ultra' => 'price_1TVHTrILykQlxpCutQwYwX2K',
+];
 
-$ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Authorization: Bearer ' . $stripe_secret,
-    'Content-Type: application/x-www-form-urlencoded'
-]);
-curl_setopt($ch, CURLOPT_POST, true);
+// ── Ler e validar body ─────────────────────────────────────────────────────
+$input = json_decode(file_get_contents('php://input'), true);
 
-$data = [
-    'success_url' => $app_url . '?session_id={CHECKOUT_SESSION_ID}',
-    'cancel_url' => $app_url,
-    'mode' => 'subscription',
-    'client_reference_id' => $user_id,
-    'subscription_data' => [
-        'metadata' => [
-            'user_id' => $user_id
-        ]
-    ],
-    'line_items' => [
-        0 => [
-            'price' => $price_id,
-            'quantity' => 1
-        ]
-    ]
+// Suporte a dois modos: {plan, user_id} OU {price_id, user_id} (legado)
+$plan    = strtolower(trim($input['plan']     ?? ''));
+$priceId = trim($input['price_id']            ?? '');
+$userId  = trim($input['user_id']             ?? '');
+$email   = trim($input['email']               ?? '');
+
+// Resolver price_id
+if (!empty($plan) && isset($priceMap[$plan])) {
+    $priceId = $priceMap[$plan];
+} elseif (empty($priceId)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Plano inválido. Use "pro" ou "ultra".']);
+    exit;
+}
+
+if (empty($userId)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'user_id é obrigatório.']);
+    exit;
+}
+
+// ── Montar payload para Stripe Checkout ────────────────────────────────────
+$postData = [
+    'mode'                            => 'subscription',
+    'client_reference_id'             => $userId,
+    'success_url'                     => $appUrl . '?session_id={CHECKOUT_SESSION_ID}&plan=' . urlencode($plan ?: 'pro'),
+    'cancel_url'                      => $appUrl . '?checkout=cancelado',
+    'subscription_data[metadata][user_id]' => $userId,
+    'subscription_data[metadata][plan]'    => $plan ?: 'pro',
+    'line_items[0][price]'            => $priceId,
+    'line_items[0][quantity]'         => 1,
+    'payment_method_types[0]'         => 'card',
 ];
 
 if (!empty($email)) {
-    $data['customer_email'] = $email;
+    $postData['customer_email'] = $email;
 }
 
-$postFields = http_build_query($data);
+// ── Chamar Stripe API ───────────────────────────────────────────────────────
+$ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_POSTFIELDS     => http_build_query($postData),
+    CURLOPT_HTTPHEADER     => [
+        'Authorization: Bearer ' . $stripeSecret,
+        'Content-Type: application/x-www-form-urlencoded',
+        'Stripe-Version: 2023-10-16',
+    ],
+]);
 
-curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
 $response = curl_exec($ch);
-$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlErr  = curl_error($ch);
 curl_close($ch);
+
+if ($curlErr) {
+    http_response_code(502);
+    echo json_encode(['error' => 'Falha de comunicação com a Stripe: ' . $curlErr]);
+    exit;
+}
 
 $resData = json_decode($response, true);
 
-if ($httpcode === 200 && isset($resData['url'])) {
+if ($httpCode === 200 && isset($resData['url'])) {
     echo json_encode(['url' => $resData['url']]);
 } else {
-    echo json_encode(['error' => 'Erro da Stripe', 'details' => $resData]);
+    http_response_code($httpCode >= 400 ? $httpCode : 500);
+    $errMsg = $resData['error']['message'] ?? 'Erro desconhecido da Stripe.';
+    echo json_encode([
+        'error'   => $errMsg,
+        'details' => $resData,
+    ]);
 }
 ?>

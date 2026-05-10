@@ -522,7 +522,7 @@ async function doCadastro(btn){
   btn.disabled=false;tx.textContent='Criar conta grátis';sp.style.display='none';
   if(r.error){err.textContent=r.error.message==='User already registered'?'E-mail já cadastrado.':r.error.message;err.style.display='block';return;}
   if(r.data&&r.data.user){
-    try{await sb.from('profiles').insert({id:r.data.user.id,email:email,full_name:nome,role:'user',plan:'free',status:'Ativo'});}catch(e){}
+    try{await sb.from('profiles').insert({id:r.data.user.id,email:email,full_name:nome,role:'user',plan:'pro',subscription_status:'manual',status:'Ativo'});}catch(e){}
     ok.textContent='✅ Conta criada! Você já pode fazer login.';ok.style.display='block';
     setTimeout(function(){document.getElementById('cadastro-screen').remove();document.getElementById('login-email').value=email;},1800);
   }
@@ -552,7 +552,7 @@ function setupApp(){
   var isAdmin=currentProfile&&currentProfile.role==='admin';
   var nav=isAdmin?adminNav:userNav;
   var nome=(currentProfile&&currentProfile.full_name)||(currentUser&&currentUser.email.split('@')[0])||'Usuário';
-  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var plan=(currentProfile&&currentProfile.plan)||'pro';
   var planDisplay=plan.charAt(0).toUpperCase()+plan.slice(1);
   document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin':'User Panel';
   document.getElementById('sidebar-role-tag').textContent=planDisplay;
@@ -572,7 +572,7 @@ function renderSidebarNav(nav){
   var h='';
   var firstItem=null;
   var inPremium=false;
-  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var plan=(currentProfile&&currentProfile.plan)||'pro';
 
   for(var i=0;i<nav.length;i++){
     var n=nav[i];
@@ -1418,7 +1418,7 @@ function pFinInteligente(){
 }
 
 function pPlanos(){
-  var plan=(currentProfile&&currentProfile.plan)||'free';
+  var plan=(currentProfile&&currentProfile.plan)||'pro';
   var isPro=plan==='pro';
   var isUltra=plan==='ultra';
   var html='<div class="page-header"><h1>Assinatura e Planos</h1><p>Escolha o melhor plano para o seu bolso</p></div>'
@@ -1432,7 +1432,7 @@ function pPlanos(){
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
     +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
     +'</div>'
-    +'<button onclick="assinarPlano(\'pro\')" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Plano Atual':'Assinar Pro')+'</button>'
+    +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':'🔵 Assinar Pro')+'</button>'
     +'</div>'
 
     +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative">'
@@ -1444,44 +1444,55 @@ function pPlanos(){
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
     +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros auto</div><div>✅ Análise de gastos inteligente</div>'
     +'</div>'
-    +'<button onclick="assinarPlano(\'ultra\')" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Plano Atual':'Assinar Ultra')+'</button>'
+    +'<button onclick="assinarPlano(\'ultra\',this)" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'✅ Plano Atual':'🚀 Assinar Ultra')+'</button>'
     +'</div>'
     
     +'<img src="/assets/images/assistente-ia-preview.png" alt="Antes e Depois com IA FFinora" style="width:100%;max-width:100%;border-radius:12px;margin-top:24px;display:block"/>';
+    +'<div id="planos-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:12px 16px;font-size:13px;margin-top:16px;width:100%;max-width:480px;margin-left:auto;margin-right:auto"></div>';
   document.getElementById('main-content').innerHTML=html;
 }
 
-async function assinarPlano(tipo){
-  var btn = event.currentTarget;
-  var txt = btn.textContent;
-  btn.textContent = 'Aguarde...';
-  btn.disabled = true;
+async function assinarPlano(tipo, btnEl){
+  // Suporte a chamada via onclick="assinarPlano('pro',this)" ou via event
+  var btn = btnEl || (typeof event !== 'undefined' && event && event.currentTarget) || null;
+  var txt = btn ? btn.textContent : '';
+  if(btn){ btn.textContent='Aguarde...'; btn.disabled=true; }
+
+  var planAtual=(currentProfile&&currentProfile.plan)||'pro';
+  if((tipo==='pro'&&planAtual==='pro')||(tipo==='ultra'&&planAtual==='ultra')){
+    if(btn){btn.textContent=txt;btn.disabled=false;}
+    return;
+  }
 
   try {
-    var precoId = tipo === 'pro' ? 'price_1TVHThILykQlxpCuY4bT6jVA' : 'price_1TVHTrILykQlxpCutQwYwX2K';
-    
     var response = await fetch('/api/stripe/checkout.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        price_id: precoId,
+        plan: tipo,
         user_id: currentUser.id,
         email: currentUser.email
       })
     });
-    
+
     var data = await response.json();
-    if(data.url) {
+    if(data.url){
       window.location.href = data.url;
     } else {
-      alert('Erro ao redirecionar para pagamento: ' + (data.error || 'Erro desconhecido.'));
-      btn.textContent = txt;
-      btn.disabled = false;
+      var msg = 'Erro ao iniciar pagamento: ' + (data.error || JSON.stringify(data.details) || 'Erro desconhecido.');
+      console.error('[Stripe Checkout]', data);
+      var errEl = document.getElementById('planos-error');
+      if(errEl){ errEl.textContent = msg; errEl.style.display='block'; }
+      else { alert(msg); }
+      if(btn){btn.textContent=txt;btn.disabled=false;}
     }
   } catch(e) {
-    alert('Erro de comunicação. Tente novamente.');
-    btn.textContent = txt;
-    btn.disabled = false;
+    var msg2 = 'Falha de comunicação com o servidor. Tente novamente.';
+    console.error('[Stripe Checkout] Exception:', e);
+    var errEl2 = document.getElementById('planos-error');
+    if(errEl2){ errEl2.textContent=msg2; errEl2.style.display='block'; }
+    else { alert(msg2); }
+    if(btn){btn.textContent=txt;btn.disabled=false;}
   }
 }
 
