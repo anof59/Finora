@@ -1,0 +1,38 @@
+# ============================================================
+# FFinora - .htaccess
+# ============================================================
+
+# Protecao contra acesso a arquivos .env
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Bloqueia diretorios sensiveis
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.claude
+RedirectMatch 404 /_backup_predeploy
+
+# ============================================================
+# Rotas amigaveis (URLs limpas)
+# ============================================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Nao reescreve se for arquivo ou diretorio real (preserva assets, api, imagens, css, js)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # /login -> app.html
+    RewriteRule ^login/?$ /app.html [L]
+
+    # /app -> app.html
+    RewriteRule ^app/?$ /app.html [L]
+
+    # /admin -> app.html
+    RewriteRule ^admin/?$ /app.html [L]
+
+    # /obrigado -> obrigado.html
+    RewriteRule ^obrigado/?$ /obrigado.html [L]
+</IfModule>

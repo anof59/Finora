@@ -76,7 +76,7 @@ $planFinal = $plan ?: 'pro';
 
 // success_url depende da origem
 if ($source === 'landing') {
-    $successUrl = 'https://ffinora.com.br/login?payment=success&plan=' . urlencode($planFinal);
+    $successUrl = 'https://ffinora.com.br/obrigado?payment=success&plan=' . urlencode($planFinal);
 } else {
     $successUrl = $appUrl . '?session_id={CHECKOUT_SESSION_ID}&plan=' . urlencode($planFinal);
 }
