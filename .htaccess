@@ -35,4 +35,11 @@ RedirectMatch 404 /_backup_predeploy
 
     # /obrigado -> obrigado.html
     RewriteRule ^obrigado/?$ /obrigado.html [L]
+
+    # /privacidade -> privacidade.html
+    RewriteRule ^privacidade/?$ /privacidade.html [L]
+
+    # /termos -> termos.html
+    RewriteRule ^termos/?$ /termos.html [L]
 </IfModule>
+

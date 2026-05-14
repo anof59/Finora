@@ -1,0 +1,24 @@
+Options -Indexes
+RewriteEngine On
+
+# Redirecionar raiz para landing page
+RewriteRule ^$ /landing.html [L]
+
+# /app e /login servem o index.html (SPA)
+RewriteRule ^app/?$ /index.html [L]
+RewriteRule ^login/?$ /index.html [L]
+
+# Bloquear acesso direto ao .env
+<Files ".env.local">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Cache para assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+</IfModule>

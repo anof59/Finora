@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<title>Política de Privacidade — FFinora</title>
+<link rel="icon" type="image/png" href="/assets/images/assistente-ia-preview.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4F46E5;--primary-dark:#3730A3;--primary-light:#818CF8;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;
+  --gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;
+  --white:#FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--gray-700);background:var(--gray-50);line-height:1.7}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 24px}
+.nav-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{font-size:1.25rem;font-weight:800;color:var(--gray-900)}
+.nav-logo span{color:var(--primary)}
+.nav-back{font-size:.9rem;color:var(--gray-600);display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--primary)}
+.container{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.page-header{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--gray-200)}
+.page-header h1{font-size:2rem;font-weight:800;color:var(--gray-900);margin-bottom:8px}
+.page-header p{font-size:.92rem;color:var(--gray-600)}
+.updated{display:inline-block;background:var(--gray-100);padding:4px 12px;border-radius:50px;font-size:.8rem;font-weight:600;color:var(--gray-600);margin-bottom:12px}
+h2{font-size:1.15rem;font-weight:700;color:var(--gray-900);margin:32px 0 12px}
+p{font-size:.95rem;color:var(--gray-700);margin-bottom:12px}
+ul{padding-left:20px;margin-bottom:12px}
+ul li{font-size:.95rem;color:var(--gray-700);margin-bottom:6px}
+.highlight{background:var(--gray-100);border-left:3px solid var(--primary);padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0}
+.highlight p{margin:0;font-size:.92rem}
+footer{border-top:1px solid var(--gray-200);padding:24px;text-align:center;font-size:.82rem;color:var(--gray-600)}
+footer a{color:var(--primary)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">F<span>F</span>inora</a>
+    <a href="/" class="nav-back">← Voltar ao início</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <span class="updated">Atualizada em 14 de maio de 2026</span>
+    <h1>Política de Privacidade</h1>
+    <p>Esta Política de Privacidade descreve como o FFinora coleta, usa e protege suas informações pessoais ao utilizar nosso serviço de controle financeiro.</p>
+  </div>
+
+  <h2>1. Informações que Coletamos</h2>
+  <p>Coletamos as seguintes informações para fornecer nossos serviços:</p>
+  <ul>
+    <li><strong>Dados de cadastro:</strong> nome completo e endereço de e-mail.</li>
+    <li><strong>Dados financeiros:</strong> transações, categorias, metas e investimentos que você registra manualmente no aplicativo.</li>
+    <li><strong>Dados de pagamento:</strong> processados exclusivamente pelo Stripe. O FFinora nunca armazena dados do seu cartão de crédito.</li>
+    <li><strong>Dados de uso:</strong> páginas acessadas, funcionalidades utilizadas e registros de sessão, para melhoria do serviço.</li>
+  </ul>
+
+  <h2>2. Como Usamos Suas Informações</h2>
+  <p>Utilizamos seus dados exclusivamente para:</p>
+  <ul>
+    <li>Fornecer e manter o serviço FFinora;</li>
+    <li>Processar pagamentos e gerenciar assinaturas;</li>
+    <li>Gerar análises e insights financeiros personalizados com Inteligência Artificial;</li>
+    <li>Enviar notificações relacionadas à sua conta e assinatura;</li>
+    <li>Melhorar continuamente a experiência do produto.</li>
+  </ul>
+
+  <div class="highlight">
+    <p>🔒 <strong>Seus dados financeiros são privados.</strong> Nunca compartilhamos, vendemos ou divulgamos suas informações financeiras a terceiros sem sua autorização expressa.</p>
+  </div>
+
+  <h2>3. Compartilhamento de Dados</h2>
+  <p>Seus dados podem ser compartilhados apenas com:</p>
+  <ul>
+    <li><strong>Stripe:</strong> para processamento seguro de pagamentos e assinaturas;</li>
+    <li><strong>Supabase:</strong> infraestrutura de banco de dados segura e criptografada;</li>
+    <li><strong>OpenAI:</strong> para geração de análises financeiras com IA (apenas usuários do plano Ultra). As mensagens são enviadas sem identificação pessoal.</li>
+  </ul>
+  <p>Não vendemos, alugamos ou divulgamos seus dados pessoais a empresas de marketing ou terceiros não autorizados.</p>
+
+  <h2>4. Segurança dos Dados</h2>
+  <p>Adotamos as seguintes medidas de segurança:</p>
+  <ul>
+    <li>Criptografia de dados em trânsito (HTTPS/TLS);</li>
+    <li>Banco de dados com Row Level Security (RLS) — você acessa apenas seus próprios dados;</li>
+    <li>Autenticação segura via Supabase Auth;</li>
+    <li>Dados de pagamento processados pelo Stripe (PCI DSS Nível 1).</li>
+  </ul>
+
+  <h2>5. Retenção de Dados</h2>
+  <p>Seus dados são mantidos enquanto sua conta estiver ativa. Após o cancelamento da conta, os dados são retidos por até 90 dias e então excluídos permanentemente, salvo exigência legal contrária.</p>
+
+  <h2>6. Seus Direitos (LGPD)</h2>
+  <p>Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem direito a:</p>
+  <ul>
+    <li>Acessar seus dados pessoais armazenados;</li>
+    <li>Solicitar correção de dados incorretos;</li>
+    <li>Solicitar a exclusão de seus dados;</li>
+    <li>Revogar seu consentimento a qualquer momento;</li>
+    <li>Solicitar portabilidade dos seus dados.</li>
+  </ul>
+  <p>Para exercer esses direitos, entre em contato: <a href="mailto:suporte@ffinora.com.br">suporte@ffinora.com.br</a></p>
+
+  <h2>7. Cookies</h2>
+  <p>Utilizamos cookies essenciais para manter sua sessão autenticada. Não utilizamos cookies de rastreamento de terceiros para fins publicitários.</p>
+
+  <h2>8. Alterações nesta Política</h2>
+  <p>Reservamo-nos o direito de atualizar esta Política de Privacidade. Em caso de alterações relevantes, você será notificado por e-mail com pelo menos 7 dias de antecedência.</p>
+
+  <h2>9. Contato</h2>
+  <p>Dúvidas sobre esta política ou sobre o tratamento dos seus dados:</p>
+  <p><strong>FFinora</strong><br>
+  E-mail: <a href="mailto:suporte@ffinora.com.br">suporte@ffinora.com.br</a></p>
+</div>
+
+<footer>
+  <p>© 2026 FFinora. Todos os direitos reservados. &bull;
+  <a href="/termos">Termos de Uso</a> &bull;
+  <a href="/">Voltar ao início</a></p>
+</footer>
+
+</body>
+</html>
