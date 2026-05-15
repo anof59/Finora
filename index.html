@@ -19,7 +19,7 @@
   --shadow:0 4px 24px rgba(0,0,0,0.08);--shadow-lg:0 8px 48px rgba(0,0,0,0.15);
   --radius:12px;--radius-lg:20px;
 }
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth}h
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--gray-800);background:var(--white);line-height:1.6;overflow-x:hidden}
 a{text-decoration:none;color:inherit}
 img{max-width:100%;height:auto}
@@ -65,32 +65,7 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .mobile-menu.open{display:flex}
 .mobile-menu a{font-size:1rem;color:var(--gray-700);font-weight:500;padding:8px 0;border-bottom:1px solid var(--gray-100)}
 
-/* HERO */
-.hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4338ca 70%,#7c3aed 100%);min-height:100vh;display:flex;align-items:center;padding:100px 0 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-30%;right:-10%;width:70%;height:140%;background:radial-gradient(ellipse,rgba(124,58,237,.25) 0%,transparent 70%);pointer-events:none}
-.hero::after{content:'';position:absolute;bottom:-20%;left:-5%;width:50%;height:100%;background:radial-gradient(ellipse,rgba(79,70,229,.2) 0%,transparent 70%);pointer-events:none}
-.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px;margin-bottom:24px;color:rgba(255,255,255,.9);font-size:.85rem;font-weight:500}
-.hero-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.hero h1{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:900;color:var(--white);line-height:1.1;margin-bottom:20px}
-.hero h1 span{background:linear-gradient(135deg,#a5f3fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.8);margin-bottom:40px;line-height:1.7;max-width:480px}
-.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
-.hero-stats{display:flex;gap:32px;margin-top:48px}
-.hero-stat{text-align:center}
-.hero-stat-num{font-size:1.8rem;font-weight:900;color:var(--white)}
-.hero-stat-label{font-size:.8rem;color:rgba(255,255,255,.65);margin-top:2px}
-.hero-img-wrap{position:relative}
-.hero-img-card{background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius-lg);padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.hero-img-card img{border-radius:12px;width:100%;display:block}
-.hero-float-badge{position:absolute;background:var(--white);border-radius:12px;padding:12px 18px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:600;color:var(--gray-800);animation:float 3s ease-in-out infinite}
-.hero-float-badge.badge-1{top:-16px;left:-20px;animation-delay:0s}
-.hero-float-badge.badge-2{bottom:20px;right:-16px;animation-delay:1.5s}
-.hero-float-badge .badge-icon{font-size:1.3rem}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-
-/* BENEFITS */
+/* HERO */.hero{background:radial-gradient(ellipse at 30% 20%, #0f1e2e 0%, #060d18 40%, #03070d 100%);min-height:100vh;display:flex;align-items:center;padding:120px 0 60px;position:relative;overflow:hidden;color:#fff}.hero::before{content:"";position:absolute;top:-20%;right:-15%;width:80%;height:120%;background:radial-gradient(ellipse,rgba(45,212,191,.12) 0%,transparent 65%);pointer-events:none}.hero::after{content:"";position:absolute;bottom:-30%;left:-10%;width:60%;height:100%;background:radial-gradient(ellipse,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none}.hero-inner{display:grid;grid-template-columns:1fr 1.05fr;gap:48px;align-items:center;position:relative;z-index:2}.hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.25);border-radius:50px;padding:10px 20px;margin-bottom:28px;color:#a7f3d0;font-size:.9rem;font-weight:500;backdrop-filter:blur(8px)}.hero-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 12px #2dd4bf;animation:pulse 2s infinite}.hero-badge .hero-badge-divider{opacity:.5;color:#fff}.hero-badge strong{color:#fff;font-weight:600}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}.hero h1{font-size:clamp(2.4rem,5.2vw,4rem);font-weight:800;color:#fff;line-height:1.05;margin-bottom:24px;letter-spacing:-.02em}.hero h1 span{background:linear-gradient(135deg,#5eead4 0%,#22d3ee 50%,#06b6d4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.7);margin-bottom:40px;line-height:1.6;max-width:520px}.hero-cta{display:flex;gap:16px;flex-wrap:wrap;align-items:center}.btn-cta-primary{background:linear-gradient(135deg,#2dd4bf 0%,#14b8a6 100%);color:#03241f;border:none;padding:16px 32px;font-weight:700;font-size:1rem;border-radius:14px;box-shadow:0 12px 30px rgba(45,212,191,.35);transition:transform .25s ease,box-shadow .25s ease}.btn-cta-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(45,212,191,.5)}.btn-cta-primary .btn-arrow{display:inline-block;transition:transform .25s ease}.btn-cta-primary:hover .btn-arrow{transform:translateX(4px)}.btn-cta-secondary{background:rgba(255,255,255,.04);color:#fff;border:1px solid rgba(255,255,255,.18);padding:16px 28px;font-weight:600;border-radius:14px;transition:background .25s ease,border-color .25s ease}.btn-cta-secondary:hover{background:rgba(255,255,255,.08);border-color:rgba(45,212,191,.4)}.btn-cta-secondary .btn-play{color:#2dd4bf;font-size:.8rem;margin-left:4px}.hero-img-wrap{position:relative;min-height:520px}.hero-img-card{position:relative;z-index:2;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}.hero-img-card img{width:100%;display:block;border-radius:16px}.hero-float-card{position:absolute;z-index:3;background:rgba(13,28,40,.85);backdrop-filter:blur(14px);border:1px solid rgba(45,212,191,.22);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;color:#fff;box-shadow:0 18px 40px rgba(0,0,0,.45);animation:floatY 4s ease-in-out infinite;max-width:230px}.hero-float-card .hero-float-emoji{font-size:1.4rem;line-height:1}.hero-float-card .hero-float-text{display:flex;flex-direction:column;line-height:1.2}.hero-float-card strong{font-size:.85rem;color:#5eead4;font-weight:600}.hero-float-card small{font-size:.72rem;color:rgba(255,255,255,.7);margin-top:2px}.hero-float-openia{top:-30px;left:8%;animation-delay:.2s}.hero-float-360{top:14%;left:-6%;animation-delay:.6s}.hero-float-graph{top:18%;right:-8%;animation-delay:1s}.hero-float-goal{top:54%;right:-10%;animation-delay:1.4s}.hero-float-sync{bottom:6%;right:-6%;animation-delay:1.8s}@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}.hero-benefits{margin-top:64px;display:grid;grid-template-columns:repeat(5,1fr);gap:24px;padding-top:36px;border-top:1px solid rgba(255,255,255,.08);position:relative;z-index:2}.hb-item{display:flex;gap:12px;align-items:flex-start}.hb-icon{font-size:1.6rem;color:#2dd4bf;flex-shrink:0;line-height:1}.hb-text{display:flex;flex-direction:column;gap:4px}.hb-text strong{color:#fff;font-weight:600;font-size:.95rem}.hb-text span{color:rgba(255,255,255,.6);font-size:.8rem;line-height:1.4}.hero-social-proof{margin-top:36px;text-align:center;color:#2dd4bf;font-size:.95rem;font-weight:500;position:relative;z-index:2}/* BENEFITS */
 .benefits{padding:80px 0;background:var(--white)}
 .benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:48px}
 .benefit-card{background:var(--gray-50);border-radius:var(--radius);padding:32px 28px;transition:transform .3s,box-shadow .3s;border:1px solid var(--gray-200)}
@@ -240,7 +215,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 /* RESPONSIVE */
 @media(max-width:900px){
   .hero-inner,.problems-grid,.solution-grid{grid-template-columns:1fr}
-  .hero-img-wrap{display:none}
+  .hero-img-wrap{min-height:auto;margin-top:32px}.hero-float-card{position:relative;display:none}.hero-benefits{grid-template-columns:repeat(2,1fr);margin-top:40px}.hero-cta{flex-direction:column;align-items:stretch}.hero-cta .btn{justify-content:center;width:100%}
   .benefits-grid{grid-template-columns:1fr 1fr}
   .how-steps{grid-template-columns:1fr 1fr}
   .how-steps::before{display:none}
@@ -291,33 +266,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 
 <!-- HERO -->
-<section class="hero" id="inicio">
-  <div class="container">
-    <div class="hero-inner">
-      <div class="hero-content fade-up">
-        <div class="hero-badge">&#128994; Controle financeiro com IA</div>
-        <h1>Pare de perder dinheiro <span>sem perceber.</span></h1>
-        <p class="hero-sub">Organize gastos, acompanhe metas e tenha clareza total da sua vida financeira com o FFinora.</p>
-        <div class="hero-cta">
-          <a href="#planos" class="btn btn-ultra">Comecar agora</a>
-          <a href="/login" class="btn btn-ghost">Entrar</a>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><div class="hero-stat-num">100%</div><div class="hero-stat-label">Online e seguro</div></div>
-          <div class="hero-stat"><div class="hero-stat-num">IA</div><div class="hero-stat-label">Analises inteligentes</div></div>
-          <div class="hero-stat"><div class="hero-stat-num">24/7</div><div class="hero-stat-label">Disponivel sempre</div></div>
-        </div>
-      </div>
-      <div class="hero-img-wrap fade-up">
-        <div class="hero-img-card">
-          <img src="/assets/images/upgrade-ultra-preview.png" alt="Dashboard FFinora" loading="lazy">
-        </div>
-        <div class="hero-float-badge badge-1"><span class="badge-icon">&#127919;</span> Meta atingida!</div>
-        <div class="hero-float-badge badge-2"><span class="badge-icon">&#128200;</span> +23% economizado</div>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="hero" id="inicio">    <div class="container">      <div class="hero-inner">        <div class="hero-content fade-up">          <div class="hero-badge">Controle financeiro com IA <span class="hero-badge-divider">|</span> <strong>OpenIA</strong></div>          <h1>O controle financeiro que <span>simplifica</span> sua vida.</h1>          <p class="hero-sub">O FFinora é o app completo para você organizar suas finanças, controlar gastos, investimentos e alcançar seus objetivos.</p>          <div class="hero-cta">            <a href="/login" class="btn btn-cta-primary">Começa Agora <span class="btn-arrow">→</span></a>            <a href="#planos" class="btn btn-cta-secondary">Ver planos <span class="btn-play">▶</span></a>          </div>        </div>        <div class="hero-img-wrap fade-up">          <div class="hero-img-card">            <img src="/assets/images/upgrade-ultra-preview.png" alt="Dashboard FFinora" loading="lazy">          </div>          <div class="hero-float-card hero-float-openia"><span class="hero-float-emoji">🤖</span><div class="hero-float-text"><strong>OpenIA</strong><small>Sua inteligência financeira</small></div></div>          <div class="hero-float-card hero-float-360"><span class="hero-float-emoji">🧭</span><div class="hero-float-text"><strong>Visão 360°</strong><small>de todas as suas finanças</small></div></div>          <div class="hero-float-card hero-float-graph"><span class="hero-float-emoji">📊</span><div class="hero-float-text"><strong>Gráficos e insights</strong><small>que mostram seu progresso</small></div></div>          <div class="hero-float-card hero-float-goal"><span class="hero-float-emoji">🎯</span><div class="hero-float-text"><strong>Metas e objetivos</strong><small>Acompanhe e alcance seus sonhos</small></div></div>          <div class="hero-float-card hero-float-sync"><span class="hero-float-emoji">🔒</span><div class="hero-float-text"><strong>Sincronização 100% segura</strong><small>Seus dados protegidos em todos os dispositivos</small></div></div>        </div>      </div>      <div class="hero-benefits">        <div class="hb-item"><div class="hb-icon">🛡️</div><div class="hb-text"><strong>100% Seguro</strong><span>Seus dados protegidos com criptografia de ponta</span></div></div>        <div class="hb-item"><div class="hb-icon">☁️</div><div class="hb-text"><strong>Sincronização Total</strong><span>Acesse suas informações de qualquer lugar</span></div></div>        <div class="hb-item"><div class="hb-icon">🔔</div><div class="hb-text"><strong>Alertas Inteligentes</strong><span>Notificações personalizadas para não perder nada</span></div></div>        <div class="hb-item"><div class="hb-icon">📈</div><div class="hb-text"><strong>Controle Completo</strong><span>Receitas, despesas, investimentos e muito mais em um só lugar</span></div></div>        <div class="hb-item"><div class="hb-icon">🎧</div><div class="hb-text"><strong>Suporte Premium</strong><span>Atendimento humanizado quando você precisar</span></div></div>      </div>      <div class="hero-social-proof">+50.000 usuários já transformaram sua vida financeira com o FFinora</div>    </div>  </section>
 
 <!-- BENEFICIOS -->
 <section class="benefits" id="beneficios">
