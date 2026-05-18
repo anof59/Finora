@@ -70,9 +70,10 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 
 /* HERO */
 /* HERO */
-.hero{background:radial-gradient(circle at 80% 50%, rgba(6,182,212,0.15) 0%, rgba(3,7,18,1) 50%), #030712;min-height:100vh;display:flex;align-items:center;padding:120px 0 0;position:relative;overflow:hidden;color:#fff}
-.hero-inner{display:grid;grid-template-columns:0.95fr 1.05fr;gap:20px;align-items:center;position:relative;z-index:2;width:100%;max-width:1440px;margin:0 auto;padding:0 24px}
-.hero-content{padding-right:20px}
+.hero{background:url('/assets/images/Hero%20Section.jpg') no-repeat center right;background-size:cover;min-height:100vh;display:flex;align-items:center;padding:120px 0 0;position:relative;overflow:hidden;color:#fff}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg, rgba(2,8,20,.95) 0%, rgba(2,8,20,.85) 35%, rgba(2,8,20,.45) 60%, rgba(2,8,20,.25) 100%);z-index:1}
+.hero-inner{position:relative;z-index:2;width:100%;max-width:1140px;margin:0 auto;padding:0 24px}
+.hero-content{max-width:600px}
 .hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:8px 20px;margin-bottom:32px;color:#e2e8f0;font-size:.9rem;font-weight:500;backdrop-filter:blur(12px)}
 .hero-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;animation:pulse 2s infinite}
 .hero-badge .hero-badge-divider{opacity:.3;color:#fff}
@@ -86,8 +87,6 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .btn-cta-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(6,182,212,0.6);background:linear-gradient(135deg,#22d3ee 0%,#06b6d4 100%)}
 .btn-cta-primary .btn-arrow{display:inline-block;transition:transform .3s ease;margin-left:12px}
 .btn-cta-primary:hover .btn-arrow{transform:translateX(6px)}
-.hero-visual{position:relative;width:130%;display:flex;align-items:flex-end;justify-content:flex-end;z-index:1;margin-right:-20%}
-.hero-visual img{width:100%;height:auto;display:block;object-fit:cover;object-position:left;filter:drop-shadow(-20px 20px 60px rgba(0,0,0,0.8));mask-image:linear-gradient(to right, black 85%, transparent 100%);-webkit-mask-image:linear-gradient(to right, black 85%, transparent 100%)}
 
 /* BENEFITS */
 .benefits{padding:80px 0;background:var(--white)}
@@ -238,12 +237,12 @@ footer a{color:var(--primary-light);text-decoration:underline}
 
 /* RESPONSIVE */
 @media(max-width:1024px){
-.hero-inner{grid-template-columns:1fr;gap:60px;text-align:center;padding-top:40px}
-.hero-content{padding-right:0}
+.hero{background-position:60% center}
+.hero::before{background:linear-gradient(90deg, rgba(2,8,20,.95) 0%, rgba(2,8,20,.85) 50%, rgba(2,8,20,.5) 100%)}
+.hero-inner{padding-top:40px;text-align:center}
+.hero-content{max-width:100%}
 .hero-sub{margin:0 auto 40px}
 .hero-cta{justify-content:center}
-.hero-visual{width:100%;margin-right:0;justify-content:center}
-.hero-visual img{mask-image:none;-webkit-mask-image:none}
 }
 @media(max-width:900px){
 .hero{padding:110px 0 0}
@@ -306,9 +305,6 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <div class="hero-cta">
 <a href="#planos" class="btn btn-cta-primary">Começa Agora <span class="btn-arrow">→</span></a>
 </div>
-</div>
-<div class="hero-visual fade-up">
-<img src="/assets/images/Hero%20Section.jpg" alt="Dashboard FFinora - Controle financeiro com IA" loading="eager">
 </div>
 </div>
 </section>
