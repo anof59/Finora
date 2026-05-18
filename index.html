@@ -71,7 +71,7 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .hero{background:radial-gradient(ellipse at 25% 30%, #0f1e2e 0%, #060d18 45%, #03070d 100%);min-height:100vh;display:flex;align-items:center;padding:140px 0 80px;position:relative;overflow:hidden;color:#fff}
 .hero::before{content:"";position:absolute;top:-20%;right:-15%;width:80%;height:120%;background:radial-gradient(ellipse,rgba(45,212,191,.12) 0%,transparent 65%);pointer-events:none}
 .hero::after{content:"";position:absolute;bottom:-30%;left:-10%;width:60%;height:100%;background:radial-gradient(ellipse,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none}
-.hero-inner{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.5fr);gap:16px;align-items:center;position:relative;z-index:2}
+.hero-inner{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;position:relative;z-index:2;max-width:1200px;margin:0 auto}
 .hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.25);border-radius:50px;padding:10px 20px;margin-bottom:28px;color:#a7f3d0;font-size:.9rem;font-weight:500;backdrop-filter:blur(8px)}
 .hero-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 12px #2dd4bf;animation:pulse 2s infinite}
 .hero-badge .hero-badge-divider{opacity:.5;color:#fff}
@@ -81,15 +81,23 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .hero h1 span{background:linear-gradient(135deg,#5eead4 0%,#22d3ee 50%,#06b6d4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:1.1rem;color:rgba(255,255,255,.7);margin-bottom:40px;line-height:1.6;max-width:520px}
 .hero-cta{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-.btn-cta-primary{background:linear-gradient(135deg,#2dd4bf 0%,#14b8a6 100%);color:#03241f;border:none;padding:16px 32px;font-weight:700;font-size:1rem;border-radius:14px;box-shadow:0 12px 30px rgba(45,212,191,.35);transition:transform .25s ease,box-shadow .25s ease}
+.btn-cta-primary{background:linear-gradient(135deg,#2dd4bf 0%,#14b8a6 100%);color:#03241f;border:none;padding:16px 32px;font-weight:700;font-size:1rem;border-radius:14px;box-shadow:0 12px 30px rgba(45,212,191,.35);transition:transform .25s ease,box-shadow .25s ease;text-decoration:none;display:inline-flex;align-items:center}
 .btn-cta-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(45,212,191,.5)}
-.btn-cta-primary .btn-arrow{display:inline-block;transition:transform .25s ease}
+.btn-cta-primary .btn-arrow{display:inline-block;transition:transform .25s ease;margin-left:8px}
 .btn-cta-primary:hover .btn-arrow{transform:translateX(4px)}
-.btn-cta-secondary{background:rgba(255,255,255,.04);color:#fff;border:1px solid rgba(255,255,255,.18);padding:16px 28px;font-weight:600;border-radius:14px;transition:background .25s ease,border-color .25s ease}
-.btn-cta-secondary:hover{background:rgba(255,255,255,.08);border-color:rgba(45,212,191,.4)}
-.btn-cta-secondary .btn-play{color:#2dd4bf;font-size:.8rem;margin-left:4px}
-.hero-visual{position:relative;width:100%;display:block;overflow:hidden;aspect-ratio:14/9;margin-right:calc(50% - 50vw);background:#060d18}
-.hero-visual img{position:absolute;top:0;left:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:100% center;display:block;border:0;border-radius:0;filter:drop-shadow(0 40px 90px rgba(0,0,0,.6))}.hero-visual::before{content:"";position:absolute;left:0;top:0;bottom:0;width:35%;pointer-events:none;background:linear-gradient(to right, #060d18 0%, #060d18 45%, rgba(6,13,24,.7) 80%, rgba(6,13,24,0) 100%);z-index:2}
+.hero-visual{position:relative;width:100%;display:block;perspective:1000px}
+.hero-visual img{width:100%;height:auto;display:block;border-radius:12px;filter:drop-shadow(0 40px 90px rgba(0,0,0,.6));transform:rotateY(-5deg) rotateX(5deg);transition:transform 0.5s ease}
+.hero-visual:hover img{transform:rotateY(0deg) rotateX(0deg)}
+.floating-cards-container{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.glass-card{position:absolute;background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);color:#fff;animation:floatCard 6s ease-in-out infinite}
+.glass-card-icon{width:40px;height:40px;border-radius:10px;background:rgba(45,212,191,0.15);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#2dd4bf}
+.glass-card-text h4{font-size:0.9rem;font-weight:600;margin:0}
+.glass-card-text p{font-size:0.8rem;color:rgba(255,255,255,0.6);margin:0}
+@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-benefits-bar{position:absolute;bottom:0;left:0;width:100%;background:rgba(6,13,24,0.8);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.05);padding:20px 0;z-index:3}
+.hero-benefits-inner{max-width:1140px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.hero-benefit-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.8);font-size:0.95rem;font-weight:500}
+.hero-benefit-icon{color:#2dd4bf}
 
 /* BENEFITS */
 .benefits{padding:80px 0;background:var(--white)}
@@ -246,6 +254,9 @@ footer a{color:var(--primary-light);text-decoration:underline}
 .hero-cta{flex-direction:column;align-items:stretch}
 .hero-cta .btn{justify-content:center;width:100%}
 .hero-visual{margin-right:0;aspect-ratio:auto;overflow:visible}.hero-visual img{position:relative;top:auto;left:auto;transform:none;width:100%;max-width:560px;margin:0 auto;object-fit:contain;object-position:center;border-radius:16px}.hero-visual::before{display:none}
+.glass-card { display: none; }
+.hero-benefits-bar { position: relative; background: transparent; padding: 20px 0 0; }
+.hero-benefits-inner { flex-direction: column; align-items: center; }
 .problems-grid,.solution-grid{grid-template-columns:1fr}
 .benefits-grid{grid-template-columns:1fr 1fr}
 .how-steps{grid-template-columns:1fr 1fr}
@@ -306,13 +317,64 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <h1>O controle financeiro que <span>simplifica</span> sua vida.</h1>
 <p class="hero-sub">O FFinora é o app completo para você organizar suas finanças, controlar gastos, investimentos e alcançar seus objetivos.</p>
 <div class="hero-cta">
-<a href="/login" class="btn btn-cta-primary">Começa Agora <span class="btn-arrow">→</span></a>
-<a href="#planos" class="btn btn-cta-secondary">Ver planos <span class="btn-play">▶</span></a>
+<a href="#planos" class="btn btn-cta-primary">Começa Agora <span class="btn-arrow">→</span></a>
 </div>
 </div>
 <div class="hero-visual fade-up">
 <img src="/assets/images/Hero%20Section.jpg" alt="Dashboard FFinora - Controle financeiro com IA" loading="eager">
+<div class="floating-cards-container">
+    <div class="glass-card" style="top:10%;left:-5%;animation-delay:0s">
+        <div class="glass-card-icon">&#128200;</div>
+        <div class="glass-card-text">
+            <h4>Visão 360º</h4>
+            <p>Seu patrimônio</p>
+        </div>
+    </div>
+    <div class="glass-card" style="top:40%;left:-10%;animation-delay:1s">
+        <div class="glass-card-icon">&#129504;</div>
+        <div class="glass-card-text">
+            <h4>OpenIA</h4>
+            <p>Seu Copiloto</p>
+        </div>
+    </div>
+    <div class="glass-card" style="bottom:15%;left:-5%;animation-delay:2s">
+        <div class="glass-card-icon">&#128176;</div>
+        <div class="glass-card-text">
+            <h4>Investimentos</h4>
+            <p>Rentabilidade</p>
+        </div>
+    </div>
+    <div class="glass-card" style="top:15%;right:-5%;animation-delay:0.5s">
+        <div class="glass-card-icon">&#127919;</div>
+        <div class="glass-card-text">
+            <h4>Metas</h4>
+            <p>Acompanhamento</p>
+        </div>
+    </div>
+    <div class="glass-card" style="top:50%;right:-10%;animation-delay:1.5s">
+        <div class="glass-card-icon">&#128203;</div>
+        <div class="glass-card-text">
+            <h4>Planejamento</h4>
+            <p>Fluxo de caixa</p>
+        </div>
+    </div>
+    <div class="glass-card" style="bottom:10%;right:-5%;animation-delay:2.5s">
+        <div class="glass-card-icon">&#128276;</div>
+        <div class="glass-card-text">
+            <h4>Alertas</h4>
+            <p>Vencimentos</p>
+        </div>
+    </div>
 </div>
+</div>
+</div>
+</div>
+<div class="hero-benefits-bar fade-up">
+<div class="hero-benefits-inner">
+<div class="hero-benefit-item"><span class="hero-benefit-icon">&#10003;</span> Criptografia de ponta a ponta</div>
+<div class="hero-benefit-item"><span class="hero-benefit-icon">&#10003;</span> Sincronização em tempo real</div>
+<div class="hero-benefit-item"><span class="hero-benefit-icon">&#10003;</span> Relatórios automáticos</div>
+<div class="hero-benefit-item"><span class="hero-benefit-icon">&#10003;</span> Pagamento seguro via Stripe</div>
 </div>
 </div>
 </section>
