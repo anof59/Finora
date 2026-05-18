@@ -69,24 +69,17 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .mobile-menu a{font-size:1rem;color:var(--gray-700);font-weight:500;padding:8px 0;border-bottom:1px solid var(--gray-100)}
 
 /* HERO */
-/* HERO */
-.hero{background:url('/assets/images/Hero%20Section.jpg') no-repeat center center;background-size:cover;min-height:100vh;display:flex;align-items:center;padding:120px 0 0;position:relative;overflow:hidden;color:#fff;background-color:#07131d}
-.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg, rgba(3,10,18,.98) 0%, rgba(3,10,18,.94) 28%, rgba(3,10,18,.72) 48%, rgba(3,10,18,.30) 75%, rgba(3,10,18,.10) 100%);z-index:1}
-.hero-inner{position:relative;z-index:2;width:100%;max-width:1140px;margin:0 auto;padding:0 24px}
-.hero-content{position:relative;z-index:2;max-width:560px;margin-left:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
-.hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:8px 20px;margin-bottom:32px;color:#e2e8f0;font-size:.9rem;font-weight:500;backdrop-filter:blur(12px)}
-.hero-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;animation:pulse 2s infinite}
-.hero-badge .hero-badge-divider{opacity:.3;color:#fff}
-.hero-badge strong{color:#fff;font-weight:600}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.hero h1{font-size:clamp(2.6rem,5.5vw,4.5rem);font-weight:800;color:#fff;line-height:1.05;margin-bottom:24px;letter-spacing:-.03em}
-.hero h1 span{background:linear-gradient(135deg,#22d3ee 0%,#0891b2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:1.15rem;color:#9ca3af;margin-bottom:48px;line-height:1.6;max-width:540px}
-.hero-cta{display:flex;align-items:center}
-.btn-cta-primary{background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);color:#fff;border:none;padding:18px 40px;font-weight:700;font-size:1.05rem;border-radius:12px;box-shadow:0 0 30px rgba(6,182,212,0.4);transition:all .3s ease;text-decoration:none;display:inline-flex;align-items:center}
-.btn-cta-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(6,182,212,0.6);background:linear-gradient(135deg,#22d3ee 0%,#06b6d4 100%)}
-.btn-cta-primary .btn-arrow{display:inline-block;transition:transform .3s ease;margin-left:12px}
-.btn-cta-primary:hover .btn-arrow{transform:translateX(6px)}
+.hero-final {
+  width: 100%;
+  background: #07131d;
+  overflow: hidden;
+  padding-top: 72px;
+}
+.hero-final img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
 /* BENEFITS */
 .benefits{padding:80px 0;background:var(--white)}
@@ -236,23 +229,9 @@ footer a{color:var(--primary-light);text-decoration:underline}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* RESPONSIVE */
-@media(max-width:1024px){
-.hero{background-position:70% center}
-.hero::before{background:linear-gradient(90deg, rgba(3,10,18,.98) 0%, rgba(3,10,18,.94) 40%, rgba(3,10,18,.70) 70%, rgba(3,10,18,.40) 100%)}
-.hero-inner{padding-top:40px;text-align:left}
-.hero-content{max-width:100%}
-.hero-sub{margin:0 0 40px}
-.hero-cta{justify-content:flex-start}
-}
 @media(max-width:900px){
-.hero{padding:110px 0 0}
 .problems-grid,.solution-grid{grid-template-columns:1fr}
 .benefits-grid{grid-template-columns:1fr 1fr}
-}
-@media(max-width:768px){
-.hero{background-size:contain;background-repeat:no-repeat;background-position:center top;background-color:#07131d;min-height:100vh}
-.hero-inner{padding-top:180px}
-}
 .how-steps{grid-template-columns:1fr 1fr}
 .how-steps::before{display:none}
 .fin-grid{grid-template-columns:1fr 1fr}
@@ -301,17 +280,10 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 
 <!-- HERO -->
-<section class="hero" id="inicio">
-<div class="hero-inner">
-<div class="hero-content fade-up">
-<div class="hero-badge">Controle financeiro com IA <span class="hero-badge-divider">|</span> <strong>OpenIA</strong></div>
-<h1>O controle financeiro que<br><span>simplifica</span> sua vida.</h1>
-<p class="hero-sub">O FFinora é o app completo para você organizar suas finanças, controlar gastos, investimentos e alcançar seus objetivos.</p>
-<div class="hero-cta">
-<a href="#planos" class="btn btn-cta-primary">Começa Agora <span class="btn-arrow">→</span></a>
-</div>
-</div>
-</div>
+<section class="hero-final" id="inicio">
+<a href="#planos" style="display:block; text-decoration:none;">
+<img src="/assets/images/Hero%20Section.jpg" alt="FFinora Hero" loading="eager">
+</a>
 </section>
 
 <!-- BENEFICIOS -->
