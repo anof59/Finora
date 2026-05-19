@@ -46,8 +46,8 @@ img{max-width:100%;height:auto}
 .fade-up.visible{opacity:1;transform:translateY(0)}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;transition:background .3s,box-shadow .3s}
-nav.scrolled{background:rgba(255,255,255,.97);box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px)}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;transition:all .3s;opacity:0;pointer-events:none;transform:translateY(-10px)}
+nav.scrolled{background:rgba(255,255,255,.97);box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);opacity:1;pointer-events:auto;transform:translateY(0)}
 .nav-inner{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:72px}
 .nav-logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;color:var(--white)}
 nav.scrolled .nav-logo{color:var(--gray-900)}
@@ -73,7 +73,7 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
   width: 100%;
   background: #07131d;
   overflow: hidden;
-  padding-top: 72px;
+  padding-top: 0;
 }
 .hero-final img {
   width: 100%;
