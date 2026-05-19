@@ -695,10 +695,10 @@ setTimeout(()=>document.getElementById('modalEmail').focus(),100);
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
 function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
 function clearError(){
-document.getElementById('modalInput')&&(document.getElementById('modalEmail').classList.remove('error'));
+document.getElementById('modalEmail').classList.remove('error');
 document.getElementById('modalError').style.display='none';
 }
-function validateEmail(e){return/^[^s@]+@[^s@]+.[^s@]+$/.test(e)}
+function validateEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}
 async function submitCheckout(){
 const emailEl=document.getElementById('modalEmail');
 const errorEl=document.getElementById('modalError');
