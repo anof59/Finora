@@ -9,22 +9,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// ── Carregar .env.local ─────────────────────────────────────────────────────
-$envFile = __DIR__ . '/../../.env.local';
+// ── Carregar .env.local ou .env ─────────────────────────────────────────────
+$envFileLocal = __DIR__ . '/../../.env.local';
+$envFileProd  = __DIR__ . '/../../.env';
 $env = [];
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            list($name, $value) = explode('=', $line, 2);
-            $env[trim($name)] = trim($value);
+
+foreach ([$envFileLocal, $envFileProd] as $file) {
+    if (file_exists($file)) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $env[trim($name)] = trim($value);
+            }
         }
     }
 }
 
-$stripeSecret = $env['STRIPE_SECRET_KEY']    ?? '';
-$appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? 'https://ffinora.com.br';
+$stripeSecret = $env['STRIPE_SECRET_KEY']    ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? '';
+$appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? getenv('NEXT_PUBLIC_APP_URL') ?? $_ENV['NEXT_PUBLIC_APP_URL'] ?? 'https://ffinora.com.br';
 
 if (empty($stripeSecret)) {
     http_response_code(500);
