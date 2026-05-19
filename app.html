@@ -1439,21 +1439,16 @@ function pPlanos(){
   var isFree=plan==='free';
   var isPro=plan==='pro';
   var isUltra=plan==='ultra';
+  
+  var banner = isFree 
+    ? '<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:20px;text-align:center;width:100%;max-width:456px;margin-left:auto;margin-right:auto">Você está no Plano Free. Faça upgrade para liberar mais recursos.</div>'
+    : '';
+
   var html='<div class="page-header"><h1>Assinatura e Planos</h1><p>Escolha o melhor plano para o seu bolso</p></div>'
+    + banner
     +'<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:20px">'
     
-    // --- Free ---
-    +'<div style="background:#fff;border:2px solid '+(isFree?'#16a34a':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative">'
-    +(isFree?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
-    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Free</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para começar sem gastar nada</div>'
-    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 0<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
-    +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Até 30 transações/mês</div><div>✅ 1 conta bancária</div><div>✅ Dashboard básico</div><div style="color:#9ca3af">❌ Sem relatórios avançados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
-    +'</div>'
-    +'<button style="width:100%;padding:10px;background:'+(isFree?'#e5e7eb':'#16a34a')+';color:'+(isFree?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isFree?'default':'pointer')+'">'+(isFree?'Plano Atual':'Começar Grátis')+'</button>'
-    +'</div>'
-    
+    // --- Pro ---
     +'<div style="background:#fff;border:2px solid '+(isPro?'#1a6fc4':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative">'
     +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
@@ -1465,6 +1460,7 @@ function pPlanos(){
     +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':'⚡ Assinar Pro')+'</button>'
     +'</div>'
 
+    // --- Ultra ---
     +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative">'
     +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
@@ -1477,8 +1473,10 @@ function pPlanos(){
     +'<button onclick="assinarPlano(\'ultra\',this)" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'✅ Plano Atual':'🚀 Assinar Ultra')+'</button>'
     +'</div>'
     
-    +'<img src="/assets/images/assistente-ia-preview.png" alt="Antes e Depois com IA FFinora" style="width:100%;max-width:100%;border-radius:12px;margin-top:24px;display:block"/>';
+    +'</div>'
+    +'<img src="/assets/images/assistente-ia-preview.png" alt="Antes e Depois com IA FFinora" style="width:100%;max-width:100%;border-radius:12px;margin-top:24px;display:block"/>'
     +'<div id="planos-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:12px 16px;font-size:13px;margin-top:16px;width:100%;max-width:480px;margin-left:auto;margin-right:auto"></div>';
+  
   document.getElementById('main-content').innerHTML=html;
 }
 
