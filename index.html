@@ -69,28 +69,13 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .mobile-menu a{font-size:1rem;color:var(--gray-700);font-weight:500;padding:8px 0;border-bottom:1px solid var(--gray-100)}
 
 /* HERO */
-.hero-final {
-  width: 100%;
-  height: 100vh;
+.hero-temp {
+  min-height: 80vh;
   background: #07131d;
-  overflow: hidden;
-  position: relative;
-}
-.hero-final img {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-@media (max-width: 768px) {
-  .hero-final {
-    height: auto;
-  }
-  .hero-final img {
-    height: auto;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 /* BENEFITS */
@@ -292,10 +277,10 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 
 <!-- HERO -->
-<section class="hero-final" id="inicio">
-  <a href="#planos" style="display:block; text-decoration:none;">
-    <img src="/assets/images/Hero Section.jpg" alt="FFinora Hero" loading="eager">
-  </a>
+<section class="hero-temp" id="inicio">
+  <div class="container">
+    <h1>Hero em reconstrução</h1>
+  </div>
 </section>
 
 <!-- BENEFICIOS -->
