@@ -213,13 +213,29 @@ tr:last-child td{border-bottom:none}
             </div>
           </div>
           <h1>Sua vida financeira,<br><span>simplificada.</span></h1>
-          <p>Acesse sua conta e tenha controle total dos seus ativos com intelig├¬ncia real.</p>
+          <p>Acesse sua conta e tenha controle total dos seus ativos com inteligência real.</p>
         </div>
         <div class="login-features">
-          <div class="feat-card"><div class="feat-card-icon">­ƒøí´©Å</div>Seguran├ºa Banc├íria</div>
-          <div class="feat-card"><div class="feat-card-icon">­ƒôê</div>Investimento</div>
-          <div class="feat-card"><div class="feat-card-icon">­ƒôè</div>Relat├│rios Inteligentes</div>
-          <div class="feat-card"><div class="feat-card-icon">­ƒÄ»</div>Metas Financeiras</div>
+          <div class="feat-card">
+            <div class="feat-card-icon">🛡️</div>
+            <strong style="display:block;margin-bottom:2px">Segurança</strong>
+            <span style="font-size:11px;opacity:0.8;font-weight:normal;line-height:1.3;display:block">Proteção bancária de alto nível.</span>
+          </div>
+          <div class="feat-card">
+            <div class="feat-card-icon">📈</div>
+            <strong style="display:block;margin-bottom:2px">Investimento</strong>
+            <span style="font-size:11px;opacity:0.8;font-weight:normal;line-height:1.3;display:block">Acompanhe e otimize seus investimentos.</span>
+          </div>
+          <div class="feat-card">
+            <div class="feat-card-icon">📊</div>
+            <strong style="display:block;margin-bottom:2px">Relatórios Inteligentes</strong>
+            <span style="font-size:11px;opacity:0.8;font-weight:normal;line-height:1.3;display:block">Análises automáticas e personalizadas.</span>
+          </div>
+          <div class="feat-card">
+            <div class="feat-card-icon">🎯</div>
+            <strong style="display:block;margin-bottom:2px">Metas Financeiras</strong>
+            <span style="font-size:11px;opacity:0.8;font-weight:normal;line-height:1.3;display:block">Defina, acompanhe e alcance seus objetivos.</span>
+          </div>
         </div>
       </div>
       <div class="login-right">
@@ -237,7 +253,7 @@ tr:last-child td{border-bottom:none}
         <div class="form-group">
           <div class="form-row"><label>Senha</label><span class="forgot">Esqueci minha senha</span></div>
           <div style="position:relative">
-            <input type="password" id="login-pass" placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" onkeydown="if(event.key==='Enter')doLogin(document.getElementById('btn-login'))" style="padding-right: 40px;"/>
+            <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin(document.getElementById('btn-login'))" style="padding-right: 40px;"/>
             <button type="button" onclick="var p=document.getElementById('login-pass'); var isPass=p.type==='password'; p.type=isPass?'text':'password'; this.innerHTML=isPass?'<svg width=\'18\' height=\'18\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' viewBox=\'0 0 24 24\'><path d=\'M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24\'/><line x1=\'1\' y1=\'1\' x2=\'23\' y2=\'23\'/></svg>':'<svg width=\'18\' height=\'18\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' viewBox=\'0 0 24 24\'><path d=\'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\'/><circle cx=\'12\' cy=\'12\' r=\'3\'/></svg>';" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;justify-content:center;padding:4px;" title="Mostrar senha">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
@@ -490,17 +506,17 @@ function openCadastro(){
     +'<div style="width:54px;height:54px;background:rgba(255,255,255,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M7 18l4-5 4 5 5-9" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
     +'<div style="font-size:13px;font-weight:600;letter-spacing:2px;opacity:.85;margin-bottom:6px">FFINORA</div>'
     +'<h2 style="font-size:22px;font-weight:800;margin-bottom:6px">Crie sua conta</h2>'
-    +'<p style="font-size:13px;opacity:.85">Comece a controlar suas finan├ºas hoje</p>'
+    +'<p style="font-size:13px;opacity:.85">Comece a controlar suas finanças hoje</p>'
     +'</div>'
     +'<div style="padding:28px">'
     +'<div id="cad-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#dc2626"></div>'
     +'<div id="cad-success" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#15803d"></div>'
     +'<div class="form-group"><label>Nome completo</label><input type="text" id="cad-nome" placeholder="Seu nome"/></div>'
     +'<div class="form-group"><label>E-mail</label><input type="email" id="cad-email" placeholder="nome@exemplo.com"/></div>'
-    +'<div class="form-group"><label>Senha (m├¡nimo 6 caracteres)</label><input type="password" id="cad-pass" placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó"/></div>'
-    +'<div class="form-group"><label>Confirmar senha</label><input type="password" id="cad-pass2" placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó"/></div>'
-    +'<button class="btn-login" id="btn-cadastrar" onclick="doCadastro(this)" style="margin-top:8px"><span id="cad-btn-text">Criar conta gr├ítis</span><div class="spinner" id="cad-spinner"></div></button>'
-    +'<button class="btn-cadastro" onclick="document.getElementById(\'cadastro-screen\').remove()">J├í tenho conta</button>'
+    +'<div class="form-group"><label>Senha (mínimo 6 caracteres)</label><input type="password" id="cad-pass" placeholder="••••••••"/></div>'
+    +'<div class="form-group"><label>Confirmar senha</label><input type="password" id="cad-pass2" placeholder="••••••••"/></div>'
+    +'<button class="btn-login" id="btn-cadastrar" onclick="doCadastro(this)" style="margin-top:8px"><span id="cad-btn-text">Criar conta grátis</span><div class="spinner" id="cad-spinner"></div></button>'
+    +'<button class="btn-cadastro" onclick="document.getElementById(\'cadastro-screen\').remove()">Já tenho conta</button>'
     +'</div></div>';
   document.body.appendChild(el);
 }
@@ -1442,23 +1458,23 @@ function pPlanos(){
     +(isPro?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1a6fc4;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Pro</div>'
     +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para controle completo</div>'
-    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 19,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/m├¬s</span></div>'
+    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 19,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>Ô£à Transa├º├Áes ilimitadas</div><div>Ô£à M├║ltiplas contas</div><div>Ô£à Relat├│rios detalhados</div><div style="color:#9ca3af">ÔØî Sem Intelig├¬ncia Artificial</div>'
+    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
     +'</div>'
-    +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'Ô£à Plano Atual':'­ƒöÁ Assinar Pro')+'</button>'
+    +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':'⚡ Assinar Pro')+'</button>'
     +'</div>'
 
     +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative">'
     +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
-    +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">Ô£¿ IA</div>'
+    +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
     +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Ultra</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder m├íximo com IA</div>'
-    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/m├¬s</span></div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder máximo com IA</div>'
+    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>Ô£à Tudo do plano Pro</div><div>Ô£à Intelig├¬ncia Artificial integrada</div><div>Ô£à Conselhos financeiros auto</div><div>Ô£à An├ílise de gastos inteligente</div>'
+    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros automáticos</div><div>✅ Análise de gastos inteligente</div>'
     +'</div>'
-    +'<button onclick="assinarPlano(\'ultra\',this)" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'Ô£à Plano Atual':'­ƒÜÇ Assinar Ultra')+'</button>'
+    +'<button onclick="assinarPlano(\'ultra\',this)" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'✅ Plano Atual':'🚀 Assinar Ultra')+'</button>'
     +'</div>'
     
     +'<img src="/assets/images/assistente-ia-preview.png" alt="Antes e Depois com IA FFinora" style="width:100%;max-width:100%;border-radius:12px;margin-top:24px;display:block"/>';
