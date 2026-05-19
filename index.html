@@ -46,8 +46,8 @@ img{max-width:100%;height:auto}
 .fade-up.visible{opacity:1;transform:translateY(0)}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;transition:all .3s;opacity:0;pointer-events:none;transform:translateY(-10px)}
-nav.scrolled{background:rgba(255,255,255,.97);box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);opacity:1;pointer-events:auto;transform:translateY(0)}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 24px;transition:background .3s,box-shadow .3s}
+nav.scrolled{background:rgba(255,255,255,.97);box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px)}
 .nav-inner{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:72px}
 .nav-logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;color:var(--white)}
 nav.scrolled .nav-logo{color:var(--gray-900)}
@@ -58,9 +58,9 @@ nav.scrolled .nav-links a{color:var(--gray-600)}
 .nav-links a:hover{color:var(--white)}
 nav.scrolled .nav-links a:hover{color:var(--primary)}
 .nav-cta{display:flex;align-items:center;gap:12px}
-.btn-nav-start{padding:10px 22px;font-size:.9rem;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);backdrop-filter:blur(10px)}
-.btn-nav-start:hover{background:rgba(255,255,255,0.2)}
-nav.scrolled .btn-nav-start{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-nav-start{padding:10px 22px;font-size:.9rem;background:var(--primary);color:#fff;border:none;border-radius:50px;font-weight:600;transition:all .3s}
+.btn-nav-start:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 4px 12px rgba(79,70,229,.3)}
+nav.scrolled .btn-nav-start{background:var(--primary);color:#fff}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
 .hamburger span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;transition:all .3s}
 nav.scrolled .hamburger span{background:var(--gray-800)}
@@ -265,7 +265,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <a href="#faq">FAQ</a>
 </div>
 <div class="nav-cta">
-<a href="#planos" class="btn btn-nav-start">Ver planos</a>
+<a href="#planos" class="btn btn-nav-start">Começa Agora</a>
 </div>
 <div class="hamburger" id="hamburger" onclick="toggleMenu()">
 <span></span><span></span><span></span>
