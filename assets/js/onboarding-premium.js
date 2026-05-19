@@ -68,14 +68,10 @@
   // segura por design do Supabase). Assim nao precisamos duplicar nada
   // nem mexer no /login.
   function getSupabaseConfig() {
-    return fetch('/login', { credentials: 'omit' })
-      .then(function (r) { return r.text(); })
-      .then(function (html) {
-        var mUrl = html.match(/SB_URL\s*=\s*['"]([^'"]+)['"]/);
-        var mKey = html.match(/SB_KEY\s*=\s*['"]([^'"]+)['"]/);
-        if (!mUrl || !mKey) throw new Error('Config Supabase nao encontrada');
-        return { url: mUrl[1], key: mKey[1] };
-      });
+    return Promise.resolve({
+      url: 'https://olkrpjewfwvnjzfdqwep.supabase.co',
+      key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sa3JwamV3Znd2bmp6ZmRxd2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTQ4NTMsImV4cCI6MjA5MTE3MDg1M30.pApauik3XsDqdxQbUQIg8LeNjLkOOMF4M6PgJEu3pKU'
+    });
   }
 
   function getSupabaseClient() {

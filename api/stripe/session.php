@@ -40,21 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// --- Carregar .env.local (mesmo padrao do checkout.php) ---------------
-$envFile = __DIR__ . '/../../.env.local';
+// --- Carregar .env.local ou .env (mesmo padrao do checkout.php) ---------------
+$envFileLocal = __DIR__ . '/../../.env.local';
+$envFileProd  = __DIR__ . '/../../.env';
 $env = [];
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            list($name, $value) = explode('=', $line, 2);
-            $env[trim($name)] = trim($value);
+
+foreach ([$envFileLocal, $envFileProd] as $file) {
+    if (file_exists($file)) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $env[trim($name)] = trim($value);
+            }
         }
     }
 }
 
-$stripeSecret = $env['STRIPE_SECRET_KEY'] ?? '';
+$stripeSecret = $env['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? '';
 if (empty($stripeSecret)) {
     http_response_code(500);
     echo json_encode(['error' => 'Stripe nao configurado no servidor.']);

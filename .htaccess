@@ -24,8 +24,8 @@ RedirectMatch 404 /_backup_predeploy
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # /login -> app.html
-    RewriteRule ^login/?$ /app.html [L]
+    # /login -> /#planos
+    RewriteRule ^login/?$ /#planos [NE,R=301,L]
 
     # /app -> app.html
     RewriteRule ^app/?$ /app.html [L]

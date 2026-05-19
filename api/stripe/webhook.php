@@ -1,20 +1,25 @@
 <?php
-$envFile = __DIR__ . '/../../.env.local';
+// --- Carregar .env.local ou .env ─────────────────────────────────────────────
+$envFileLocal = __DIR__ . '/../../.env.local';
+$envFileProd  = __DIR__ . '/../../.env';
 $env = [];
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            list($name, $value) = explode('=', $line, 2);
-            $env[trim($name)] = trim($value);
+
+foreach ([$envFileLocal, $envFileProd] as $file) {
+    if (file_exists($file)) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $env[trim($name)] = trim($value);
+            }
         }
     }
 }
 
-$stripe_webhook_secret = isset($env['STRIPE_WEBHOOK_SECRET']) ? $env['STRIPE_WEBHOOK_SECRET'] : '';
-$supabaseUrl = isset($env['NEXT_PUBLIC_SUPABASE_URL']) ? $env['NEXT_PUBLIC_SUPABASE_URL'] : '';
-$supabaseServiceKey = isset($env['SUPABASE_SERVICE_ROLE_KEY']) ? $env['SUPABASE_SERVICE_ROLE_KEY'] : '';
+$stripe_webhook_secret = $env['STRIPE_WEBHOOK_SECRET']     ?? getenv('STRIPE_WEBHOOK_SECRET')     ?? $_ENV['STRIPE_WEBHOOK_SECRET']     ?? '';
+$supabaseUrl           = $env['NEXT_PUBLIC_SUPABASE_URL']   ?? getenv('NEXT_PUBLIC_SUPABASE_URL')   ?? $_ENV['NEXT_PUBLIC_SUPABASE_URL']   ?? '';
+$supabaseServiceKey    = $env['SUPABASE_SERVICE_ROLE_KEY']  ?? getenv('SUPABASE_SERVICE_ROLE_KEY']  ?? $_ENV['SUPABASE_SERVICE_ROLE_KEY']  ?? '';
 
 $payload = @file_get_contents('php://input');
 $sig_header = isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? $_SERVER['HTTP_STRIPE_SIGNATURE'] : '';
