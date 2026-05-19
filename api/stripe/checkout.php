@@ -27,8 +27,8 @@ foreach ([$envFileLocal, $envFileProd] as $file) {
     }
 }
 
-$stripeSecret = $env['STRIPE_SECRET_KEY']    ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? '';
-$appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? getenv('NEXT_PUBLIC_APP_URL') ?? $_ENV['NEXT_PUBLIC_APP_URL'] ?? 'https://ffinora.com.br';
+$stripeSecret = $env['STRIPE_SECRET_KEY']    ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? $_SERVER['STRIPE_SECRET_KEY'] ?? '';
+$appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? getenv('NEXT_PUBLIC_APP_URL') ?? $_ENV['NEXT_PUBLIC_APP_URL'] ?? $_SERVER['NEXT_PUBLIC_APP_URL'] ?? 'https://ffinora.com.br';
 
 if (empty($stripeSecret)) {
     http_response_code(500);

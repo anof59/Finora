@@ -17,9 +17,9 @@ foreach ([$envFileLocal, $envFileProd] as $file) {
     }
 }
 
-$stripe_webhook_secret = $env['STRIPE_WEBHOOK_SECRET']     ?? getenv('STRIPE_WEBHOOK_SECRET')     ?? $_ENV['STRIPE_WEBHOOK_SECRET']     ?? '';
-$supabaseUrl           = $env['NEXT_PUBLIC_SUPABASE_URL']   ?? getenv('NEXT_PUBLIC_SUPABASE_URL')   ?? $_ENV['NEXT_PUBLIC_SUPABASE_URL']   ?? '';
-$supabaseServiceKey    = $env['SUPABASE_SERVICE_ROLE_KEY']  ?? getenv('SUPABASE_SERVICE_ROLE_KEY']  ?? $_ENV['SUPABASE_SERVICE_ROLE_KEY']  ?? '';
+$stripe_webhook_secret = $env['STRIPE_WEBHOOK_SECRET']     ?? getenv('STRIPE_WEBHOOK_SECRET')     ?? $_ENV['STRIPE_WEBHOOK_SECRET']     ?? $_SERVER['STRIPE_WEBHOOK_SECRET']     ?? '';
+$supabaseUrl           = $env['NEXT_PUBLIC_SUPABASE_URL']   ?? getenv('NEXT_PUBLIC_SUPABASE_URL')   ?? $_ENV['NEXT_PUBLIC_SUPABASE_URL']   ?? $_SERVER['NEXT_PUBLIC_SUPABASE_URL']   ?? '';
+$supabaseServiceKey    = $env['SUPABASE_SERVICE_ROLE_KEY']  ?? getenv('SUPABASE_SERVICE_ROLE_KEY')  ?? $_ENV['SUPABASE_SERVICE_ROLE_KEY']  ?? $_SERVER['SUPABASE_SERVICE_ROLE_KEY']  ?? '';
 
 $payload = @file_get_contents('php://input');
 $sig_header = isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? $_SERVER['HTTP_STRIPE_SIGNATURE'] : '';
