@@ -70,12 +70,31 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 
 /* HERO */
 .hero-temp {
-  min-height: 80vh;
   background: #07131d;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+}
+.hero-image-wrapper {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.hero-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 24px;
+}
+@media(max-width:680px){
+  .hero-image-wrapper {
+    padding: 20px 12px;
+  }
 }
 
 /* BENEFITS */
@@ -276,8 +295,8 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <a href="#faq" onclick="closeMenu()">FAQ</a>
 </div>
 <section class="hero-temp" id="inicio">
-  <div class="container">
-    <h1>Hero em reconstrução</h1>
+  <div class="hero-image-wrapper">
+    <img src="/assets/images/Hero Section.jpg" class="hero-image" alt="FFinora Hero" />
   </div>
 </section>
 
