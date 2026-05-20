@@ -126,8 +126,19 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .solution-point{display:flex;align-items:flex-start;gap:14px}
 .solution-point-check{width:28px;height:28px;border-radius:50%;background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-top:2px;font-weight:900}
 .solution-point p{font-size:.95rem;color:var(--gray-700);line-height:1.6}
-.solution-img{border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
-.solution-img img{width:100%;display:block}
+.solution-img{
+  border-radius:0;
+  overflow:visible;
+  box-shadow:none;
+}
+.controle-real-image{
+  width:100%;
+  max-width:650px;
+  height:auto;
+  display:block;
+  object-fit:contain;
+  margin:0 auto;
+}
 
 /* HOW IT WORKS */
 .how{padding:80px 0;background:var(--gray-50)}
@@ -396,7 +407,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 </div>
 <div class="solution-img fade-up">
-<img src="/assets/images/assistente-ia-preview.png" alt="Assistente IA FFinora" loading="lazy">
+  <img src="/assets/images/controle real.jpg" alt="Controle Real FFinora" class="controle-real-image" loading="lazy">
 </div>
 </div>
 </div>
