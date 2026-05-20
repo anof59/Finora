@@ -90,7 +90,18 @@ async function _getFinancialContext(){
     if (balance < 0) alerts.push('Saldo total negativo');
 
     var metas = [];
-    try { metas = JSON.parse(localStorage.getItem('finora_metas_v2') || '[]'); } catch(e){}
+    try {
+      var rMetas = await sb.from('goals').select('*').eq('user_id', currentUser.id);
+      metas = (rMetas.data || []).map(function(m){
+        return {
+          nome: m.title,
+          alvo: parseFloat(m.target_amount || 0),
+          guardado: parseFloat(m.current_amount || 0),
+          prazo: m.due_date || '',
+          cor: m.color || '#1a6fc4'
+        };
+      });
+    } catch(e){}
 
     var recent = [].concat(all).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); }).slice(0,20);
 

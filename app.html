@@ -435,6 +435,66 @@ function navigate(pageId,el){
 }
 
 /* ===== AUTH ===== */
+async function syncLocalDataToSupabase(userId) {
+  // Sync goals (metas)
+  try {
+    var localGoals = JSON.parse(localStorage.getItem('finora_metas_v2') || '[]');
+    if (localGoals.length > 0) {
+      console.log('Migrando metas locais para o Supabase...');
+      for (var goal of localGoals) {
+        await sb.from('goals').insert({
+          user_id: userId,
+          title: goal.nome || 'Meta sem título',
+          target_amount: parseFloat(goal.alvo || 0),
+          current_amount: parseFloat(goal.guardado || 0),
+          due_date: goal.prazo || null,
+          color: goal.cor || '#1a6fc4'
+        });
+      }
+      localStorage.removeItem('finora_metas_v2');
+      console.log('Metas migradas com sucesso.');
+    }
+  } catch (e) {
+    console.error('Erro ao migrar metas:', e);
+  }
+
+  // Sync investments
+  try {
+    var localInvs = JSON.parse(localStorage.getItem('finora_inv_v2') || '[]');
+    if (localInvs.length > 0) {
+      console.log('Migrando investimentos locais para o Supabase...');
+      for (var inv of localInvs) {
+        await sb.from('investments').insert({
+          user_id: userId,
+          name: inv.nome || 'Investimento sem nome',
+          type: inv.tipo || 'Outro',
+          value: parseFloat(inv.valor || 0),
+          current_value: parseFloat(inv.atual || inv.valor || 0)
+        });
+      }
+      localStorage.removeItem('finora_inv_v2');
+      console.log('Investimentos migrados com sucesso.');
+    }
+  } catch (e) {
+    console.error('Erro ao migrar investimentos:', e);
+  }
+
+  // Sync investor profile
+  try {
+    var localPerfil = localStorage.getItem('finora_perfil_v1');
+    if (localPerfil) {
+      console.log('Migrando perfil de investidor para o Supabase...');
+      await sb.from('profiles').update({
+        investor_profile: localPerfil
+      }).eq('id', userId);
+      localStorage.removeItem('finora_perfil_v1');
+      console.log('Perfil de investidor migrado com sucesso.');
+    }
+  } catch (e) {
+    console.error('Erro ao migrar perfil de investidor:', e);
+  }
+}
+
 async function checkSession(){
   try{
     var r=await sb.auth.getSession();
@@ -442,6 +502,7 @@ async function checkSession(){
       currentUser=r.data.session.user;
       var rp=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
       currentProfile=rp.data;
+      await syncLocalDataToSupabase(currentUser.id);
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').style.display='flex';
       setupApp();
@@ -468,6 +529,7 @@ async function doLogin(btn){
   currentUser=r.data.user;
   var rp=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
   currentProfile=rp.data;
+  await syncLocalDataToSupabase(currentUser.id);
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='flex';
   setupApp();
@@ -644,8 +706,8 @@ async function pDash(){
   var income=all.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
   var expense=all.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
   var balance=income-expense;
-  var r2=await sb.from('investments').select('value').eq('user_id',currentUser.id);
-  var invested=(r2.data||[]).reduce(function(s,i){return s+parseFloat(i.value);},0);
+  var r2=await sb.from('investments').select('value,current_value').eq('user_id',currentUser.id);
+  var invested=(r2.data||[]).reduce(function(s,i){return s+parseFloat(i.current_value||i.value||0);},0);
   var months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   var incM=Array(12).fill(0),expM=Array(12).fill(0);
   all.forEach(function(t){
@@ -726,25 +788,22 @@ async function saveTx(){
 function closeModal(id){var m=document.getElementById(id);if(m)m.remove();}
 function mkModal(id,inner){
   closeModal(id);
-  var el=document.createElement('div');el.id=id;el.className='modal-overlay';
-  el.innerHTML='<div class="modal-box">'+inner+'</div>';
-  el.onclick=function(e){if(e.target===el)el.remove();};
-  document.body.appendChild(el);
-}
-
-/* ===== METAS ===== */
-var METAS_KEY='finora_metas_v2';
-function metasLoad(){try{return JSON.parse(localStorage.getItem(METAS_KEY)||'[]');}catch(e){return[];}}
-function metasSave(d){localStorage.setItem(METAS_KEY,JSON.stringify(d));}
+  var el=document.createElement('div');el.id=id;el.className/* ===== METAS ===== */
 async function pMetas(){
-  var metas=metasLoad();
+  var metas = [];
+  try {
+    var r = await sb.from('goals').select('*').eq('user_id', currentUser.id);
+    metas = r.data || [];
+  } catch(e) {
+    console.error(e);
+  }
   var sobra=0;
   try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobra=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
   
   var html=`<div class="page-header-row"><div class="page-header"><h1>Metas Financeiras 🎯</h1><p>Defina, gerencie e alcance seus objetivos</p></div><button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button></div>`;
   
   var dicas = [];
-  var metasConcluidas = metas.filter(m => m.guardado >= m.alvo && m.alvo > 0).length;
+  var metasConcluidas = metas.filter(m => parseFloat(m.current_amount || 0) >= parseFloat(m.target_amount || 0) && parseFloat(m.target_amount || 0) > 0).length;
   if(metasConcluidas > 0) dicas.push({i:'🏆', txt:`Você já atingiu <strong>${metasConcluidas} meta(s)</strong>! Selo de Disciplina Financeira desbloqueado.`, cor:'#d97706', bg:'#fffbeb', br:'#f59e0b'});
   
   if(sobra > 0) dicas.push({i:'💡', txt:`Seu saldo livre do mês é <strong>${fmt(sobra)}</strong>. Distribuindo esse valor nas suas metas, você acelera suas conquistas.`, cor:'#15803d', bg:'#f0fdf4', br:'#16a34a'});
@@ -752,8 +811,10 @@ async function pMetas(){
 
   var alerts = [];
   metas.forEach(m => {
-    var pct = m.alvo>0 ? Math.min(100, Math.round(m.guardado/m.alvo*100)) : 0;
-    if(pct >= 80 && pct < 100) alerts.push(`A meta <strong>${m.nome}</strong> está ${pct}% concluída! Falta muito pouco.`);
+    var alvo = parseFloat(m.target_amount || 0);
+    var guardado = parseFloat(m.current_amount || 0);
+    var pct = alvo>0 ? Math.min(100, Math.round(guardado/alvo*100)) : 0;
+    if(pct >= 80 && pct < 100) alerts.push(`A meta <strong>${m.title}</strong> está ${pct}% concluída! Falta muito pouco.`);
   });
   if(alerts.length) dicas.push({i:'🔥', txt: alerts.join('<br>'), cor:'#c2410c', bg:'#ffedd5', br:'#f97316'});
 
@@ -769,14 +830,14 @@ async function pMetas(){
     html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:60px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)"><div style="font-size:48px;margin-bottom:14px">🚀</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Você ainda não tem metas</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">Defina um objetivo, prazo e deixe a IA ajudar você a chegar lá.</div><button class="btn-primary" onclick="openMetaModal()" style="padding:10px 20px;font-size:14px">Criar minha primeira meta</button></div>`;
   } else {
     html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:16px;">`;
-    metas.forEach((m,i)=>{
-      var alvo=parseFloat(m.alvo)||0, guardado=parseFloat(m.guardado)||0;
+    metas.forEach((m)=>{
+      var alvo=parseFloat(m.target_amount)||0, guardado=parseFloat(m.current_amount)||0;
       var pct=alvo>0?Math.min(100,Math.round(guardado/alvo*100)):0;
       var falta=Math.max(0,alvo-guardado);
-      var cor=m.cor||'#1a6fc4';
+      var cor=m.color||'#1a6fc4';
       var sug = '';
-      if(m.prazo) {
-         var hoje = new Date(); var dPrazo = new Date(m.prazo);
+      if(m.due_date) {
+         var hoje = new Date(); var dPrazo = new Date(m.due_date);
          var meses = (dPrazo.getFullYear() - hoje.getFullYear())*12 + (dPrazo.getMonth() - hoje.getMonth());
          if(meses > 0 && falta > 0) sug = `Guarde <strong>${fmt(falta/meses)}</strong>/mês`;
          else if(falta > 0) sug = `⚠️ Prazo se esgotando!`;
@@ -787,8 +848,8 @@ async function pMetas(){
         <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${cor}"></div>
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
           <div>
-            <div style="font-size:16px;font-weight:700;color:#0d1b2e">${m.nome}</div>
-            ${m.prazo?`<div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo: ${fmtD(m.prazo)}</div>`:''}
+            <div style="font-size:16px;font-weight:700;color:#0d1b2e">${m.title}</div>
+            ${m.due_date?`<div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo: ${fmtD(m.due_date)}</div>`:''}
           </div>
           <span style="background:${cor}15;color:${cor};font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px">${pct}%</span>
         </div>
@@ -805,8 +866,8 @@ async function pMetas(){
         ${sug ? `<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#475569;margin-bottom:16px;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>${sug}</div>` : ''}
 
         <div style="display:flex;gap:8px;border-top:1px solid #f3f4f6;padding-top:16px">
-          <button onclick="openAddValorMeta(${i})" style="flex:1;padding:8px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Progresso</button>
-          <button onclick="deleteMeta(${i})" style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+          <button onclick="openAddValorMeta('${m.id}')" style="flex:1;padding:8px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Progresso</button>
+          <button onclick="deleteMeta('${m.id}')" style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
         </div>
       </div>`;
     });
@@ -829,38 +890,79 @@ function openMetaModal(){
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('meta-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveMeta()">Criar Meta</button></div>`);
 }
 function selectMetaCor(el,cor){document.querySelectorAll('#meta-cores div').forEach(d=>d.style.borderColor='transparent');el.style.borderColor='#111827';document.getElementById('m-cor').value=cor;}
-function saveMeta(){
+async function saveMeta(){
   var nome=(document.getElementById('m-nome').value||'').trim();
   var alvo=parseFloat(document.getElementById('m-alvo').value||0);
   var guardado=parseFloat(document.getElementById('m-guardado').value||0);
-  var prazo=document.getElementById('m-prazo').value;
+  var prazo=document.getElementById('m-prazo').value || null;
   var cor=document.getElementById('m-cor').value;
   if(!nome||!alvo){alert('Informe nome e valor alvo.');return;}
-  var d=metasLoad(); d.push({nome:nome,alvo:alvo,guardado:guardado,prazo:prazo,cor:cor}); metasSave(d); closeModal('meta-modal'); pMetas();
+  try {
+    var r = await sb.from('goals').insert({
+      user_id: currentUser.id,
+      title: nome,
+      target_amount: alvo,
+      current_amount: guardado,
+      due_date: prazo,
+      color: cor
+    });
+    if (r.error) throw r.error;
+    closeModal('meta-modal');
+    pMetas();
+  } catch(e) {
+    alert('Erro ao salvar meta: ' + e.message);
+  }
 }
-function deleteMeta(i){if(!confirm('Tem certeza que deseja excluir esta meta?'))return;var d=metasLoad();d.splice(i,1);metasSave(d);pMetas();}
-function openAddValorMeta(i){
-  var m=metasLoad()[i];
-  mkModal('addval-modal',`<div class="modal-title">Progresso — ${m.nome}</div>
-    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Faltam ${fmt(m.alvo - m.guardado)} para concluir sua meta.</div>
-    <div class="modal-field"><label>Novo Aporte (R$)</label><input type="number" id="av-val" placeholder="0.00"/></div>
-    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('addval-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAddValorMeta(${i})">Adicionar Valor</button></div>`);
+async function deleteMeta(id){
+  if(!confirm('Tem certeza que deseja excluir esta meta?'))return;
+  try {
+    var r = await sb.from('goals').delete().eq('id', id);
+    if (r.error) throw r.error;
+    pMetas();
+  } catch(e) {
+    alert('Erro ao excluir meta: ' + e.message);
+  }
 }
-function saveAddValorMeta(i){var v=parseFloat(document.getElementById('av-val').value||0);if(!v){alert('Informe o valor do aporte.');return;}var d=metasLoad();d[i].guardado=parseFloat(d[i].guardado||0)+v;metasSave(d);closeModal('addval-modal');pMetas();}
-
-/* ===== INVESTIMENTOS ===== */
-var INV_KEY='finora_inv_v2';
-var PERFIL_KEY='finora_perfil_v1';
-function invLoad(){try{return JSON.parse(localStorage.getItem(INV_KEY)||'[]');}catch(e){return[];}}
-function invSave(d){localStorage.setItem(INV_KEY,JSON.stringify(d));}
-function perfilLoad(){return localStorage.getItem(PERFIL_KEY)||'Moderado';}
-function perfilSave(p){localStorage.setItem(PERFIL_KEY,p);}
-
+async function openAddValorMeta(id){
+  try {
+    var r = await sb.from('goals').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var m = r.data;
+    var alvo = parseFloat(m.target_amount || 0);
+    var guardado = parseFloat(m.current_amount || 0);
+    mkModal('addval-modal',`<div class="modal-title">Progresso — ${m.title}</div>
+      <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Faltam ${fmt(alvo - guardado)} para concluir sua meta.</div>
+      <div class="modal-field"><label>Novo Aporte (R$)</label><input type="number" id="av-val" placeholder="0.00"/></div>
+      <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('addval-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAddValorMeta('${id}')">Adicionar Valor</button></div>`);
+  } catch(e) {
+    alert('Erro ao carregar meta: ' + e.message);
+  }
+}
+async function saveAddValorMeta(id){
+  var v=parseFloat(document.getElementById('av-val').value||0);
+  if(!v){alert('Informe o valor do aporte.');return;}
+  try {
+    var r = await sb.from('goals').select('current_amount').eq('id', id).single();
+    if (r.error) throw r.error;
+    var current = parseFloat(r.data.current_amount || 0);
+    var r2 = await sb.from/* ===== INVESTIMENTOS ===== */
 async function pInv(){
-  var invs=invLoad();
-  var perfil=perfilLoad();
-  var total=invs.reduce((s,i)=>s+parseFloat(i.valor||0),0);
-  var lucroPrej = invs.reduce((s,i)=>s+(parseFloat(i.atual||i.valor)-parseFloat(i.valor)), 0);
+  var invs = [];
+  var perfil = 'Moderado';
+  try {
+    var r = await sb.from('investments').select('*').eq('user_id', currentUser.id);
+    invs = r.data || [];
+    
+    var rp = await sb.from('profiles').select('investor_profile').eq('id', currentUser.id).single();
+    if (rp.data && rp.data.investor_profile) {
+      perfil = rp.data.investor_profile;
+    }
+  } catch(e) {
+    console.error(e);
+  }
+  
+  var total=invs.reduce((s,i)=>s+parseFloat(i.value||0),0);
+  var lucroPrej = invs.reduce((s,i)=>s+(parseFloat(i.current_value||i.value)-parseFloat(i.value)), 0);
   var patrimonyAtual = total + lucroPrej;
   var rentabilidade = total > 0 ? (lucroPrej / total) * 100 : 0;
   
@@ -946,21 +1048,21 @@ async function pInv(){
     html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px"><div style="font-size:32px;margin-bottom:10px">📈</div><div style="font-size:14px;font-weight:700;margin-bottom:16px">Você ainda não possui investimentos cadastrados.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
   } else {
     html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:12px;margin-bottom:30px">`;
-    invs.forEach((inv,i)=>{
-      var ic=icones[inv.tipo]||'💼'; var cor=cores[inv.tipo]||'#1a6fc4';
-      var valor=parseFloat(inv.valor||0); var atual=parseFloat(inv.atual||inv.valor||0);
+    invs.forEach((inv)=>{
+      var ic=icones[inv.type]||'💼'; var cor=cores[inv.type]||'#1a6fc4';
+      var valor=parseFloat(inv.value||0); var atual=parseFloat(inv.current_value||inv.value||0);
       var variacao = atual - valor;
       var pct = valor>0 ? (variacao/valor)*100 : 0;
       var corVar = variacao>=0 ? '#16a34a' : '#dc2626';
       var iconVar = variacao>=0 ? '▲' : '▼';
       
       html+=`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);position:relative">
-        <button onclick="deleteInv(${i})" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px">×</button>
+        <button onclick="deleteInv('${inv.id}')" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:18px">×</button>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
           <div style="width:40px;height:40px;border-radius:10px;background:${cor}15;display:flex;align-items:center;justify-content:center;font-size:20px">${ic}</div>
           <div>
-            <div style="font-size:14px;font-weight:700;color:#0d1b2e;padding-right:20px">${inv.nome}</div>
-            <div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:2px">${inv.tipo}</div>
+            <div style="font-size:14px;font-weight:700;color:#0d1b2e;padding-right:20px">${inv.name}</div>
+            <div style="font-size:11px;color:#6b7280;font-weight:600;margin-top:2px">${inv.type}</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
@@ -975,7 +1077,7 @@ async function pInv(){
           <span style="font-size:11px;color:#6b7280">Lucro/Prejuízo:</span>
           <strong style="font-size:13px;color:${corVar}">${iconVar} ${fmt(Math.abs(variacao))} (${pct.toFixed(2)}%)</strong>
         </div>
-        <button onclick="openAtualizarInv(${i})" style="width:100%;margin-top:12px;padding:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Atualizar Saldo</button>
+        <button onclick="openAtualizarInv('${inv.id}')" style="width:100%;margin-top:12px;padding:8px;background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Atualizar Saldo</button>
       </div>`;
     });
     html += `</div>`;
@@ -1108,8 +1210,12 @@ function calcSimulacaoV2(){
   allCharts.push(simChart);
 }
 
-function openPerfilModal(){
-  var p = perfilLoad();
+async function openPerfilModal(){
+  var p = 'Moderado';
+  try {
+    var rp = await sb.from('profiles').select('investor_profile').eq('id', currentUser.id).single();
+    if (rp.data && rp.data.investor_profile) p = rp.data.investor_profile;
+  } catch(e) {}
   mkModal('perfil-modal',`<div class="modal-title">Seu Perfil de Investidor</div>
     <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Defina seu perfil para receber recomendações inteligentes de IA mais adequadas.</div>
     <div class="modal-field"><label>Selecione</label>
@@ -1121,10 +1227,16 @@ function openPerfilModal(){
     </div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('perfil-modal')">Cancelar</button><button class="btn-modal-save" onclick="savePerfil()">Salvar Perfil</button></div>`);
 }
-function savePerfil(){
-  perfilSave(document.getElementById('p-perfil').value);
-  closeModal('perfil-modal');
-  pInv();
+async function savePerfil(){
+  var p = document.getElementById('p-perfil').value;
+  try {
+    var r = await sb.from('profiles').update({ investor_profile: p }).eq('id', currentUser.id);
+    if (r.error) throw r.error;
+    closeModal('perfil-modal');
+    pInv();
+  } catch(e) {
+    alert('Erro ao salvar perfil: ' + e.message);
+  }
 }
 
 function openInvModal(){
@@ -1140,27 +1252,63 @@ function openInvModal(){
     </div>
     <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveInv()">Adicionar à Carteira</button></div>`);
 }
-function saveInv(){
+async function saveInv(){
   var nome=(document.getElementById('iv-nome').value||'').trim();
   var tipo=document.getElementById('iv-tipo').value;
   var valor=parseFloat(document.getElementById('iv-valor').value||0);
   if(!nome||!valor){alert('Informe nome e valor.');return;}
-  var d=invLoad(); d.push({nome:nome,tipo:tipo,valor:valor,atual:valor}); invSave(d); closeModal('inv-modal'); pInv();
+  try {
+    var r = await sb.from('investments').insert({
+      user_id: currentUser.id,
+      name: nome,
+      type: tipo,
+      value: valor,
+      current_value: valor
+    });
+    if (r.error) throw r.error;
+    closeModal('inv-modal');
+    pInv();
+  } catch(e) {
+    alert('Erro ao salvar investimento: ' + e.message);
+  }
 }
-function deleteInv(i){if(!confirm('Deseja remover este ativo da carteira?'))return;var d=invLoad();d.splice(i,1);invSave(d);pInv();}
-function openAtualizarInv(i){
-  var inv = invLoad()[i];
-  var atual = parseFloat(inv.atual||inv.valor||0);
-  mkModal('att-inv-modal', `<div class="modal-title">Atualizar Saldo do Ativo</div>
-    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Ativo: <strong>${inv.nome}</strong></div>
-    <div class="modal-field"><label>Saldo Atualizado (R$)</label><input type="number" id="att-iv-val" value="${atual}"/></div>
-    <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('att-inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAtualizarInv(${i})">Salvar</button></div>`);
+async function deleteInv(id){
+  if(!confirm('Deseja remover este ativo da carteira?'))return;
+  try {
+    var r = await sb.from('investments').delete().eq('id', id);
+    if (r.error) throw r.error;
+    pInv();
+  } catch(e) {
+    alert('Erro ao excluir investimento: ' + e.message);
+  }
 }
-function saveAtualizarInv(i){
+async function openAtualizarInv(id){
+  try {
+    var r = await sb.from('investments').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var inv = r.data;
+    var atual = parseFloat(inv.current_value||inv.value||0);
+    mkModal('att-inv-modal', `<div class="modal-title">Atualizar Saldo do Ativo</div>
+      <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Ativo: <strong>${inv.name}</strong></div>
+      <div class="modal-field"><label>Saldo Atualizado (R$)</label><input type="number" id="att-iv-val" value="${atual}"/></div>
+      <div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal('att-inv-modal')">Cancelar</button><button class="btn-modal-save" onclick="saveAtualizarInv('${id}')">Salvar</button></div>`);
+  } catch(e) {
+    alert('Erro ao carregar investimento: ' + e.message);
+  }
+}
+async function saveAtualizarInv(id){
   var val = parseFloat(document.getElementById('att-iv-val').value);
   if(isNaN(val)){alert('Valor inválido');return;}
-  var d=invLoad(); d[i].atual = val; invSave(d); closeModal('att-inv-modal'); pInv();
-}
+  try {
+    var r = await sb.from('investments').update({ current_value: val }).eq('id', id);
+    if (r.error) throw r.error;
+    closeModal('att-inv-modal');
+    pInv();
+  } catch(e) {
+    alert('Erro ao atualizar saldo: ' + e.message);
+  }
+
+
 
 /* ===== ANÁLISE ===== */
 async function pAnalise(){

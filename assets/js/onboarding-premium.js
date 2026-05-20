@@ -50,6 +50,7 @@
 
   // ---- 3. Email da Stripe vive APENAS aqui dentro ----------------------
   var signupEmail = null;       // <- nao vai pro DOM, nao vai pro hidden
+  var stripeSessionData = null; // dados completos da sessao Stripe
   var supabaseClient = null;    // cliente Supabase carregado on-demand
 
   // Carrega o SDK do Supabase via CDN (mesmo padrao do /login)
@@ -99,6 +100,7 @@
       })
       .then(function (data) {
         if (!data || !data.email) throw new Error('Sessao Stripe sem email');
+        stripeSessionData = data;
         signupEmail = String(data.email).trim().toLowerCase();
         return signupEmail;
       });
@@ -141,7 +143,7 @@
             email: email,
             password: pass1,
             options: {
-              emailRedirectTo: window.location.origin + '/app.html'
+              emailRedirectTo: window.location.origin + '/app'
             }
           });
         });
@@ -155,16 +157,38 @@
               return sb.auth.signInWithPassword({ email: signupEmail, password: pass1 });
             }).then(function (login) {
               if (login.error) throw new Error(login.error.message);
-              return { _logged: true };
+              return login;
             });
           }
           throw new Error(msg);
         }
         return res;
       })
+      .then(function (res) {
+        // Atualiza perfil com os dados do Stripe pagos
+        var user = res.data ? res.data.user : (res.user || null);
+        if (!user && res.session && res.session.user) user = res.session.user;
+        
+        if (user && stripeSessionData) {
+          return getSupabaseClient().then(function (sb) {
+            return sb.from('profiles').update({
+              plan: stripeSessionData.plan || 'pro',
+              stripe_customer_id: stripeSessionData.customer_id,
+              stripe_subscription_id: stripeSessionData.subscription_id,
+              subscription_status: 'active'
+            }).eq('id', user.id).then(function (upd) {
+              if (upd.error) {
+                console.error('Erro ao atualizar perfil com dados Stripe:', upd.error.message);
+              }
+              return res;
+            });
+          });
+        }
+        return res;
+      })
       .then(function () {
         setMsg('success', 'Conta ativada! Redirecionando...');
-        setTimeout(function () { window.location.href = '/app.html'; }, 800);
+        setTimeout(function () { window.location.href = '/app'; }, 800);
       })
       .catch(function (err) {
         submit.disabled = false;

@@ -744,7 +744,7 @@ let _plan='pro';
 function openModal(plan){
 _plan=plan;
 const isPro=plan==='pro';
-document.getElementById('modalIcon').textContent=isPro?'&#128200;':'&#129504;';
+document.getElementById('modalIcon').textContent=isPro?'📈':'🧠';
 document.getElementById('modalTitle').textContent=isPro?'Assinar plano PRO':'Assinar plano ULTRA';
 document.getElementById('modalDesc').textContent='Informe seu e-mail para continuar para o checkout seguro Stripe.';
 const badge=document.getElementById('modalBadge');

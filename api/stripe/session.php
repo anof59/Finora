@@ -40,34 +40,51 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// --- Carregar .env.local ou .env (mesmo padrao do checkout.php) ---------------
-$envFileLocal = __DIR__ . '/../../.env.local';
-$envFileProd  = __DIR__ . '/../../.env';
+// --- Carregar Variáveis de Ambiente (Robusto) -------------------------------
 $env = [];
 
-foreach ([$envFileLocal, $envFileProd] as $file) {
+// 1. Tentar carregar do secrets.php (arquivo visível e seguro via PHP)
+$secretsFile = __DIR__ . '/../../secrets.php';
+if (file_exists($secretsFile)) {
+    $secrets = include($secretsFile);
+    if (is_array($secrets)) {
+        $env = array_merge($env, $secrets);
+    }
+}
+
+// 2. Tentar carregar de arquivos .env.local e .env tradicional
+$envPaths = [
+    __DIR__ . '/../../.env.local',
+    __DIR__ . '/../../.env',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env.local' : '',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env' : '',
+];
+
+foreach (array_unique(array_filter($envPaths)) as $file) {
     if (file_exists($file)) {
         $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             if (strpos(trim($line), '#') === 0) continue;
             if (strpos($line, '=') !== false) {
                 list($name, $value) = explode('=', $line, 2);
-                $env[trim($name)] = trim($value);
+                $val = trim($value);
+                $val = preg_replace('/^[\'"]|[\'"]$/', '', $val); // Remove aspas
+                $env[trim($name)] = $val;
             }
         }
     }
 }
 
-$stripeSecret = $env['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? '';
+$stripeSecret = $env['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY') ?? $_ENV['STRIPE_SECRET_KEY'] ?? $_SERVER['STRIPE_SECRET_KEY'] ?? '';
 if (empty($stripeSecret)) {
     http_response_code(500);
-    echo json_encode(['error' => 'Stripe nao configurado no servidor.']);
+    echo json_encode(['error' => 'Stripe não configurado no servidor. Certifique-se de que o arquivo .env ou secrets.php está configurado na raiz do servidor.']);
     exit;
 }
 
 // --- Validar session_id ------------------------------------------------
 $sessionId = isset($_GET['session_id']) ? trim($_GET['session_id']) : '';
-if ($sessionId === '' || !preg_match('/^cs_(test|live)_[A-Za-z0-9]+$/', $sessionId)) {
+if ($sessionId === '' || !preg_match('/^cs_(test|live)_[A-Za-z0-9_-]+$/', $sessionId)) {
     http_response_code(400);
     echo json_encode(['error' => 'session_id invalido ou ausente.']);
     exit;

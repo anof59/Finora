@@ -9,19 +9,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// ── Carregar .env.local ou .env ─────────────────────────────────────────────
-$envFileLocal = __DIR__ . '/../../.env.local';
-$envFileProd  = __DIR__ . '/../../.env';
+// ── Carregar Variáveis de Ambiente (Robusto) ───────────────────────────────
 $env = [];
 
-foreach ([$envFileLocal, $envFileProd] as $file) {
+// 1. Tentar carregar do secrets.php (arquivo visível e seguro via PHP)
+$secretsFile = __DIR__ . '/../../secrets.php';
+if (file_exists($secretsFile)) {
+    $secrets = include($secretsFile);
+    if (is_array($secrets)) {
+        $env = array_merge($env, $secrets);
+    }
+}
+
+// 2. Tentar carregar de arquivos .env.local e .env tradicional
+$envPaths = [
+    __DIR__ . '/../../.env.local',
+    __DIR__ . '/../../.env',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env.local' : '',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env' : '',
+];
+
+foreach (array_unique(array_filter($envPaths)) as $file) {
     if (file_exists($file)) {
         $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             if (strpos(trim($line), '#') === 0) continue;
             if (strpos($line, '=') !== false) {
                 list($name, $value) = explode('=', $line, 2);
-                $env[trim($name)] = trim($value);
+                $val = trim($value);
+                $val = preg_replace('/^[\'"]|[\'"]$/', '', $val); // Remove aspas
+                $env[trim($name)] = $val;
             }
         }
     }
@@ -32,7 +49,7 @@ $appUrl       = $env['NEXT_PUBLIC_APP_URL']  ?? getenv('NEXT_PUBLIC_APP_URL') ??
 
 if (empty($stripeSecret)) {
     http_response_code(500);
-    echo json_encode(['error' => 'Stripe não configurado no servidor.']);
+    echo json_encode(['error' => 'Stripe não configurado no servidor. Certifique-se de que o arquivo .env ou secrets.php está configurado na raiz do servidor.']);
     exit;
 }
 
@@ -80,7 +97,7 @@ $planFinal = $plan ?: 'pro';
 
 // success_url depende da origem
 if ($source === 'landing') {
-    $successUrl = 'https://ffinora.com.br/obrigado?payment=success&plan=' . urlencode($planFinal);
+    $successUrl = rtrim($appUrl, '/') . '/obrigado?payment=success&plan=' . urlencode($planFinal);
 } else {
     $successUrl = $appUrl . '?session_id={CHECKOUT_SESSION_ID}&plan=' . urlencode($planFinal);
 }
