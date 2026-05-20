@@ -126,18 +126,42 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .solution-point{display:flex;align-items:flex-start;gap:14px}
 .solution-point-check{width:28px;height:28px;border-radius:50%;background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-top:2px;font-weight:900}
 .solution-point p{font-size:.95rem;color:var(--gray-700);line-height:1.6}
+.container-controle-real{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:60px;
+  margin-top:48px;
+}
+.container-controle-real > div{
+  flex:1;
+}
 .solution-img{
   border-radius:0;
   overflow:visible;
   box-shadow:none;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 .controle-real-image{
   width:100%;
-  max-width:650px;
+  max-width:820px;
   height:auto;
   display:block;
   object-fit:contain;
-  margin:0 auto;
+}
+@media(max-width:768px){
+  .container-controle-real{
+    flex-direction:column;
+    text-align:center;
+  }
+  .container-controle-real > div{
+    width:100%;
+  }
+  .controle-real-image{
+    max-width:100%;
+  }
 }
 
 /* HOW IT WORKS */
@@ -394,7 +418,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <!-- SOLUCAO -->
 <section class="solution" id="solucao">
 <div class="container">
-<div class="solution-grid">
+<div class="container-controle-real">
 <div class="solution-text fade-up">
 <span class="section-tag">A solucao</span>
 <h2 class="section-title">O FFinora transforma caos financeiro em controle real</h2>
