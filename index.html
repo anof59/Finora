@@ -69,33 +69,27 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .mobile-menu a{font-size:1rem;color:var(--gray-700);font-weight:500;padding:8px 0;border-bottom:1px solid var(--gray-100)}
 
 /* HERO */
-.hero-section{
-    width:100%;
-    background:#020b14;
-    padding-top:90px;
-    padding-bottom:40px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+.hero-section {
+  width: 100%;
+  background: #020b14;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 0 40px;
+  overflow: hidden;
 }
 
-.hero-image-wrapper{
-    width:100%;
-    max-width:1600px;
-    margin:0 auto;
-}
-
-.hero-image{
-    width:100%;
-    height:auto;
-    display:block;
-    object-fit:contain;
+.hero-image {
+  width: 100%;
+  max-width: 1600px;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 @media(max-width:768px){
   .hero-section {
-    padding-top:70px;
-    padding-bottom:20px;
+    padding: 60px 0 20px;
   }
 }
 
@@ -297,9 +291,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <a href="#faq" onclick="closeMenu()">FAQ</a>
 </div>
 <section class="hero-section" id="inicio">
-  <div class="hero-image-wrapper">
-    <img src="/assets/images/Hero Section.png" alt="FFinora Hero" class="hero-image">
-  </div>
+  <img src="/assets/images/Hero Section.png" alt="FFinora Hero" class="hero-image">
 </section>
 
 <!-- BENEFICIOS -->
