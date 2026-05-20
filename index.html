@@ -186,8 +186,30 @@ nav.scrolled .hamburger span{background:var(--gray-800)}
 .ba-item:last-child{border-bottom:none}
 .ba-item-icon{font-size:1.2rem;width:28px;text-align:center}
 .ba-item p{font-size:.92rem;font-weight:500;color:var(--gray-800)}
-.ba-preview{grid-column:1/-1;margin-top:16px;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
-.ba-preview img{width:100%;display:block}
+.preview-dashboard-wrapper{
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+margin-top:40px;
+}
+
+.preview-dashboard-image{
+width:100%;
+max-width:1200px;
+height:auto;
+border-radius:24px;
+display:block;
+object-fit:contain;
+box-shadow:0 20px 60px rgba(0,0,0,0.18);
+}
+
+@media(max-width:768px){
+.preview-dashboard-image{
+max-width:100%;
+border-radius:18px;
+}
+}
 
 /* FIN INTELIGENTE */
 .fin{padding:80px 0;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);position:relative;overflow:hidden}
@@ -496,8 +518,8 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <div class="ba-item"><span class="ba-item-icon">&#129504;</span><p>Inteligencia financeira com IA</p></div>
 </div>
 </div>
-<div class="ba-preview fade-up" style="margin-top:40px">
-<img src="/assets/images/upgrade-ultra-preview.png" alt="Preview Dashboard FFinora" loading="lazy">
+<div class="preview-dashboard-wrapper fade-up">
+  <img src="/assets/images/antes e depois.png" alt="Preview Dashboard FFinora" class="preview-dashboard-image" loading="lazy">
 </div>
 </div>
 </section>
