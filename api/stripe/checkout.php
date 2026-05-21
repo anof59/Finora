@@ -12,16 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ── Carregar Variáveis de Ambiente (Robusto) ───────────────────────────────
 $env = [];
 
-// 1. Tentar carregar do secrets.php (arquivo visível e seguro via PHP)
-$secretsFile = __DIR__ . '/../../secrets.php';
-if (file_exists($secretsFile)) {
-    $secrets = include($secretsFile);
-    if (is_array($secrets)) {
-        $env = array_merge($env, $secrets);
+// Caminhos possíveis para o secrets.php (suporte Hostinger e outros hosts)
+$secretsPaths = [
+    __DIR__ . '/../../secrets.php',                                                         // Caminho relativo via __DIR__
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT']))
+        ? $_SERVER['DOCUMENT_ROOT'] . '/secrets.php' : '',                                  // Caminho via DOCUMENT_ROOT (Hostinger)
+    dirname(dirname(__DIR__)) . '/secrets.php',                                             // Fallback dirname duplo
+];
+
+foreach (array_unique(array_filter($secretsPaths)) as $secretsFile) {
+    if (file_exists($secretsFile)) {
+        $secrets = include($secretsFile);
+        if (is_array($secrets)) {
+            $env = array_merge($env, $secrets);
+            break; // Encontrou e carregou — parar busca
+        }
     }
 }
 
-// 2. Tentar carregar de arquivos .env.local e .env tradicional
+// 2. Tentar carregar de arquivos .env.local e .env tradicional (fallback adicional)
 $envPaths = [
     __DIR__ . '/../../.env.local',
     __DIR__ . '/../../.env',
