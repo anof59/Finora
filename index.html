@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="FFinora - Organize gastos, acompanhe metas e tenha clareza total da sua vida financeira com inteligencia artificial.">
 <title>FFinora - Controle Financeiro com IA</title>
-<link rel="icon" type="image/jpeg" href="/assets/images/favicon.jpg">
-<link rel="apple-touch-icon" href="/assets/images/favicon.jpg">
+<link rel="icon" type="image/jpeg" href="assets/images/favicon.jpg">
+<link rel="apple-touch-icon" href="assets/images/favicon.jpg">
 <meta name="theme-color" content="#07131d">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -348,7 +348,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <a href="#faq" onclick="closeMenu()">FAQ</a>
 </div>
 <section class="hero-section" id="inicio">
-  <img src="/assets/images/Hero Section.png" alt="FFinora Hero" class="hero-image">
+  <img src="assets/images/Hero Section.png" alt="FFinora Hero" class="hero-image">
 </section>
 
 <!-- BENEFICIOS -->
@@ -453,7 +453,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 </div>
 <div class="solution-img fade-up">
-  <img src="/assets/images/controle real.jpg" alt="Controle Real FFinora" class="controle-real-image" loading="lazy">
+  <img src="assets/images/controle real.jpg" alt="Controle Real FFinora" class="controle-real-image" loading="lazy">
 </div>
 </div>
 </div>
@@ -519,7 +519,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 </div>
 </div>
 <div class="preview-dashboard-wrapper fade-up">
-  <img src="/assets/images/antes e depois.png" alt="Preview Dashboard FFinora" class="preview-dashboard-image" loading="lazy">
+  <img src="assets/images/antes e depois.png" alt="Preview Dashboard FFinora" class="preview-dashboard-image" loading="lazy">
 </div>
 </div>
 </section>
@@ -688,7 +688,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <div class="cta-final-btns fade-up">
 <button class="btn" style="background:white;color:var(--primary);font-weight:700" onclick="openModal('pro')">Assinar PRO &mdash; R$ 19,90/mes</button>
 <button class="btn btn-ghost" onclick="openModal('ultra')">Assinar ULTRA &mdash; R$ 39,90/mes &#11088;</button>
-<a href="/login" class="btn btn-ghost">Ja tenho conta &rarr;</a>
+<a href="app.html" class="btn btn-ghost">Ja tenho conta &rarr;</a>
 </div>
 </div>
 </section>
@@ -697,7 +697,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <footer>
 <div class="footer-logo">FFinora</div>
 <p>Controle financeiro com inteligencia artificial.<br>
-<a href="/login">Acessar conta</a> &bull; Suporte: <a href="mailto:suporte@ffinora.com.br">suporte@ffinora.com.br</a></p>
+<a href="app.html">Acessar conta</a> &bull; Suporte: <a href="mailto:suporte@ffinora.com.br">suporte@ffinora.com.br</a></p>
 <p style="margin-top:12px;font-size:.78rem">&copy; 2026 FFinora. Todos os direitos reservados. Pagamentos processados pelo Stripe.</p>
 </footer>
 
@@ -780,7 +780,7 @@ return;
 btn.disabled=true;
 btn.innerHTML='<span class="loading-spinner"></span> Redirecionando...';
 try{
-const res=await fetch('/api/stripe/checkout.php',{
+const res=await fetch('api/stripe/checkout.php',{
 method:'POST',
 headers:{'Content-Type':'application/json'},
 body:JSON.stringify({source:'landing',plan:_plan,email})

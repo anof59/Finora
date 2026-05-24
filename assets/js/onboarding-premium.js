@@ -89,7 +89,7 @@
 
   // ---- 4. Buscar email do cliente na Stripe ----------------------------
   function fetchStripeEmail() {
-    return fetch('/api/stripe/session.php?session_id=' + encodeURIComponent(sessId), {
+    return fetch('api/stripe/session.php?session_id=' + encodeURIComponent(sessId), {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
       credentials: 'omit'

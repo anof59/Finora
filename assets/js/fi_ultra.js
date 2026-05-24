@@ -118,7 +118,7 @@ async function _callAI(feature, userPrompt, extraMessages){
   var messages = extraMessages || [{ role: 'user', content: userPrompt }];
 
   try {
-    var resp = await fetch('/api/ai/index.php', {
+    var resp = await fetch('api/ai/index.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ feature: feature, messages: messages, context: ctx })
