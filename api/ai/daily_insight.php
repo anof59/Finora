@@ -15,23 +15,44 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Load env
-$envFile = __DIR__ . '/../../.env.local';
+// Load env (Robusto)
 $env = [];
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            list($name, $value) = explode('=', $line, 2);
-            $env[trim($name)] = trim($value);
+
+// Tentar carregar do secrets.php (produção)
+$secretsFile = __DIR__ . '/../../secrets.php';
+if (file_exists($secretsFile)) {
+    $secrets = include($secretsFile);
+    if (is_array($secrets)) {
+        $env = array_merge($env, $secrets);
+    }
+}
+
+// Tentar carregar de arquivos .env.local e .env tradicional
+$envPaths = [
+    __DIR__ . '/../../.env.local',
+    __DIR__ . '/../../.env',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env.local' : '',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/.env' : '',
+];
+
+foreach (array_unique(array_filter($envPaths)) as $file) {
+    if (file_exists($file)) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $val = trim($value);
+                $val = preg_replace('/^[\'"]|[\'"]$/', '', $val); // Remove aspas
+                $env[trim($name)] = $val;
+            }
         }
     }
 }
 
-$openAiKey     = $env['OPENAI_API_KEY'] ?? '';
-$supabaseUrl   = $env['NEXT_PUBLIC_SUPABASE_URL'] ?? '';
-$supabaseAnon  = $env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '';
+$openAiKey     = $env['OPENAI_API_KEY']             ?? getenv('OPENAI_API_KEY')             ?? $_ENV['OPENAI_API_KEY']             ?? $_SERVER['OPENAI_API_KEY']             ?? '';
+$supabaseUrl     = $env['NEXT_PUBLIC_SUPABASE_URL']   ?? getenv('NEXT_PUBLIC_SUPABASE_URL')   ?? $_ENV['NEXT_PUBLIC_SUPABASE_URL']   ?? $_SERVER['NEXT_PUBLIC_SUPABASE_URL']   ?? '';
+$supabaseAnon    = $env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY') ?? $_ENV['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? $_SERVER['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '';
 
 if (empty($supabaseUrl) || empty($supabaseAnon)) {
     echo json_encode(['error' => 'Supabase not configured']);
