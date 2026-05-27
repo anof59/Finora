@@ -19,6 +19,10 @@ RedirectMatch 404 /_backup_predeploy
     RewriteEngine On
     RewriteBase /
 
+    # Preserva o cabecalho Authorization para o PHP em ambientes FastCGI/CGI
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
     # Nao reescreve se for arquivo ou diretorio real (preserva assets, api, imagens, css, js)
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d

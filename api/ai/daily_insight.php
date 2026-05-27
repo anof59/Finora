@@ -39,13 +39,28 @@ if (empty($supabaseUrl) || empty($supabaseAnon)) {
     exit;
 }
 
-// Extract Bearer token
+// Extract Bearer token (Resilient)
 $authHeader = '';
 if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+} elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+} elseif (function_exists('getallheaders')) {
+    $headers = getallheaders();
+    foreach ($headers as $name => $value) {
+        if (strtolower($name) === 'authorization') {
+            $authHeader = $value;
+            break;
+        }
+    }
 } elseif (function_exists('apache_request_headers')) {
     $headers = apache_request_headers();
-    $authHeader = $headers['Authorization'] ?? '';
+    foreach ($headers as $name => $value) {
+        if (strtolower($name) === 'authorization') {
+            $authHeader = $value;
+            break;
+        }
+    }
 }
 
 if (empty($authHeader) || stripos($authHeader, 'Bearer ') !== 0) {
