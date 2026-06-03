@@ -316,6 +316,14 @@ tr:last-child td{border-bottom:none}
         </button>
         
       </div>
+    <div id="trial-banner" style="display: none; background: #fffbeb; border-bottom: 1px solid #fde68a; color: #b45309; padding: 10px 24px; font-size: 13px; font-weight: 600; align-items: center; justify-content: space-between; gap: 12px;">
+      <span style="display: flex; align-items: center; gap: 6px;">
+        <span>⏳</span>
+        <span id="trial-banner-text"></span>
+      </span>
+      <button onclick="navigateToPlanos()" style="background: #d97706; color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+        Assinar Agora
+      </button>
     </div>
     <div class="content" id="main-content"></div>
   </div>
@@ -436,6 +444,14 @@ function navigate(pageId,el){
   closeSidebar();
   allCharts.forEach(function(c){try{c.destroy();}catch(e){}});
   allCharts=[];
+
+  if (isTrialExpired() && pageId !== 'planos') {
+    document.getElementById('topbar-title').textContent = 'Teste Grátis Expirado';
+    setLoading();
+    renderExpiredScreen();
+    return;
+  }
+
   document.getElementById('topbar-title').textContent=pageTitles[pageId]||pageId;
   setLoading();
   var map={
@@ -515,6 +531,93 @@ async function syncLocalDataToSupabase(userId) {
   } catch (e) {
     console.error('Erro ao migrar perfil de investidor:', e);
   }
+}
+
+
+// --- SISTEMA DE TRIAL ---
+function isTrialExpired() {
+  var plan = (currentProfile && currentProfile.plan) || 'free';
+  var role = (currentProfile && currentProfile.role) || 'user';
+  if (role === 'admin' || plan === 'pro' || plan === 'ultra') {
+    return false;
+  }
+  if (currentProfile && currentProfile.trial_expires_at) {
+    var expires = new Date(currentProfile.trial_expires_at);
+    var now = new Date();
+    return now >= expires;
+  }
+  return false;
+}
+
+function checkTrial() {
+  var banner = document.getElementById('trial-banner');
+  if (!banner) return;
+  
+  var plan = (currentProfile && currentProfile.plan) || 'free';
+  var role = (currentProfile && currentProfile.role) || 'user';
+  
+  if (role === 'admin' || plan === 'pro' || plan === 'ultra') {
+    banner.style.display = 'none';
+    return;
+  }
+  
+  if (!currentProfile || !currentProfile.trial_expires_at) {
+    banner.style.display = 'none';
+    return;
+  }
+  
+  var expires = new Date(currentProfile.trial_expires_at);
+  var now = new Date();
+  var diffTime = expires.getTime() - now.getTime();
+  var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays <= 0) {
+    banner.style.display = 'none';
+    return;
+  }
+  
+  banner.style.display = 'flex';
+  var textEl = document.getElementById('trial-banner-text');
+  
+  if (diffDays <= 3) {
+    banner.style.background = '#fef2f2';
+    banner.style.borderBottom = '1px solid #fca5a5';
+    banner.style.color = '#991b1b';
+    var btn = banner.querySelector('button');
+    if (btn) btn.style.background = '#dc2626';
+    textEl.innerHTML = 'Seu teste grátis termina em <strong>' + diffDays + ' ' + (diffDays === 1 ? 'dia' : 'dias') + '</strong>. Assine o Pro para continuar usando.';
+  } else {
+    banner.style.background = '#fffbeb';
+    banner.style.borderBottom = '1px solid #fde68a';
+    banner.style.color = '#b45309';
+    var btn = banner.querySelector('button');
+    if (btn) btn.style.background = '#d97706';
+    textEl.textContent = 'Seu teste grátis termina em ' + diffDays + ' ' + (diffDays === 1 ? 'dia' : 'dias') + '.';
+  }
+}
+
+function renderExpiredScreen() {
+  document.getElementById('main-content').innerHTML = `
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: 20px;">
+      <div class="card" style="max-width: 480px; width: 100%; text-align: center; padding: 40px 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+        <div style="font-size: 56px; margin-bottom: 20px;">🔒</div>
+        <h2 style="font-size: 24px; font-weight: 800; color: #0d1b2e; margin-bottom: 12px;">Seu teste grátis expirou</h2>
+        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px;">
+          Continue usando o FFinora por apenas R$ 9,90/mês.
+        </p>
+        <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 10px; background: var(--blue); color: #fff; border: none; cursor: pointer; transition: all 0.2s;" onclick="assinarPlano('pro', this)">
+          Assinar Agora
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function navigateToPlanos() {
+  var el = Array.from(document.querySelectorAll('.nav-item')).find(function(n) {
+    return n.getAttribute('onclick')?.includes('planos');
+  });
+  navigate('planos', el);
 }
 
 async function checkSession(){
@@ -615,7 +718,24 @@ async function doCadastro(btn){
   btn.disabled=false;tx.textContent='Criar conta grátis';sp.style.display='none';
   if(r.error){err.textContent=r.error.message==='User already registered'?'E-mail já cadastrado.':r.error.message;err.style.display='block';return;}
   if(r.data&&r.data.user){
-    try{await sb.from('profiles').insert({id:r.data.user.id,email:email,full_name:nome,role:'user',plan:'free',subscription_status:'manual',status:'Ativo'});}catch(e){}
+    var now = new Date();
+    var expires = new Date();
+    expires.setDate(now.getDate() + 7);
+    try{
+      await sb.from('profiles').insert({
+        id:r.data.user.id,
+        email:email,
+        full_name:nome,
+        role:'user',
+        plan:'trial',
+        subscription_status:'manual',
+        status:'Ativo',
+        trial_started_at: now.toISOString(),
+        trial_expires_at: expires.toISOString()
+      });
+    }catch(e){
+      console.error('Erro ao registrar perfil com trial:', e);
+    }
     ok.textContent='✅ Conta criada! Você já pode fazer login.';ok.style.display='block';
     setTimeout(function(){document.getElementById('cadastro-screen').remove();document.getElementById('login-email').value=email;},1800);
   }
@@ -658,6 +778,7 @@ function setupApp(){
   } else {
     renderSidebarNav(nav);
   }
+  checkTrial();
 }
 
 function renderSidebarNav(nav){
@@ -1616,9 +1737,12 @@ function pPlanos(){
   var isPro=plan==='pro';
   var isUltra=plan==='ultra';
   
-  var banner = isFree 
-    ? '<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:20px;text-align:center;width:100%;max-width:456px;margin-left:auto;margin-right:auto">Você está no Plano Free. Faça upgrade para liberar mais recursos.</div>'
-    : '';
+  var banner = '';
+  if (plan === 'free') {
+    banner = '<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:20px;text-align:center;width:100%;max-width:456px;margin-left:auto;margin-right:auto">Você está no Plano Free. Faça upgrade para liberar mais recursos.</div>';
+  } else if (plan === 'trial') {
+    banner = '<div style="background:#fffbeb;border:1px solid #fde68a;color:#b45309;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:20px;text-align:center;width:100%;max-width:456px;margin-left:auto;margin-right:auto">Você está no período de teste grátis (Trial).</div>';
+  }
 
   var html='<div class="page-header"><h1>Assinatura e Planos</h1><p>Escolha o melhor plano para o seu bolso</p></div>'
     + banner
@@ -1633,7 +1757,7 @@ function pPlanos(){
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
     +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
     +'</div>'
-    +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':'Começar teste grátis')+'</button>'
+    +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':(plan==='trial'?'Assinar Pro':'Começar teste grátis'))+'</button>'
     +'</div>'
 
     // --- Ultra ---
