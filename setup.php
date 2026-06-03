@@ -14,6 +14,8 @@ $secretsFile = file_exists($parentSecretsFile) ? $parentSecretsFile : $localSecr
 $error = '';
 $success = false;
 
+$forceEdit = isset($_GET['force']) && $_GET['force'] == '1';
+
 // Tenta pré-carregar do .env.local para facilitar o teste local
 $env = [];
 $envFileLocal = __DIR__ . '/.env.local';
@@ -30,9 +32,17 @@ if (file_exists($envFileLocal)) {
     }
 }
 
+// Carrega os valores atuais do secrets.php se o arquivo já existir
+if ($alreadyConfigured && file_exists($secretsFile)) {
+    $secretsData = include($secretsFile);
+    if (is_array($secretsData)) {
+        $env = array_merge($env, $secretsData);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($alreadyConfigured) {
-        $error = 'O sistema já está configurado. Para reconfigurar, exclua o arquivo `secrets.php` no servidor.';
+    if ($alreadyConfigured && !$forceEdit) {
+        $error = 'O sistema já está configurado. Para reconfigurar, use o botão de edição.';
     } else {
         $stripeSecret   = trim($_POST['stripe_secret'] ?? '');
         $openaiKey      = trim($_POST['openai_key'] ?? '');
@@ -334,14 +344,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <?php if ($alreadyConfigured && !$success): ?>
+        <?php if ($alreadyConfigured && !$success && !$forceEdit): ?>
             <div class="configured-box">
                 <div class="alert alert-success" style="justify-content: center; font-weight: 600;">
                     <span>🛡️</span>
                     <span>FFinora já está configurado!</span>
                 </div>
                 <p>As chaves estão salvas e seguras em <code>secrets.php</code>.</p>
-                <a href="index.html" class="btn-home">Ir para o Site Inicial</a>
+                <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 24px;">
+                    <a href="setup.php?force=1" class="btn-home" style="background: linear-gradient(135deg, var(--primary), #6366f1); border: none; color: white; box-shadow: 0 4px 12px var(--primary-glow);">Editar Configurações</a>
+                    <a href="index.html" class="btn-home">Ir para o Site Inicial</a>
+                </div>
             </div>
         <?php else: ?>
             <form method="POST">
