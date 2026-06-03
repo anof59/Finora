@@ -303,20 +303,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($error): ?>
             <div class="alert alert-error">
-                <span>⚠️</span> <?php echo htmlspecialchars($error); ?>
+                <span>⚠️</span>
+                <span><?php echo htmlspecialchars($error); ?></span>
             </div>
         <?php endif; ?>
 
         <?php if ($success): ?>
             <div class="alert alert-success">
-                <span>✅</span> Configuração salva com sucesso! O arquivo <strong>secrets.php</strong> foi gerado na raiz.
+                <span>✅</span>
+                <span>Configuração salva com sucesso! O arquivo <strong>secrets.php</strong> foi gerado na raiz.</span>
             </div>
         <?php endif; ?>
 
         <?php if ($alreadyConfigured && !$success): ?>
             <div class="configured-box">
                 <div class="alert alert-success" style="justify-content: center; font-weight: 600;">
-                    <span>🛡️</span> FFinora já está configurado!
+                    <span>🛡️</span>
+                    <span>FFinora já está configurado!</span>
                 </div>
                 <p>As chaves estão salvas e seguras em <code>secrets.php</code>.</p>
                 <a href="index.html" class="btn-home">Ir para o Site Inicial</a>
