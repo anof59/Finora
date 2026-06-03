@@ -65,7 +65,7 @@ if (empty($stripeSecret)) {
 // ── Mapeamento plano → price_id (IDs Live da Stripe) ──────────────────────
 $priceMap = [
     // CRIAR PRICE ID NO STRIPE PARA PRO R$ 9,90
-    'pro'   => 'price_1TVHThILykQlxpCuY4bT6jVA',
+    'pro'   => 'price_1TeLSeILykQlxpCu0zAHZJMF',
     'ultra' => 'price_1TVHTrILykQlxpCutQwYwX2K',
 ];
 
@@ -122,6 +122,10 @@ $postData = [
     'line_items[0][quantity]'           => 1,
     'payment_method_types[0]'           => 'card',
 ];
+
+if ($planFinal === 'pro') {
+    $postData['subscription_data[trial_period_days]'] = 7;
+}
 
 // client_reference_id e metadata user_id apenas quando existir userId
 if (!empty($userId)) {
