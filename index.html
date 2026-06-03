@@ -230,8 +230,8 @@ border-radius:18px;
 
 /* PLANS */
 .plans{padding:80px 0;background:var(--gray-50)}
-.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:780px;margin:48px auto 0}
-.plan-card{background:var(--white);border-radius:var(--radius-lg);padding:40px 36px;border:2px solid var(--gray-200);position:relative;transition:transform .3s,box-shadow .3s;box-shadow:var(--shadow)}
+.plans-grid{display:flex;justify-content:center;align-items:center;gap:32px;max-width:374px;margin:48px auto 0}
+.plan-card{width:100%;background:var(--white);border-radius:var(--radius-lg);padding:40px 36px;border:2px solid var(--gray-200);position:relative;transition:transform .3s,box-shadow .3s;box-shadow:var(--shadow)}
 .plan-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
 .plan-card.ultra{border-color:var(--ultra);box-shadow:0 8px 40px rgba(124,58,237,.2)}
 .plan-popular{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ultra),var(--primary));color:var(--white);padding:6px 20px;border-radius:50px;font-size:.8rem;font-weight:700;letter-spacing:.5px;white-space:nowrap}
@@ -306,7 +306,7 @@ footer a{color:var(--primary-light);text-decoration:underline}
 .how-steps{grid-template-columns:1fr 1fr}
 .how-steps::before{display:none}
 .fin-grid{grid-template-columns:1fr 1fr}
-.plans-grid{grid-template-columns:1fr;max-width:400px}
+.plans-grid{max-width:374px}
 .ba-grid{grid-template-columns:1fr}
 }
 @media(max-width:600px){
@@ -611,8 +611,8 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <div class="container">
 <div class="text-center fade-up">
 <span class="section-tag">Escolha seu plano</span>
-<h2 class="section-title">Investimento que se paga todo mes</h2>
-<p class="section-sub">Comece hoje e transforme sua relacao com o dinheiro.</p>
+<h2 class="section-title">Plano Pro</h2>
+<p class="section-sub">Comece hoje e transforme sua relação com o dinheiro.</p>
 </div>
 <div class="plans-grid">
 <!-- PRO -->
