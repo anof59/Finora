@@ -618,8 +618,8 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <!-- PRO -->
 <div class="plan-card fade-up">
 <div class="plan-name">PRO</div>
-<div class="plan-price">R$ 19<span>,90/mes</span></div>
-<p class="plan-desc">Controle financeiro completo para organizar sua vida.</p>
+<div class="plan-price">R$ 9<span>,90/mes</span></div>
+<p class="plan-desc">Teste grátis por 7 dias. Depois, apenas R$ 9,90/mês.</p>
 <div class="plan-features">
 <div class="plan-feature">Dashboard completo</div>
 <div class="plan-feature">Transacoes ilimitadas</div>
@@ -628,10 +628,10 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <div class="plan-feature">Investimentos</div>
 <div class="plan-feature">Relatorios detalhados</div>
 </div>
-<button class="btn btn-primary plan-btn" onclick="openModal('pro')">Assinar PRO</button>
+<button class="btn btn-primary plan-btn" onclick="openModal('pro')">Começar teste grátis</button>
 </div>
 <!-- ULTRA -->
-<div class="plan-card ultra fade-up">
+<div class="plan-card ultra fade-up" style="display: none !important;">
 <div class="plan-popular">&#11088; Mais popular</div>
 <div class="plan-name" style="color:var(--ultra)">ULTRA</div>
 <div class="plan-price">R$ 39<span style="color:var(--ultra-light)">,90/mes</span></div>
@@ -712,8 +712,8 @@ footer a{color:var(--primary-light);text-decoration:underline}
 <h2 class="fade-up">Comece agora a controlar seu dinheiro de verdade</h2>
 <p class="fade-up">Junte-se a quem ja transformou sua vida financeira com o FFinora.</p>
 <div class="cta-final-btns fade-up">
-<button class="btn" style="background:white;color:var(--primary);font-weight:700" onclick="openModal('pro')">Assinar PRO &mdash; R$ 19,90/mes</button>
-<button class="btn btn-ghost" onclick="openModal('ultra')">Assinar ULTRA &mdash; R$ 39,90/mes &#11088;</button>
+<button class="btn" style="background:white;color:var(--primary);font-weight:700" onclick="openModal('pro')">Começar teste grátis</button>
+<button class="btn btn-ghost" onclick="openModal('ultra')" style="display: none !important;">Assinar ULTRA &mdash; R$ 39,90/mes &#11088;</button>
 <a href="app.html" class="btn btn-ghost">Ja tenho conta &rarr;</a>
 </div>
 </div>
@@ -771,14 +771,15 @@ function openModal(plan){
 _plan=plan;
 const isPro=plan==='pro';
 document.getElementById('modalIcon').textContent=isPro?'📈':'🧠';
-document.getElementById('modalTitle').textContent=isPro?'Assinar plano PRO':'Assinar plano ULTRA';
-document.getElementById('modalDesc').textContent='Informe seu e-mail para continuar para o checkout seguro Stripe.';
+document.getElementById('modalTitle').textContent=isPro?'Começar teste grátis Pro':'Assinar plano ULTRA';
+document.getElementById('modalDesc').textContent=isPro?'Informe seu e-mail para ativar 7 dias grátis. Após o teste, a assinatura continua por R$ 9,90/mês.':'Informe seu e-mail para continuar para o checkout seguro Stripe.';
 const badge=document.getElementById('modalBadge');
 badge.innerHTML=isPro
-?'<span style="background:#EEF2FF;color:#3730A3;padding:6px 18px;border-radius:50px;font-size:.85rem;font-weight:700">PRO &mdash; R$ 19,90/mes</span>'
+?'<span style="background:#EEF2FF;color:#3730A3;padding:6px 18px;border-radius:50px;font-size:.85rem;font-weight:700">PRO &mdash; 7 dias grátis, depois R$ 9,90/mês</span>'
 :'<span style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;padding:6px 18px;border-radius:50px;font-size:.85rem;font-weight:700">&#11088; ULTRA &mdash; R$ 39,90/mes</span>';
 const btn=document.getElementById('modalBtn');
 btn.className='modal-btn '+(isPro?'modal-btn-pro':'modal-btn-ultra');
+btn.textContent=isPro?'Começar teste grátis':'Continuar para o pagamento';
 document.getElementById('modalEmail').value='';
 clearError();
 document.getElementById('modalOverlay').classList.add('open');
@@ -819,7 +820,7 @@ throw new Error(data.error||'Erro ao iniciar checkout');
 }
 }catch(err){
 btn.disabled=false;
-btn.innerHTML='Continuar para o pagamento';
+btn.innerHTML=_plan==='pro'?'Começar teste grátis':'Continuar para o pagamento';
 errorEl.style.display='block';
 errorEl.textContent=err.message||'Erro ao conectar. Tente novamente.';
 }

@@ -64,6 +64,7 @@ if (empty($stripeSecret)) {
 
 // ── Mapeamento plano → price_id (IDs Live da Stripe) ──────────────────────
 $priceMap = [
+    // CRIAR PRICE ID NO STRIPE PARA PRO R$ 9,90
     'pro'   => 'price_1TVHThILykQlxpCuY4bT6jVA',
     'ultra' => 'price_1TVHTrILykQlxpCutQwYwX2K',
 ];
