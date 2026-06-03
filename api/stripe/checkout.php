@@ -18,6 +18,7 @@ $secretsPaths = [
     (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT']))
         ? $_SERVER['DOCUMENT_ROOT'] . '/secrets.php' : '',                                  // Caminho via DOCUMENT_ROOT (Hostinger)
     dirname(dirname(__DIR__)) . '/secrets.php',                                             // Fallback dirname duplo
+    dirname(dirname(dirname(__DIR__))) . '/secrets.php',                                     // Um nível acima do DOCUMENT_ROOT (seguro contra deploys do git)
 ];
 
 foreach (array_unique(array_filter($secretsPaths)) as $secretsFile) {

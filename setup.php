@@ -7,8 +7,10 @@
  * --------------------------------------------------------------
  */
 
-$secretsFile = __DIR__ . '/secrets.php';
-$alreadyConfigured = file_exists($secretsFile);
+$parentSecretsFile = dirname(__DIR__) . '/secrets.php';
+$localSecretsFile = __DIR__ . '/secrets.php';
+$alreadyConfigured = file_exists($parentSecretsFile) || file_exists($localSecretsFile);
+$secretsFile = file_exists($parentSecretsFile) ? $parentSecretsFile : $localSecretsFile;
 $error = '';
 $success = false;
 
@@ -56,7 +58,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      . "    'NEXT_PUBLIC_APP_URL' => '" . addslashes($appUrl) . "',\n"
                      . "];\n";
 
-            if (file_put_contents($secretsFile, $content)) {
+            $written = false;
+            $parentDir = dirname(__DIR__);
+            if (is_writable($parentDir)) {
+                $targetFile = $parentDir . '/secrets.php';
+                if (file_put_contents($targetFile, $content)) {
+                    $written = true;
+                    $secretsFile = $targetFile;
+                }
+            }
+            if (!$written) {
+                $targetFile = __DIR__ . '/secrets.php';
+                if (file_put_contents($targetFile, $content)) {
+                    $written = true;
+                    $secretsFile = $targetFile;
+                }
+            }
+
+            if ($written) {
                 $success = true;
                 $alreadyConfigured = true;
             } else {

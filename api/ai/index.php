@@ -19,11 +19,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $env = [];
 
 // Tentar carregar do secrets.php (arquivo visível e seguro via PHP)
-$secretsFile = __DIR__ . '/../../secrets.php';
-if (file_exists($secretsFile)) {
-    $secrets = include($secretsFile);
-    if (is_array($secrets)) {
-        $env = array_merge($env, $secrets);
+$secretsPaths = [
+    __DIR__ . '/../../secrets.php',
+    (isset($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] . '/secrets.php' : '',
+    dirname(dirname(__DIR__)) . '/secrets.php',
+    dirname(dirname(dirname(__DIR__))) . '/secrets.php',
+];
+foreach (array_unique(array_filter($secretsPaths)) as $secFile) {
+    if (file_exists($secFile)) {
+        $secrets = include($secFile);
+        if (is_array($secrets)) {
+            $env = array_merge($env, $secrets);
+            break;
+        }
     }
 }
 
