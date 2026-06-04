@@ -71,7 +71,7 @@ body{display:flex;background:var(--gray-bg);color:var(--text)}
 .badge{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1px solid white}
 .hamburger{display:none;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex-shrink:0}
 .hamburger span{display:block;width:16px;height:2px;background:var(--text-muted);border-radius:2px}
-.content{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
 .sidebar-overlay.active{display:block}
 .sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border)}
@@ -110,8 +110,8 @@ nav{flex:1;padding:10px 0 6px;overflow-y:auto}
 .chart-title{font-size:13px;font-weight:600}
 .chart-sub{font-size:11px;color:var(--text-muted);margin-bottom:14px;margin-top:2px}
 .btn-primary{padding:8px 16px;background:var(--blue);color:white;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
-.tx-list{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.tx-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f3f4f6}
+.tx-list{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;width:100%;max-width:100%}
+.tx-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid #f3f4f6}
 .tx-item:last-child{border-bottom:none}
 .tx-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .tx-icon.out{background:#fee2e2}
@@ -119,7 +119,7 @@ nav{flex:1;padding:10px 0 6px;overflow-y:auto}
 .tx-info{flex:1;min-width:0}
 .tx-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{font-size:11px;color:var(--text-muted)}
-.tx-value{font-size:13px;font-weight:700;white-space:nowrap}
+.tx-value{font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .td-red{color:var(--red);font-weight:600}
 .td-green{color:var(--green);font-weight:600}
 .td-gray{color:var(--text-muted);font-size:11px}
@@ -200,7 +200,7 @@ tr:last-child td{border-bottom:none}
 
 .desktop-toggle{display:flex;width:34px;height:34px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;align-items:center;justify-content:center;color:var(--text-muted);flex-shrink:0}
 @media(max-width:680px){.login-body{padding:0;align-items:flex-start}.login-card{flex-direction:column;border-radius:0;width:100%;box-shadow:none;min-height:100vh}.login-left{width:100%;padding:28px 22px}.login-logo{width:180px}.login-left h1{font-size:22px;margin:14px 0 10px}.login-right{padding:24px 22px 40px}.login-topbar{display:none}}
-@media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
+@media(max-width:768px){#app{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{width:100%;height:100%}.hamburger{display:flex}.desktop-toggle{display:none}.content{padding:14px;overflow-x:hidden}.cards-grid{grid-template-columns:1fr 1fr;gap:10px}.card-value{font-size:18px}}
 </style>
 </head>
 <body>
@@ -314,8 +314,8 @@ tr:last-child td{border-bottom:none}
         <button class="icon-btn" onclick="toggleTheme()" title="Mudar Tema">
           <svg id="theme-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        
       </div>
+    </div>
     <div id="trial-banner" style="display: none; background: #fffbeb; border-bottom: 1px solid #fde68a; color: #b45309; padding: 10px 24px; font-size: 13px; font-weight: 600; align-items: center; justify-content: space-between; gap: 12px;">
       <span style="display: flex; align-items: center; gap: 6px;">
         <span>⏳</span>
