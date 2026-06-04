@@ -44,11 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($alreadyConfigured && !$forceEdit) {
         $error = 'O sistema já está configurado. Para reconfigurar, use o botão de edição.';
     } else {
-        $stripeSecret   = trim($_POST['stripe_secret'] ?? '');
-        $openaiKey      = trim($_POST['openai_key'] ?? '');
+        $stripeSecret   = trim($_POST['stripe_secret_key'] ?? '');
+        $openaiKey      = trim($_POST['openai_api_key'] ?? '');
         $supabaseUrl    = trim($_POST['supabase_url'] ?? '');
         $supabaseAnon   = trim($_POST['supabase_anon'] ?? '');
-        $supabaseService= trim($_POST['supabase_service'] ?? '');
+        $supabaseService= trim($_POST['supabase_service_role_key'] ?? '');
         $appUrl         = trim($_POST['app_url'] ?? 'https://ffinora.com.br');
 
         if (empty($stripeSecret) || empty($openaiKey) || empty($supabaseUrl) || empty($supabaseAnon)) {
@@ -360,14 +360,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <div class="form-group">
                     <label for="stripe_secret">Stripe Secret Key (sk_live... ou sk_test...)</label>
-                    <input type="password" id="stripe_secret" name="stripe_secret" required 
+                    <input type="password" id="stripe_secret" name="stripe_secret_key" autocomplete="off" required 
                            value="<?php echo htmlspecialchars($env['STRIPE_SECRET_KEY'] ?? ''); ?>" placeholder="sk_live_...">
                     <span class="helper-text">Usada para criar as sessões de checkout e receber pagamentos.</span>
                 </div>
 
                 <div class="form-group">
                     <label for="openai_key">OpenAI API Key (sk-proj-...)</label>
-                    <input type="password" id="openai_key" name="openai_key" required 
+                    <input type="password" id="openai_key" name="openai_api_key" autocomplete="off" required 
                            value="<?php echo htmlspecialchars($env['OPENAI_API_KEY'] ?? ''); ?>" placeholder="sk-proj-...">
                     <span class="helper-text">Usada pelo assistente financeiro IA Ultra.</span>
                 </div>
@@ -380,13 +380,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-group">
                     <label for="supabase_anon">Supabase Anon Key</label>
-                    <input type="password" id="supabase_anon" name="supabase_anon" required 
+                    <input type="password" id="supabase_anon" name="supabase_anon" autocomplete="off" required 
                            value="<?php echo htmlspecialchars($env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? ''); ?>" placeholder="eyJhbGci...">
                 </div>
 
                 <div class="form-group">
                     <label for="supabase_service">Supabase Service Role Key (Opcional)</label>
-                    <input type="password" id="supabase_service" name="supabase_service" 
+                    <input type="password" id="supabase_service" name="supabase_service_role_key" autocomplete="off" 
                            value="<?php echo htmlspecialchars($env['SUPABASE_SERVICE_ROLE_KEY'] ?? ''); ?>" placeholder="eyJhbGci...">
                     <span class="helper-text">Necessário apenas para rotinas administrativas backend.</span>
                 </div>
