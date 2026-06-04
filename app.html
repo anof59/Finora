@@ -380,15 +380,26 @@ var userNav=[
   {section:'Visão Geral'},
   {id:'dashboard',label:'Dashboard',icon:'grid',tooltip:'Resumo da sua vida financeira'},
   {id:'transacoes',label:'Transações',icon:'arrows',tooltip:'Registre entradas e saídas'},
-  {section:'Gestão'},
+  
+  {section:'Planejamento'},
   {id:'organizacao',label:'Organização',icon:'wallet',tooltip:'Controle inteligente do seu dinheiro',badgeKey:'livre'},
   {id:'planejamento',label:'Planejamento',icon:'compass',tooltip:'Planeje seu futuro financeiro'},
   {id:'mes-atual',label:'Mês Atual',icon:'calendar',tooltip:'Resumo do seu mês financeiro',badgeKey:'mes'},
+  {id:'metas',label:'Metas',icon:'target',tooltip:'Crie objetivos financeiros e acompanhe seu progresso'},
+  {id:'contas-fixas',label:'Contas Fixas',icon:'bell',tooltip:'Cadastre despesas recorrentes e acompanhe vencimentos'},
+  
+  {section:'Evolução'},
+  {id:'desafios',label:'Desafios',icon:'trophy',tooltip:'Complete desafios financeiros e melhore seus hábitos'},
+  {id:'evolucao',label:'Evolução',icon:'activity',tooltip:'Acompanhe seu crescimento financeiro ao longo do tempo'},
+  
   {section:'Patrimônio'},
   {id:'investimentos',label:'Investimentos',icon:'trending-up',tooltip:'Acompanhe sua carteira'},
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
+  
+  {section:'Assinatura'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'},
+  
   {isPremiumSection:true,title:'FIN. INTELIGENTE'},
   {id:'fi-chat',label:'Chat com IA',icon:'sparkles',tooltip:'Seu assistente financeiro',premiumItem:true},
   {id:'fi-analise',label:'Análise do Mês',icon:'activity',tooltip:'Insight detalhado do mês',premiumItem:true},
@@ -416,6 +427,7 @@ var pageTitles={
   dashboard:'Dashboard',transacoes:'Transações',metas:'Metas',investimentos:'Investimentos',
   analise:'Análise',tabelas:'Tabelas',
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
+  'contas-fixas':'Contas Fixas',desafios:'Desafios',evolucao:'Evolução',
   planos:'Planos e Assinatura',
   'fi-chat':'Chat com IA','fi-analise':'Análise do Mês',
   'fi-planejamento':'Planejamento Inteligente','fi-sugestoes':'Sugestões de Economia',
@@ -460,6 +472,7 @@ function navigate(pageId,el){
     dashboard:pDash,transacoes:pTx,metas:pMetas,investimentos:pInv,
     analise:pAnalise,tabelas:pTabelas,
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
+    'contas-fixas':pContasFixas,desafios:pDesafios,evolucao:pEvolucao,
     planos:pPlanos,
     'fi-chat':pFinInteligente,'fi-analise':pFinInteligente,
     'fi-planejamento':pFinInteligente,'fi-sugestoes':pFinInteligente,
@@ -959,7 +972,7 @@ async function pMetas(){
   var sobra=0;
   try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobra=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
   
-  var html=`<div class="page-header-row"><div class="page-header"><h1>Metas Financeiras 🎯</h1><p>Defina, gerencie e alcance seus objetivos</p></div><button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button></div>`;
+  var html=`<div class="page-header-row"><div class="page-header"><h1>Metas 🎯</h1><p>Crie objetivos financeiros e acompanhe seu progresso.</p></div><button class="btn-primary" onclick="openMetaModal()">+ Nova Meta</button></div>`;
   
   var dicas = [];
   var metasConcluidas = metas.filter(m => parseFloat(m.current_amount || 0) >= parseFloat(m.target_amount || 0) && parseFloat(m.target_amount || 0) > 0).length;
@@ -986,7 +999,7 @@ async function pMetas(){
   html += `</div>`;
 
   if(!metas.length){
-    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:60px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)"><div style="font-size:48px;margin-bottom:14px">🚀</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Você ainda não tem metas</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">Defina um objetivo, prazo e deixe a IA ajudar você a chegar lá.</div><button class="btn-primary" onclick="openMetaModal()" style="padding:10px 20px;font-size:14px">Criar minha primeira meta</button></div>`;
+    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:32px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px"><div style="font-size:48px;margin-bottom:14px">🚀</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Você ainda não tem metas personalizadas</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">Crie objetivos financeiros e acompanhe seu progresso real. Veja abaixo alguns exemplos de metas:</div><button class="btn-primary" onclick="openMetaModal()" style="padding:10px 20px;font-size:14px">Criar minha primeira meta</button></div><h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-muted)">Exemplos de Metas para inspirar você:</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:16px;opacity:0.85"><div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#16a34a"></div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px"><div><div style="font-size:16px;font-weight:700;color:#0d1b2e">Reserva de Emergência 🏦</div><div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo sugerido: 31/12/2026</div></div><span style="background:#16a34a15;color:#16a34a;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px">25%</span></div><div style="height:10px;background:#f1f2f5;border-radius:5px;overflow:hidden;margin-bottom:12px"><div style="width:25%;height:100%;background:linear-gradient(90deg, #16a34acc, #16a34a);border-radius:5px;"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:16px"><div style="color:#6b7280">Guardado: <strong style="color:#1a1a2e">R$ 2.500,00</strong></div><div style="color:#6b7280">Alvo: <strong style="color:#1a1a2e">R$ 10.000,00</strong></div></div><div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#475569;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Guarde R$ 1.250,00/mês</div></div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#7c3aed"></div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px"><div><div style="font-size:16px;font-weight:700;color:#0d1b2e">Viagem dos Sonhos ✈️</div><div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo sugerido: 15/08/2026</div></div><span style="background:#7c3aed15;color:#7c3aed;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px">24%</span></div><div style="height:10px;background:#f1f2f5;border-radius:5px;overflow:hidden;margin-bottom:12px"><div style="width:24%;height:100%;background:linear-gradient(90deg, #7c3aedcc, #7c3aed);border-radius:5px;"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:16px"><div style="color:#6b7280">Guardado: <strong style="color:#1a1a2e">R$ 1.200,00</strong></div><div style="color:#6b7280">Alvo: <strong style="color:#1a1a2e">R$ 5.000,00</strong></div></div><div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#475569;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Guarde R$ 190,00/mês</div></div><div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:#1a6fc4"></div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px"><div><div style="font-size:16px;font-weight:700;color:#0d1b2e">Comprar Veículo 🚗</div><div style="font-size:11px;color:#6b7280;margin-top:2px;font-weight:600">Prazo sugerido: 10/06/2027</div></div><span style="background:#1a6fc415;color:#1a6fc4;font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px">33%</span></div><div style="height:10px;background:#f1f2f5;border-radius:5px;overflow:hidden;margin-bottom:12px"><div style="width:33%;height:100%;background:linear-gradient(90deg, #1a6fc4cc, #1a6fc4);border-radius:5px;"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:16px"><div style="color:#6b7280">Guardado: <strong style="color:#1a1a2e">R$ 15.000,00</strong></div><div style="color:#6b7280">Alvo: <strong style="color:#1a1a2e">R$ 45.000,00</strong></div></div><div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:11px;color:#475569;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Guarde R$ 2.500,00/mês</div></div></div>`;
   } else {
     html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:16px;">`;
     metas.forEach((m)=>{
@@ -1542,6 +1555,133 @@ function exportPDF(){var inc=tabelaCache.filter(function(t){return isIncome(t.ty
 
 /* ===== CONFIGURAÇÕES ===== */
 function pCfg(){document.getElementById('topbar-title').textContent='Configurações';devScreen();}
+
+/* ===== CONTAS FIXAS ===== */
+function pContasFixas(){
+  var html = '<div class="page-header-row"><div class="page-header"><h1>Contas Fixas 📑</h1><p>Cadastre despesas recorrentes e acompanhe vencimentos.</p></div><button class="btn-primary" onclick="openContasFixasModal()">+ Nova Conta Fixa</button></div>';
+  
+  var contas = [
+    { nome: 'Internet 🌐', valor: 119.90, vencimento: 10, categoria: 'Assinaturas', status: 'Pendente' },
+    { nome: 'Energia ⚡', valor: 250.00, vencimento: 15, categoria: 'Moradia', status: 'Pendente' },
+    { nome: 'Água 💧', valor: 85.00, vencimento: 20, categoria: 'Moradia', status: 'Pendente' },
+    { nome: 'Netflix 🎬', valor: 45.90, vencimento: 5, categoria: 'Assinaturas', status: 'Pago' }
+  ];
+
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
+  contas.forEach(function(c){
+    var statusCor = c.status === 'Pago' ? '#16a34a' : '#d97706';
+    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);position:relative">'
+      + '<span style="position:absolute;top:16px;right:16px;background:'+statusCor+'15;color:'+statusCor+';font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px">'+c.status+'</span>'
+      + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">'+c.nome+'</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Categoria: <strong>'+c.categoria+'</strong></div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1px solid var(--border);padding-top:12px">'
+      + '<div style="color:var(--text-muted)">Dia de vencimento: <strong style="color:var(--text)">'+c.vencimento+'</strong></div>'
+      + '<strong style="font-size:14px;color:var(--red)">'+fmt(c.valor)+'</strong>'
+      + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function openContasFixasModal(){
+  mkModal('contas-fixas-modal', '<div class="modal-title">Nova Conta Fixa 📑</div>'
+    + '<div class="modal-field"><label>Nome da Conta</label><input id="cf-nome" placeholder="Ex: Internet fibra"/></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    + '<div class="modal-field"><label>Valor (R$)</label><input type="number" id="cf-valor" placeholder="0.00"/></div>'
+    + '<div class="modal-field"><label>Dia Vencimento</label><input type="number" id="cf-vencimento" placeholder="Ex: 10"/></div>'
+    + '</div>'
+    + '<div class="modal-field"><label>Categoria</label><input id="cf-categoria" placeholder="Ex: Contas de consumo"/></div>'
+    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'contas-fixas-modal\')">Cancelar</button><button class="btn-modal-save" onclick="alert(\'Conta Fixa adicionada com sucesso! (Simulação)\');closeModal(\'contas-fixas-modal\');">Salvar</button></div>');
+}
+
+/* ===== DESAFIOS ===== */
+function pDesafios(){
+  var html = '<div class="page-header-row"><div class="page-header"><h1>Desafios Financeiros 🏆</h1><p>Complete desafios financeiros e melhore seus hábitos.</p></div><button class="btn-primary" onclick="openDesafioModal()">+ Novo Desafio</button></div>';
+
+  var desafios = [
+    { titulo: 'Economizar R$ 100 esta semana 💰', desc: 'Evite gastos supérfluos e guarde R$ 100 até domingo.', progresso: 60, alvo: 100, atual: 60, dias: 3, cor: '#1a6fc4' },
+    { titulo: 'Reduzir Delivery 🍔', desc: 'Faça comida em casa. Limite-se a no máximo 2 pedidos nesta semana.', progresso: 100, alvo: 2, atual: 2, dias: 5, cor: '#d97706' },
+    { titulo: 'Guardar R$ 500 no mês 🏦', desc: 'Faça um esforço para investir R$ 500 de sobra de caixa.', progresso: 30, alvo: 500, atual: 150, dias: 20, cor: '#16a34a' }
+  ];
+
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
+  desafios.forEach(function(d){
+    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden">'
+      + '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:'+d.cor+'"></div>'
+      + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">'+d.titulo+'</div>'
+      + '<p style="font-size:12px;color:var(--text-muted);line-height:1.4;margin-bottom:12px">'+d.desc+'</p>'
+      + '<div style="height:8px;background:#f1f2f5;border-radius:4px;overflow:hidden;margin-bottom:12px">'
+      + '<div style="width:'+d.progresso+'%;height:100%;background:linear-gradient(90deg, '+d.cor+'cc, '+d.cor+');border-radius:4px;"></div>'
+      + '</div>'
+      + '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:12px">'
+      + '<span>Progresso: <strong>'+d.progresso+'%</strong></span>'
+      + '<span>Faltam: <strong>'+(d.dias === 1 ? '1 dia' : d.dias + ' dias')+'</strong></span>'
+      + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function openDesafioModal(){
+  mkModal('desafio-modal', '<div class="modal-title">Novo Desafio 🏆</div>'
+    + '<div class="modal-field"><label>Nome do Desafio</label><input id="ds-nome" placeholder="Ex: Ficar 3 dias sem gastar nada"/></div>'
+    + '<div class="modal-field"><label>Meta (R$ ou quantidade)</label><input type="number" id="ds-meta" placeholder="Ex: 100"/></div>'
+    + '<div class="modal-field"><label>Prazo (dias)</label><input type="number" id="ds-dias" placeholder="Ex: 7"/></div>'
+    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'desafio-modal\')">Cancelar</button><button class="btn-modal-save" onclick="alert(\'Desafio criado com sucesso! (Simulação)\');closeModal(\'desafio-modal\');">Criar Desafio</button></div>');
+}
+
+/* ===== EVOLUÇÃO ===== */
+function pEvolucao(){
+  var html = '<div class="page-header-row"><div class="page-header"><h1>Evolução Financeira 📈</h1><p>Acompanhe seu crescimento financeiro ao longo do tempo.</p></div></div>';
+  
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px">'
+    + '<div class="card" style="border-left:4px solid #16a34a"><div class="card-label">Economia Mensal Média</div><div class="card-value" style="color:#16a34a">+15.4% <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">vs mês anterior</span></div></div>'
+    + '<div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Crescimento Patrimonial</div><div class="card-value" style="color:#1a6fc4">+R$ 1.850,00 <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">este mês</span></div></div>'
+    + '<div class="card" style="border-left:4px solid #7c3aed"><div class="card-label">Gastos em Relação à Renda</div><div class="card-value" style="color:#7c3aed">-8.2% <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">redução</span></div></div>'
+    + '</div>';
+
+  html += '<div class="chart-card" style="margin-bottom:24px;">'
+    + '<div class="chart-title">Evolução do Patrimônio Líquido (Histórico)</div>'
+    + '<div class="chart-sub">Soma de saldos e investimentos nos últimos 6 meses</div>'
+    + '<div style="position:relative;height:240px"><canvas id="c-evolucao"></canvas></div>'
+    + '</div>';
+
+  document.getElementById('main-content').innerHTML = html;
+
+  setTimeout(function(){
+    var ctx = document.getElementById('c-evolucao');
+    if (!ctx) return;
+    allCharts.push(new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Dez', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        datasets: [
+          {
+            label: 'Patrimônio Líquido (R$)',
+            data: [12000, 13500, 14200, 15800, 17100, 18950],
+            backgroundColor: '#1a6fc4cc',
+            borderColor: '#1a6fc4',
+            borderWidth: 1,
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f2f5' } }
+        }
+      }
+    }));
+  }, 100);
+}
 
 /* ===== ORGANIZAÇÃO ===== */
 async function pOrganizacao(){
