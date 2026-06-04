@@ -2662,19 +2662,219 @@ async function updateProgressoDesafio() {
 }
 
 /* ===== EVOLUÇÃO ===== */
-function pEvolucao(){
+async function pEvolucao(){
+  var transactions = [];
+  var investments = [];
+  var goals = [];
+
+  try {
+    var r = await sb.from('transactions').select('*').eq('user_id', currentUser.id);
+    transactions = r.data || [];
+  } catch(e) {
+    console.error('Erro ao buscar transações:', e);
+  }
+
+  if (!transactions.length) {
+    var html = renderPremiumHeader('Evolução')
+      + '<div class="premium-body">'
+      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="font-size:56px;margin-bottom:16px">📈</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Evolução Financeira</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Adicione receitas e despesas para visualizar sua evolução financeira.</div>'
+      + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Ir para Transações</button>'
+      + '</div>'
+      + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+    return;
+  }
+
+  try {
+    var r = await sb.from('investments').select('*').eq('user_id', currentUser.id);
+    investments = r.data || [];
+  } catch(e) {
+    console.warn('Erro ao buscar investimentos, usando []:', e);
+    investments = [];
+  }
+
+  try {
+    var r = await sb.from('goals').select('*').eq('user_id', currentUser.id);
+    goals = r.data || [];
+  } catch(e) {
+    console.warn('Erro ao buscar metas, usando []:', e);
+    goals = [];
+  }
+
+  // Chaves e labels dos últimos 6 meses (fim com o mês atual)
+  var monthsLabels = [];
+  var monthsKeys = [];
+  var now = new Date();
+  for (var i = 5; i >= 0; i--) {
+    var temp = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var label = temp.toLocaleDateString('pt-BR', { month: 'short' });
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    monthsLabels.push(label);
+    
+    var year = temp.getFullYear();
+    var month = String(temp.getMonth() + 1).padStart(2, '0');
+    monthsKeys.push(year + '-' + month);
+  }
+
+  var monthlyIncome = Array(6).fill(0);
+  var monthlyExpense = Array(6).fill(0);
+
+  transactions.forEach(function(t){
+    var p = String(t.date || '').split('T')[0].split('-');
+    if (p.length === 3) {
+      var key = p[0] + '-' + p[1];
+      var idx = monthsKeys.indexOf(key);
+      if (idx >= 0) {
+        if (isIncome(t.type)) monthlyIncome[idx] += parseFloat(t.amount || 0);
+        else monthlyExpense[idx] += parseFloat(t.amount || 0);
+      }
+    }
+  });
+
+  // Saldo cumulativo de transações por mês
+  var monthlyCumulativeBalance = Array(6).fill(0);
+  for (var m = 0; m < 6; m++) {
+    var keyLimit = monthsKeys[m];
+    var bal = 0;
+    transactions.forEach(function(t){
+      var tKey = String(t.date || '').substring(0, 7);
+      if (tKey <= keyLimit) {
+        if (isIncome(t.type)) bal += parseFloat(t.amount || 0);
+        else bal -= parseFloat(t.amount || 0);
+      }
+    });
+    monthlyCumulativeBalance[m] = bal;
+  }
+
+  // Investimentos e Metas acumulados por mês
+  var monthlyCumulativeInvested = Array(6).fill(0);
+  var monthlyCumulativeGoals = Array(6).fill(0);
+
+  for (var m = 0; m < 6; m++) {
+    var keyLimit = monthsKeys[m];
+    
+    var invVal = 0;
+    investments.forEach(function(i){
+      var iKey = String(i.created_at || '').substring(0, 7) || '0000-00';
+      if (iKey <= keyLimit) {
+        invVal += parseFloat(i.current_value || i.value || 0);
+      }
+    });
+    monthlyCumulativeInvested[m] = invVal;
+
+    var goalVal = 0;
+    goals.forEach(function(g){
+      var gKey = String(g.created_at || '').substring(0, 7) || '0000-00';
+      if (gKey <= keyLimit) {
+        goalVal += parseFloat(g.saved_amount || 0);
+      }
+    });
+    monthlyCumulativeGoals[m] = goalVal;
+  }
+
+  // Patrimônio Líquido acumulado por mês
+  var monthlyNetWorth = Array(6).fill(0);
+  for (var m = 0; m < 6; m++) {
+    monthlyNetWorth[m] = monthlyCumulativeBalance[m] + monthlyCumulativeInvested[m] + monthlyCumulativeGoals[m];
+  }
+
+  // activeMonths: quantidade de meses com transação nos últimos 6 meses
+  var activeMonths = 0;
+  for (var m = 0; m < 6; m++) {
+    if (monthlyIncome[m] > 0 || monthlyExpense[m] > 0) activeMonths++;
+  }
+  if (activeMonths === 0) activeMonths = 1;
+
+  // 1. Economia Mensal Média
+  var totalSavings = monthlyIncome.reduce((a,b)=>a+b,0) - monthlyExpense.reduce((a,b)=>a+b,0);
+  var averageSavings = totalSavings / activeMonths;
+
+  var savings_curr = monthlyIncome[5] - monthlyExpense[5];
+  var savings_prev = monthlyIncome[4] - monthlyExpense[4];
+  var pctChangeText = 'vs mês anterior';
+  if (savings_prev !== 0) {
+    var pct = ((savings_curr - savings_prev) / Math.abs(savings_prev) * 100);
+    pctChangeText = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '% vs mês anterior';
+  } else {
+    pctChangeText = '+0.0% vs mês anterior';
+  }
+
+  // 2. Crescimento Patrimonial
+  var PL_current = monthlyNetWorth[5];
+  var PL_prev = monthlyNetWorth[4];
+  var PL_growth = PL_current - PL_prev;
+  var PL_growth_text = (PL_growth >= 0 ? '+' : '-') + fmt(Math.abs(PL_growth));
+
+  // 3. Gastos em Relação à Renda
+  var currentIncome = monthlyIncome[5];
+  var currentExpense = monthlyExpense[5];
+  var ratio_curr = currentIncome > 0 ? (currentExpense / currentIncome * 100) : 0;
+
+  var prevIncome = monthlyIncome[4];
+  var prevExpense = monthlyExpense[4];
+  var ratio_prev = prevIncome > 0 ? (prevExpense / prevIncome * 100) : 0;
+  var ratio_diff = ratio_curr - ratio_prev;
+  var ratio_diff_text = (ratio_diff >= 0 ? '+' : '') + ratio_diff.toFixed(1) + '% vs mês anterior';
+
+  // 4. Indicadores Gerais
+  var bestMonthIndex = 0;
+  var bestVal = -Infinity;
+  for (var m = 0; m < 6; m++) {
+    var val = monthlyIncome[m] - monthlyExpense[m];
+    if (val > bestVal) {
+      bestVal = val;
+      bestMonthIndex = m;
+    }
+  }
+  var melhorMesText = monthsLabels[bestMonthIndex] + ' (' + fmt(bestVal) + ')';
+
+  var worstMonthIndex = 0;
+  var worstVal = Infinity;
+  for (var m = 0; m < 6; m++) {
+    var val = monthlyIncome[m] - monthlyExpense[m];
+    if (val < worstVal) {
+      worstVal = val;
+      worstMonthIndex = m;
+    }
+  }
+  var piorMesText = monthsLabels[worstMonthIndex] + ' (' + fmt(worstVal) + ')';
+
+  var avgIncome = monthlyIncome.reduce((a,b)=>a+b,0) / activeMonths;
+  var avgExpense = monthlyExpense.reduce((a,b)=>a+b,0) / activeMonths;
+
+  var totalInc = monthlyIncome.reduce((a,b)=>a+b,0);
+  var totalExp = monthlyExpense.reduce((a,b)=>a+b,0);
+  var savingsRate = totalInc > 0 ? ((totalInc - totalExp) / totalInc * 100) : 0;
+  var savingsRateText = savingsRate.toFixed(1) + '%';
+
   var html = renderPremiumHeader('Evolução')
     + '<div class="premium-body">'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px">'
-    + '<div class="card" style="border-left:4px solid #16a34a"><div class="card-label">Economia Mensal Média</div><div class="card-value" style="color:#16a34a">+15.4% <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">vs mês anterior</span></div></div>'
-    + '<div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Crescimento Patrimonial</div><div class="card-value" style="color:#1a6fc4">+R$ 1.850,00 <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">este mês</span></div></div>'
-    + '<div class="card" style="border-left:4px solid #7c3aed"><div class="card-label">Gastos em Relação à Renda</div><div class="card-value" style="color:#7c3aed">-8.2% <span style="font-size:12px;font-weight:normal;color:var(--text-muted)">redução</span></div></div>'
+    + '<div class="card" style="border-left:4px solid #16a34a"><div class="card-label">Economia Mensal Média</div><div class="card-value" style="color:#16a34a">' + fmt(averageSavings) + ' <span style="font-size:12px;font-weight:normal;color:var(--text-muted);display:block;margin-top:4px">' + pctChangeText + '</span></div></div>'
+    + '<div class="card" style="border-left:4px solid #1a6fc4"><div class="card-label">Crescimento Patrimonial</div><div class="card-value" style="color:#1a6fc4">' + PL_growth_text + ' <span style="font-size:12px;font-weight:normal;color:var(--text-muted);display:block;margin-top:4px">este mês (Total: ' + fmt(PL_current) + ')</span></div></div>'
+    + '<div class="card" style="border-left:4px solid #7c3aed"><div class="card-label">Gastos em Relação à Renda</div><div class="card-value" style="color:#7c3aed">' + ratio_curr.toFixed(1) + '% <span style="font-size:12px;font-weight:normal;color:var(--text-muted);display:block;margin-top:4px">' + ratio_diff_text + '</span></div></div>'
     + '</div>'
+    
     + '<div class="chart-card" style="margin-bottom:24px;">'
     + '<div class="chart-title">Evolução do Patrimônio Líquido (Histórico)</div>'
-    + '<div class="chart-sub">Soma de saldos e investimentos nos últimos 6 meses</div>'
+    + '<div class="chart-sub">Soma de saldos, investimentos e metas nos últimos 6 meses</div>'
     + '<div style="position:relative;height:240px"><canvas id="c-evolucao"></canvas></div>'
     + '</div>'
+
+    + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);margin-bottom:24px">'
+    + '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;border-bottom:1px solid #f3f4f6;padding-bottom:12px">Indicadores de Desempenho</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">'
+    + '<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Melhor Mês Financeiro</div><div style="font-size:15px;font-weight:700;color:#16a34a">' + melhorMesText + '</div></div>'
+    + '<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Pior Mês Financeiro</div><div style="font-size:15px;font-weight:700;color:#dc2626">' + piorMesText + '</div></div>'
+    + '<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Média de Receitas</div><div style="font-size:15px;font-weight:700;color:var(--text)">' + fmt(avgIncome) + '</div></div>'
+    + '<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Média de Despesas</div><div style="font-size:15px;font-weight:700;color:var(--text)">' + fmt(avgExpense) + '</div></div>'
+    + '<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Taxa de Economia Geral</div><div style="font-size:15px;font-weight:700;color:#7c3aed">' + savingsRateText + '</div></div>'
+    + '</div>'
+    + '</div>'
+
     + '</div>';
 
   document.getElementById('main-content').innerHTML = html;
@@ -2685,11 +2885,11 @@ function pEvolucao(){
     allCharts.push(new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Dez', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+        labels: monthsLabels,
         datasets: [
           {
             label: 'Patrimônio Líquido (R$)',
-            data: [12000, 13500, 14200, 15800, 17100, 18950],
+            data: monthlyNetWorth,
             backgroundColor: '#1a6fc4cc',
             borderColor: '#1a6fc4',
             borderWidth: 1,
