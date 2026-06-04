@@ -2209,83 +2209,456 @@ function exportPDF(){var inc=tabelaCache.filter(function(t){return isIncome(t.ty
 function pCfg(){document.getElementById('topbar-title').textContent='Configurações';devScreen();}
 
 /* ===== CONTAS FIXAS ===== */
-function pContasFixas(){
+async function pContasFixas(){
+  var contas = [];
+  try {
+    var r = await sb.from('fixed_expenses').select('*').eq('user_id', currentUser.id).order('due_day', { ascending: true });
+    contas = r.data || [];
+  } catch(e) {
+    console.error(e);
+  }
+
+  var totalMensal = contas.reduce(function(acc, c){ return acc + parseFloat(c.amount || 0); }, 0);
+  var totalPago = contas.filter(function(c){ return c.status === 'paid'; }).reduce(function(acc, c){ return acc + parseFloat(c.amount || 0); }, 0);
+  var totalPendente = contas.filter(function(c){ return c.status === 'pending'; }).reduce(function(acc, c){ return acc + parseFloat(c.amount || 0); }, 0);
+  var totalAtrasado = contas.filter(function(c){ return c.status === 'overdue'; }).reduce(function(acc, c){ return acc + parseFloat(c.amount || 0); }, 0);
+
   var html = renderPremiumHeader('Contas Fixas')
     + '<div class="premium-body">'
-    + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="openContasFixasModal()">+ Nova Conta Fixa</button></div>';
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">'
+    + adminCard('Total Mensal', fmt(totalMensal), 'cadastrado', '#1a6fc4')
+    + adminCard('Pago', fmt(totalPago), 'confirmado', '#16a34a')
+    + adminCard('Pendente', fmt(totalPendente), 'a pagar', '#d97706')
+    + adminCard('Atrasado', fmt(totalAtrasado), 'vencido', '#dc2626')
+    + '</div>'
+    + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="handleNewContaFixaBtn()">+ Nova Conta Fixa</button></div>';
   
-  var contas = [
-    { nome: 'Internet 🌐', valor: 119.90, vencimento: 10, categoria: 'Assinaturas', status: 'Pendente' },
-    { nome: 'Energia ⚡', valor: 250.00, vencimento: 15, categoria: 'Moradia', status: 'Pendente' },
-    { nome: 'Água 💧', valor: 85.00, vencimento: 20, categoria: 'Moradia', status: 'Pendente' },
-    { nome: 'Netflix 🎬', valor: 45.90, vencimento: 5, categoria: 'Assinaturas', status: 'Pago' }
-  ];
-
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
-  contas.forEach(function(c){
-    var statusCor = c.status === 'Pago' ? '#16a34a' : '#d97706';
-    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);position:relative">'
-      + '<span style="position:absolute;top:16px;right:16px;background:'+statusCor+'15;color:'+statusCor+';font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px">'+c.status+'</span>'
-      + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">'+c.nome+'</div>'
-      + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Categoria: <strong>'+c.categoria+'</strong></div>'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1px solid var(--border);padding-top:12px">'
-      + '<div style="color:var(--text-muted)">Dia de vencimento: <strong style="color:var(--text)">'+c.vencimento+'</strong></div>'
-      + '<strong style="font-size:14px;color:var(--red)">'+fmt(c.valor)+'</strong>'
-      + '</div>'
+  if (!contas.length) {
+    html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="font-size:56px;margin-bottom:16px">📑</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Tudo organizado!</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Você ainda não possui contas fixas cadastradas. Cadastre suas contas recorrentes e não perca nenhum vencimento.</div>'
+      + '<button class="btn-primary" onclick="handleNewContaFixaBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeira Conta</button>'
       + '</div>';
-  });
-  html += '</div></div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
+    contas.forEach(function(c){
+      var statusCor = c.status === 'paid' ? '#16a34a' : c.status === 'pending' ? '#d97706' : '#dc2626';
+      var statusTexto = c.status === 'paid' ? 'Pago' : c.status === 'pending' ? 'Pendente' : 'Atrasado';
+      html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.02);position:relative">'
+        + '<span style="position:absolute;top:16px;right:16px;background:'+statusCor+'15;color:'+statusCor+';font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px">'+statusTexto+'</span>'
+        + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">'+c.title+'</div>'
+        + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Categoria: <strong>'+c.category+'</strong></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px">'
+        + '<div style="color:var(--text-muted)">Dia de vencimento: <strong style="color:var(--text)">'+c.due_day+'</strong></div>'
+        + '<strong style="font-size:14px;color:var(--text)">'+fmt(c.amount)+'</strong>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="toggleContaFixaStatus(\''+c.id+'\',\''+c.status+'\')" style="flex:2;padding:6px 12px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">'
+        + (c.status === 'paid' ? '🔄 Pendente' : '✅ Pago')
+        + '</button>'
+        + '<button onclick="openEditContaFixaModal(\''+c.id+'\')" style="flex:1;padding:6px 12px;background:#fff;color:#4b5563;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center">Editar</button>'
+        + '<button onclick="deleteContaFixa(\''+c.id+'\')" style="padding:6px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>'
+        + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
   document.getElementById('main-content').innerHTML = html;
+}
+
+async function toggleContaFixaStatus(id, currentStatus) {
+  var newStatus = currentStatus === 'paid' ? 'pending' : 'paid';
+  try {
+    var r = await sb.from('fixed_expenses').update({ status: newStatus }).eq('id', id);
+    if (r.error) throw r.error;
+    pContasFixas();
+  } catch(e) {
+    alert('Erro ao atualizar status: ' + e.message);
+  }
+}
+
+async function deleteContaFixa(id) {
+  if (!confirm('Deseja realmente excluir esta conta fixa?')) return;
+  try {
+    var r = await sb.from('fixed_expenses').delete().eq('id', id);
+    if (r.error) throw r.error;
+    pContasFixas();
+  } catch(e) {
+    alert('Erro ao excluir conta fixa: ' + e.message);
+  }
+}
+
+async function handleNewContaFixaBtn() {
+  var plan = (currentProfile && currentProfile.plan) || 'free';
+  if (plan === 'trial') {
+    try {
+      var countRes = await sb.from('fixed_expenses').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+      var currentCount = countRes.count || 0;
+      if (currentCount >= 2) {
+        showLimitModal();
+        return;
+      }
+    } catch(e) {
+      console.error('Erro ao verificar limite de contas fixas:', e);
+    }
+  }
+  openContasFixasModal();
 }
 
 function openContasFixasModal(){
   mkModal('contas-fixas-modal', '<div class="modal-title">Nova Conta Fixa 📑</div>'
     + '<div class="modal-field"><label>Nome da Conta</label><input id="cf-nome" placeholder="Ex: Internet fibra"/></div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    + '<div class="modal-field"><label>Valor (R$)</label><input type="number" id="cf-valor" placeholder="0.00"/></div>'
-    + '<div class="modal-field"><label>Dia Vencimento</label><input type="number" id="cf-vencimento" placeholder="Ex: 10"/></div>'
+    + '<div class="modal-field"><label>Valor (R$)</label><input type="number" step="0.01" id="cf-valor" placeholder="0.00"/></div>'
+    + '<div class="modal-field"><label>Dia Vencimento</label><input type="number" min="1" max="31" id="cf-vencimento" placeholder="Ex: 10"/></div>'
     + '</div>'
     + '<div class="modal-field"><label>Categoria</label><input id="cf-categoria" placeholder="Ex: Contas de consumo"/></div>'
-    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'contas-fixas-modal\')">Cancelar</button><button class="btn-modal-save" onclick="alert(\'Conta Fixa adicionada com sucesso! (Simulação)\');closeModal(\'contas-fixas-modal\');">Salvar</button></div>');
+    + '<div class="modal-field"><label>Situação</label><select id="cf-status" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;font-size:14px"><option value="pending">Pendente</option><option value="paid">Pago</option><option value="overdue">Atrasado</option></select></div>'
+    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'contas-fixas-modal\')">Cancelar</button><button class="btn-modal-save" onclick="saveContaFixa()">Salvar</button></div>');
+}
+
+async function saveContaFixa() {
+  var nome = (document.getElementById('cf-nome').value || '').trim();
+  var valor = parseFloat(document.getElementById('cf-valor').value || 0);
+  var vencimento = parseInt(document.getElementById('cf-vencimento').value || 0);
+  var categoria = (document.getElementById('cf-categoria').value || '').trim();
+  var status = document.getElementById('cf-status').value || 'pending';
+
+  if (!nome || !valor || !vencimento || !categoria) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+  if (vencimento < 1 || vencimento > 31) {
+    alert('Dia do vencimento deve ser entre 1 e 31.');
+    return;
+  }
+
+  try {
+    var r = await sb.from('fixed_expenses').insert({
+      user_id: currentUser.id,
+      title: nome,
+      amount: valor,
+      due_day: vencimento,
+      category: categoria,
+      status: status
+    });
+    if (r.error) throw r.error;
+    closeModal('contas-fixas-modal');
+    pContasFixas();
+  } catch(e) {
+    alert('Erro ao salvar conta fixa: ' + e.message);
+  }
+}
+
+async function openEditContaFixaModal(id) {
+  try {
+    var r = await sb.from('fixed_expenses').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var c = r.data;
+
+    mkModal('edit-contas-fixas-modal', '<div class="modal-title">Editar Conta Fixa 📑</div>'
+      + '<input type="hidden" id="edit-cf-id" value="' + c.id + '"/>'
+      + '<div class="modal-field"><label>Nome da Conta</label><input id="edit-cf-nome" value="' + c.title + '" placeholder="Ex: Internet fibra"/></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      + '<div class="modal-field"><label>Valor (R$)</label><input type="number" step="0.01" id="edit-cf-valor" value="' + c.amount + '" placeholder="0.00"/></div>'
+      + '<div class="modal-field"><label>Dia Vencimento</label><input type="number" min="1" max="31" id="edit-cf-vencimento" value="' + c.due_day + '" placeholder="Ex: 10"/></div>'
+      + '</div>'
+      + '<div class="modal-field"><label>Categoria</label><input id="edit-cf-categoria" value="' + c.category + '" placeholder="Ex: Contas de consumo"/></div>'
+      + '<div class="modal-field"><label>Situação</label><select id="edit-cf-status" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;outline:none;background:#fff;font-size:14px">'
+      + '<option value="pending" ' + (c.status === 'pending' ? 'selected' : '') + '>Pendente</option>'
+      + '<option value="paid" ' + (c.status === 'paid' ? 'selected' : '') + '>Pago</option>'
+      + '<option value="overdue" ' + (c.status === 'overdue' ? 'selected' : '') + '>Atrasado</option>'
+      + '</select></div>'
+      + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'edit-contas-fixas-modal\')">Cancelar</button><button class="btn-modal-save" onclick="updateContaFixa()">Salvar</button></div>');
+  } catch(e) {
+    alert('Erro ao carregar conta fixa: ' + e.message);
+  }
+}
+
+async function updateContaFixa() {
+  var id = document.getElementById('edit-cf-id').value;
+  var nome = (document.getElementById('edit-cf-nome').value || '').trim();
+  var valor = parseFloat(document.getElementById('edit-cf-valor').value || 0);
+  var vencimento = parseInt(document.getElementById('edit-cf-vencimento').value || 0);
+  var categoria = (document.getElementById('edit-cf-categoria').value || '').trim();
+  var status = document.getElementById('edit-cf-status').value || 'pending';
+
+  if (!nome || !valor || !vencimento || !categoria) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+  if (vencimento < 1 || vencimento > 31) {
+    alert('Dia do vencimento deve ser entre 1 e 31.');
+    return;
+  }
+
+  try {
+    var r = await sb.from('fixed_expenses').update({
+      title: nome,
+      amount: valor,
+      due_day: vencimento,
+      category: categoria,
+      status: status
+    }).eq('id', id);
+    if (r.error) throw r.error;
+    closeModal('edit-contas-fixas-modal');
+    pContasFixas();
+  } catch(e) {
+    alert('Erro ao atualizar conta fixa: ' + e.message);
+  }
 }
 
 /* ===== DESAFIOS ===== */
-function pDesafios(){
+async function pDesafios(){
+  var challenges = [];
+  try {
+    var r = await sb.from('financial_challenges').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    challenges = r.data || [];
+  } catch(e) {
+    console.error(e);
+  }
+
   var html = renderPremiumHeader('Desafios')
     + '<div class="premium-body">'
-    + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="openDesafioModal()">+ Novo Desafio</button></div>';
+    + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="handleNewDesafioBtn()">+ Novo Desafio</button></div>';
 
-  var desafios = [
-    { titulo: 'Economizar R$ 100 esta semana 💰', desc: 'Evite gastos supérfluos e guarde R$ 100 até domingo.', progresso: 60, alvo: 100, atual: 60, dias: 3, cor: '#1a6fc4' },
-    { titulo: 'Reduzir Delivery 🍔', desc: 'Faça comida em casa. Limite-se a no máximo 2 pedidos nesta semana.', progresso: 100, alvo: 2, atual: 2, dias: 5, cor: '#d97706' },
-    { titulo: 'Guardar R$ 500 no mês 🏦', desc: 'Faça um esforço para investir R$ 500 de sobra de caixa.', progresso: 30, alvo: 500, atual: 150, dias: 20, cor: '#16a34a' }
-  ];
-
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
-  desafios.forEach(function(d){
-    html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden">'
-      + '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:'+d.cor+'"></div>'
-      + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">'+d.titulo+'</div>'
-      + '<p style="font-size:12px;color:var(--text-muted);line-height:1.4;margin-bottom:12px">'+d.desc+'</p>'
-      + '<div style="height:8px;background:#f1f2f5;border-radius:4px;overflow:hidden;margin-bottom:12px">'
-      + '<div style="width:'+d.progresso+'%;height:100%;background:linear-gradient(90deg, '+d.cor+'cc, '+d.cor+');border-radius:4px;"></div>'
-      + '</div>'
-      + '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:12px">'
-      + '<span>Progresso: <strong>'+d.progresso+'%</strong></span>'
-      + '<span>Faltam: <strong>'+(d.dias === 1 ? '1 dia' : d.dias + ' dias')+'</strong></span>'
-      + '</div>'
+  if (!challenges.length) {
+    html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="font-size:56px;margin-bottom:16px">🏆</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhum desafio criado ainda.</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie desafios financeiros pessoais para economizar dinheiro, reduzir custos ou atingir metas rápidas.</div>'
+      + '<button class="btn-primary" onclick="handleNewDesafioBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeiro Desafio</button>'
       + '</div>';
-  });
-  html += '</div></div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">';
+    challenges.forEach(function(d){
+      var alvo = parseFloat(d.target_value || 0);
+      var atual = parseFloat(d.current_value || 0);
+      var pct = alvo > 0 ? Math.min(100, Math.round(atual / alvo * 100)) : 0;
+      
+      // Calcular dias restantes
+      var hoje = new Date();
+      hoje.setHours(0,0,0,0);
+      var criado = new Date(d.created_at);
+      criado.setHours(0,0,0,0);
+      
+      var targetDate = criado.getTime() + (parseInt(d.deadline || 0) * 24 * 60 * 60 * 1000);
+      var diffTime = targetDate - hoje.getTime();
+      var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      var diasRestantesText = '';
+      var statusCor = '#1a6fc4';
+      if (pct >= 100) {
+        diasRestantesText = '🎉 Concluído!';
+        statusCor = '#16a34a';
+      } else if (diffDays > 1) {
+        diasRestantesText = `Faltam ${diffDays} dias`;
+      } else if (diffDays === 1) {
+        diasRestantesText = 'Falta 1 dia';
+      } else if (diffDays === 0) {
+        diasRestantesText = 'Vence hoje ⚠️';
+        statusCor = '#d97706';
+      } else {
+        diasRestantesText = `Vencido há ${Math.abs(diffDays)} dias ⚠️`;
+        statusCor = '#dc2626';
+      }
+      
+      var descHtml = d.description ? '<p style="font-size:12px;color:var(--text-muted);line-height:1.4;margin-bottom:12px;height:40px;overflow:hidden;text-overflow:ellipsis">' + d.description + '</p>' : '<p style="font-size:12px;color:var(--text-muted);line-height:1.4;margin-bottom:12px;height:40px;font-style:italic">Sem descrição</p>';
+
+      html += '<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.03);position:relative;overflow:hidden">'
+        + '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:'+statusCor+'"></div>'
+        + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">'+d.title+'</div>'
+        + descHtml
+        + '<div style="height:8px;background:#f1f2f5;border-radius:4px;overflow:hidden;margin-bottom:12px">'
+        + '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg, '+statusCor+'cc, '+statusCor+');border-radius:4px;"></div>'
+        + '</div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:16px">'
+        + '<span>Progresso: <strong>'+pct+'%</strong> ('+fmt(atual)+' / '+fmt(alvo)+')</span>'
+        + '<span><strong>'+diasRestantesText+'</strong></span>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;border-top:1px solid #f3f4f6;padding-top:12px">'
+        + '<button onclick="openUpdateProgressoDesafioModal(\''+d.id+'\')" style="flex:2;padding:6px 12px;background:#1a6fc4;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">📊 Progresso</button>'
+        + '<button onclick="openEditDesafioModal(\''+d.id+'\')" style="flex:1;padding:6px 12px;background:#fff;color:#4b5563;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center">Editar</button>'
+        + '<button onclick="deleteDesafio(\''+d.id+'\')" style="padding:6px;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>'
+        + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
   document.getElementById('main-content').innerHTML = html;
+}
+
+async function deleteDesafio(id) {
+  if (!confirm('Deseja realmente excluir este desafio?')) return;
+  try {
+    var r = await sb.from('financial_challenges').delete().eq('id', id);
+    if (r.error) throw r.error;
+    pDesafios();
+  } catch(e) {
+    alert('Erro ao excluir desafio: ' + e.message);
+  }
+}
+
+async function handleNewDesafioBtn() {
+  var plan = (currentProfile && currentProfile.plan) || 'free';
+  if (plan === 'trial') {
+    try {
+      var countRes = await sb.from('financial_challenges').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+      var currentCount = countRes.count || 0;
+      if (currentCount >= 2) {
+        showLimitModal();
+        return;
+      }
+    } catch(e) {
+      console.error('Erro ao verificar limite de desafios:', e);
+    }
+  }
+  openDesafioModal();
 }
 
 function openDesafioModal(){
   mkModal('desafio-modal', '<div class="modal-title">Novo Desafio 🏆</div>'
-    + '<div class="modal-field"><label>Nome do Desafio</label><input id="ds-nome" placeholder="Ex: Ficar 3 dias sem gastar nada"/></div>'
-    + '<div class="modal-field"><label>Meta (R$ ou quantidade)</label><input type="number" id="ds-meta" placeholder="Ex: 100"/></div>'
-    + '<div class="modal-field"><label>Prazo (dias)</label><input type="number" id="ds-dias" placeholder="Ex: 7"/></div>'
-    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'desafio-modal\')">Cancelar</button><button class="btn-modal-save" onclick="alert(\'Desafio criado com sucesso! (Simulação)\');closeModal(\'desafio-modal\');">Criar Desafio</button></div>');
+    + '<div class="modal-field"><label>Nome do Desafio</label><input id="ds-nome" placeholder="Ex: Economizar no Delivery"/></div>'
+    + '<div class="modal-field"><label>Descrição</label><input id="ds-desc" placeholder="Ex: Evitar pedir iFood essa semana"/></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    + '<div class="modal-field"><label>Meta (R$)</label><input type="number" step="0.01" id="ds-meta" placeholder="0.00"/></div>'
+    + '<div class="modal-field"><label>Atual (R$)</label><input type="number" step="0.01" id="ds-atual" value="0" placeholder="0.00"/></div>'
+    + '</div>'
+    + '<div class="modal-field"><label>Prazo (dias)</label><input type="number" min="1" id="ds-dias" placeholder="Ex: 7"/></div>'
+    + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'desafio-modal\')">Cancelar</button><button class="btn-modal-save" onclick="saveDesafio()">Criar Desafio</button></div>');
+}
+
+async function saveDesafio() {
+  var nome = (document.getElementById('ds-nome').value || '').trim();
+  var desc = (document.getElementById('ds-desc').value || '').trim();
+  var meta = parseFloat(document.getElementById('ds-meta').value || 0);
+  var atual = parseFloat(document.getElementById('ds-atual').value || 0);
+  var dias = parseInt(document.getElementById('ds-dias').value || 0);
+
+  if (!nome || !meta || !dias) {
+    alert('Por favor, preencha nome, meta e prazo.');
+    return;
+  }
+
+  try {
+    var r = await sb.from('financial_challenges').insert({
+      user_id: currentUser.id,
+      title: nome,
+      description: desc,
+      target_value: meta,
+      current_value: atual,
+      deadline: dias,
+      status: atual >= meta ? 'completed' : 'pending'
+    });
+    if (r.error) throw r.error;
+    closeModal('desafio-modal');
+    pDesafios();
+  } catch(e) {
+    alert('Erro ao criar desafio: ' + e.message);
+  }
+}
+
+async function openEditDesafioModal(id) {
+  try {
+    var r = await sb.from('financial_challenges').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var d = r.data;
+
+    mkModal('edit-desafio-modal', '<div class="modal-title">Editar Desafio 🏆</div>'
+      + '<input type="hidden" id="edit-ds-id" value="' + d.id + '"/>'
+      + '<div class="modal-field"><label>Nome do Desafio</label><input id="edit-ds-nome" value="' + d.title + '" placeholder="Ex: Economizar no Delivery"/></div>'
+      + '<div class="modal-field"><label>Descrição</label><input id="edit-ds-desc" value="' + (d.description || '') + '" placeholder="Ex: Evitar pedir iFood essa semana"/></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      + '<div class="modal-field"><label>Meta (R$)</label><input type="number" step="0.01" id="edit-ds-meta" value="' + d.target_value + '" placeholder="0.00"/></div>'
+      + '<div class="modal-field"><label>Atual (R$)</label><input type="number" step="0.01" id="edit-ds-atual" value="' + d.current_value + '" placeholder="0.00"/></div>'
+      + '</div>'
+      + '<div class="modal-field"><label>Prazo (dias)</label><input type="number" min="1" id="edit-ds-dias" value="' + d.deadline + '" placeholder="Ex: 7"/></div>'
+      + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'edit-desafio-modal\')">Cancelar</button><button class="btn-modal-save" onclick="updateDesafio()">Salvar</button></div>');
+  } catch(e) {
+    alert('Erro ao carregar desafio: ' + e.message);
+  }
+}
+
+async function updateDesafio() {
+  var id = document.getElementById('edit-ds-id').value;
+  var nome = (document.getElementById('edit-ds-nome').value || '').trim();
+  var desc = (document.getElementById('edit-ds-desc').value || '').trim();
+  var meta = parseFloat(document.getElementById('edit-ds-meta').value || 0);
+  var atual = parseFloat(document.getElementById('edit-ds-atual').value || 0);
+  var dias = parseInt(document.getElementById('edit-ds-dias').value || 0);
+
+  if (!nome || !meta || !dias) {
+    alert('Por favor, preencha nome, meta e prazo.');
+    return;
+  }
+
+  try {
+    var r = await sb.from('financial_challenges').update({
+      title: nome,
+      description: desc,
+      target_value: meta,
+      current_value: atual,
+      deadline: dias,
+      status: atual >= meta ? 'completed' : 'pending'
+    }).eq('id', id);
+    if (r.error) throw r.error;
+    closeModal('edit-desafio-modal');
+    pDesafios();
+  } catch(e) {
+    alert('Erro ao atualizar desafio: ' + e.message);
+  }
+}
+
+async function openUpdateProgressoDesafioModal(id) {
+  try {
+    var r = await sb.from('financial_challenges').select('*').eq('id', id).single();
+    if (r.error) throw r.error;
+    var d = r.data;
+
+    mkModal('progresso-desafio-modal', '<div class="modal-title">Atualizar Progresso 📊</div>'
+      + '<input type="hidden" id="prog-ds-id" value="' + d.id + '"/>'
+      + '<div style="font-size:14px;color:var(--text);margin-bottom:14px">Desafio: <strong>' + d.title + '</strong></div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Progresso atual: ' + fmt(d.current_value) + ' / ' + fmt(d.target_value) + '</div>'
+      + '<div class="modal-field"><label>Valor a adicionar (R$)</label><input type="number" step="0.01" id="prog-ds-adicionar" placeholder="Ex: 50.00"/></div>'
+      + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;text-align:center">Ou informe o valor total novo no campo abaixo:</div>'
+      + '<div class="modal-field"><label>Novo Valor Total (R$)</label><input type="number" step="0.01" id="prog-ds-total" value="' + d.current_value + '"/></div>'
+      + '<div class="modal-footer"><button class="btn-modal-cancel" onclick="closeModal(\'progresso-desafio-modal\')">Cancelar</button><button class="btn-modal-save" onclick="updateProgressoDesafio()">Salvar</button></div>');
+  } catch(e) {
+    alert('Erro ao carregar progresso do desafio: ' + e.message);
+  }
+}
+
+async function updateProgressoDesafio() {
+  var id = document.getElementById('prog-ds-id').value;
+  var adicionar = parseFloat(document.getElementById('prog-ds-adicionar').value || 0);
+  var total = parseFloat(document.getElementById('prog-ds-total').value || 0);
+
+  try {
+    var r = await sb.from('financial_challenges').select('current_value, target_value').eq('id', id).single();
+    if (r.error) throw r.error;
+    var d = r.data;
+
+    var novoValor = d.current_value;
+    if (adicionar !== 0) {
+      novoValor = parseFloat(d.current_value) + adicionar;
+    } else {
+      novoValor = total;
+    }
+
+    var updateRes = await sb.from('financial_challenges').update({
+      current_value: novoValor,
+      status: novoValor >= d.target_value ? 'completed' : 'pending'
+    }).eq('id', id);
+
+    if (updateRes.error) throw updateRes.error;
+    closeModal('progresso-desafio-modal');
+    pDesafios();
+  } catch(e) {
+    alert('Erro ao atualizar progresso do desafio: ' + e.message);
+  }
 }
 
 /* ===== EVOLUÇÃO ===== */
