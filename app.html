@@ -598,6 +598,21 @@ tr:last-child td{border-bottom:none}
     padding: 16px;
   }
 }
+/* Customizations for Administrative Area */
+body[data-admin="true"] .mobile-nav-bar {
+  display: none !important;
+}
+body[data-admin="true"] .mobile-nav-btn-floating {
+  display: none !important;
+}
+body[data-admin="true"] .content {
+  padding-bottom: 20px !important;
+}
+@media(max-width:768px) {
+  body[data-admin="true"] .content {
+    padding-bottom: 14px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -697,7 +712,7 @@ tr:last-child td{border-bottom:none}
         <div class="avatar" id="sidebar-avatar">A</div>
         <div style="min-width:0">
           <div class="uname" id="sidebar-name">Usuário</div>
-          <div class="urole">Plano <span id="sidebar-role-tag">Free</span></div>
+          <div class="urole"><span id="sidebar-role-prefix">Plano </span><span id="sidebar-role-tag">Free</span></div>
         </div>
       </div>
     </div>
@@ -1238,14 +1253,25 @@ async function refreshNavBadges(){
 
 function setupApp(){
   var isAdmin=currentProfile&&currentProfile.role==='admin';
+  document.body.setAttribute('data-admin', isAdmin ? 'true' : 'false');
   var nav=isAdmin?adminNav:userNav;
   var nome=(currentProfile&&currentProfile.full_name)||(currentUser&&currentUser.email.split('@')[0])||'Usuário';
   var plan=(currentProfile&&currentProfile.plan)||'free';
   var planDisplay=plan.charAt(0).toUpperCase()+plan.slice(1);
   document.getElementById('sidebar-role-label').textContent=isAdmin?'Admin':'User Panel';
-  document.getElementById('sidebar-role-tag').textContent=planDisplay;
+  
+  var prefixEl = document.getElementById('sidebar-role-prefix');
+  var tagEl = document.getElementById('sidebar-role-tag');
+  if (prefixEl && tagEl) {
+    prefixEl.textContent = isAdmin ? '' : 'Plano ';
+    tagEl.textContent = isAdmin ? 'Administrador' : planDisplay;
+  } else if (tagEl) {
+    tagEl.textContent = planDisplay;
+  }
+  
   document.getElementById('sidebar-name').textContent=nome;
   document.getElementById('sidebar-avatar').textContent=nome[0].toUpperCase();
+  document.getElementById('sidebar-plan-badge').style.display=isAdmin?'none':'inline-block';
   document.getElementById('sidebar-plan-badge').textContent=planDisplay;
 
   if(!isAdmin){
