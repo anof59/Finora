@@ -848,9 +848,6 @@ var userNav=[
   {id:'analise',label:'Análise',icon:'bar-chart',tooltip:'Insights e score financeiro'},
   {id:'tabelas',label:'Tabelas',icon:'table',tooltip:'Histórico completo de transações'},
   
-  {section:'Inteligência'},
-  {id:'fi-chat',label:'Assistente IA',icon:'sparkles',tooltip:'Seu assistente financeiro',premiumItem:true},
-  
   {section:'Assinatura'},
   {id:'planos',label:'Planos e Assinatura',icon:'trophy',tooltip:'Faça upgrade da sua conta'}
 ];
@@ -872,11 +869,6 @@ var pageTitles={
   organizacao:'Organização',planejamento:'Planejamento','mes-atual':'Mês Atual',
   'contas-fixas':'Contas Fixas',desafios:'Desafios',evolucao:'Evolução',
   planos:'Planos e Assinatura',
-  'fi-chat':'Chat com IA','fi-analise':'Análise do Mês',
-  'fi-planejamento':'Planejamento Inteligente','fi-sugestoes':'Sugestões de Economia',
-  'fi-metas':'Metas Inteligentes','fi-previsao':'Previsão de Saldo',
-  'fi-alertas':'Alertas Inteligentes','fi-investimentos':'Investimentos IA',
-  'fi-perfil':'Perfil Financeiro',
   'admin-visao-geral':'Visão Geral','admin-usuarios':'Usuários',
   'admin-assinaturas':'Assinaturas e Planos','admin-pagamentos':'Pagamentos',
   'admin-acessos':'Acessos e Bloqueios','admin-relatorios':'Relatórios',
@@ -902,7 +894,6 @@ function renderPremiumHeader(title, isDashboard) {
     + '<div class="premium-header-content">'
     + '<div class="premium-header-left">'
     + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
-    + '<button class="header-btn menu-toggle-btn" onclick="toggleSidebar()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>'
     + '<span style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">' + title + '</span>'
     + '</div>'
     + '<div style="display:flex;align-items:center;gap:6px;opacity:0.85;margin-bottom:12px">'
@@ -913,7 +904,6 @@ function renderPremiumHeader(title, isDashboard) {
     + '<div style="font-size: 13px; opacity: 0.75; margin-top: 2px;">Tenha um ótimo dia! 👋</div>'
     + '</div>'
     + '<div class="premium-header-right">'
-    + '<button class="header-btn notification-btn" onclick="alert(\'Nenhuma notificação nova.\')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9m-4 13a2 2 0 01-4 0"/></svg><span class="notification-dot"></span></button>'
     + '</div>'
     + '</div>'
     + '</div>';
@@ -957,6 +947,11 @@ function navigate(pageId,el){
   } else {
     document.querySelector('.topbar').style.display = 'flex';
   }
+  
+  var topbarHam = document.querySelector('.topbar .hamburger');
+  if (topbarHam) {
+    topbarHam.style.display = pageId.startsWith('admin-') ? '' : 'none';
+  }
 
   updateMobileActiveNav(pageId);
 
@@ -968,11 +963,6 @@ function navigate(pageId,el){
     organizacao:pOrganizacao,planejamento:pPlanejamento,'mes-atual':pMesAtual,
     'contas-fixas':pContasFixas,desafios:pDesafios,evolucao:pEvolucao,
     planos:pPlanos,
-    'fi-chat':pFinInteligente,'fi-analise':pFinInteligente,
-    'fi-planejamento':pFinInteligente,'fi-sugestoes':pFinInteligente,
-    'fi-metas':pFinInteligente,'fi-previsao':pFinInteligente,
-    'fi-alertas':pFinInteligente,'fi-investimentos':pFinInteligente,
-    'fi-perfil':pFinInteligente,
     'admin-visao-geral':pAdminVisaoGeral,'admin-usuarios':pAdminUsuarios,
     'admin-assinaturas':pAdminAssinaturas,'admin-pagamentos':pAdminPagamentos,
     'admin-acessos':pAdminAcessos,'admin-relatorios':pAdminRelatorios,
@@ -3209,20 +3199,10 @@ async function pMesAtual(){
   document.getElementById('main-content').innerHTML=html;
 }
 
-function pFinInteligente(){
-  var plan=(currentProfile&&currentProfile.plan)||'free';
-  if(plan !== 'ultra'){
-    document.getElementById('main-content').innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:48px;text-align:center"><div style="font-size:40px;margin-bottom:14px">🤖✨</div><div style="font-size:20px;font-weight:800;color:#0d1b2e;margin-bottom:8px">FIN. INTELIGENTE Bloqueado</div><div style="font-size:14px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Todas as ferramentas avançadas de IA estão disponíveis apenas no plano Ultra. Mude agora e ative o poder da OpenAI na sua conta FFinora.</div><img src="assets/images/upgrade-ultra-preview.png" style="max-width:100%;border-radius:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" onerror="this.style.display=\'none\'"/><br><button onclick="navigate(\'planos\', document.querySelector(\'[onclick*=\\\'planos\\\']\'))" style="padding:10px 24px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px">Fazer Upgrade para Ultra</button></div>';
-    return;
-  }
-  document.getElementById('main-content').innerHTML='<div class="page-header"><h1>FIN. INTELIGENTE</h1><p>Com OpenAI Ativada</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px"><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">📊 Análise de Gastos</div><div style="font-size:12px;color:var(--text-muted)">Visão mensal</div></div><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">💡 Sugestões</div><div style="font-size:12px;color:var(--text-muted)">Dicas personalizadas</div></div><div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">🎯 Metas</div><div style="font-size:12px;color:var(--text-muted)">Acompanhe suas metas</div></div></div><div style="background:var(--white);border:1.5px solid #7c3aed;border-radius:14px;padding:20px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">✨</span><div><div style="font-size:14px;font-weight:700">OpenAI Ativada</div><div style="font-size:12px;color:#7c3aed">IA conectada ao seu perfil</div></div></div><div style="border:1px solid var(--border);border-radius:10px;padding:16px;min-height:120px;background:var(--gray-bg);font-size:13px;color:var(--text-muted);display:flex;align-items:center;justify-content:center">Faça perguntas sobre suas finanças...</div></div>';
-}
-
 function pPlanos(){
   var plan=(currentProfile&&currentProfile.plan)||'free';
   var isFree=plan==='free';
   var isPro=plan==='pro';
-  var isUltra=plan==='ultra';
   
   var banner = '';
   if (plan === 'free') {
@@ -3242,26 +3222,12 @@ function pPlanos(){
     +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Para controle completo</div>'
     +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 9,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
     +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div><div style="color:#9ca3af">❌ Sem Inteligência Artificial</div>'
+    +'<div>✅ Transações ilimitadas</div><div>✅ Múltiplas contas</div><div>✅ Relatórios detalhados</div>'
     +'</div>'
     +'<button onclick="assinarPlano(\'pro\',this)" style="width:100%;padding:10px;background:'+(isPro?'#e5e7eb':'#1a6fc4')+';color:'+(isPro?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isPro?'default':'pointer')+'">'+(isPro?'✅ Plano Atual':(plan==='trial'?'Assinar Pro':'Começar teste grátis'))+'</button>'
     +'</div>'
-
-    // --- Ultra ---
-    +'<div style="background:#fff;border:2px solid '+(isUltra?'#7c3aed':'#e5e7eb')+';border-radius:16px;padding:18px;width:220px;position:relative;display:none;">'
-    +(isUltra?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">Seu Plano Atual</div>':'')
-    +'<div style="position:absolute;top:16px;right:16px;background:#f3e8ff;color:#7c3aed;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">✨ IA</div>'
-    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px">Ultra</div>'
-    +'<div style="font-size:13px;color:#6b7280;margin-bottom:16px">Poder máximo com IA</div>'
-    +'<div style="font-size:28px;font-weight:800;color:#0d1b2e;margin-bottom:20px">R$ 39,90<span style="font-size:14px;color:#9ca3af;font-weight:600">/mês</span></div>'
-    +'<div style="margin-bottom:24px;font-size:13px;color:#4b5563;display:flex;flex-direction:column;gap:10px">'
-    +'<div>✅ Tudo do plano Pro</div><div>✅ Inteligência Artificial integrada</div><div>✅ Conselhos financeiros automáticos</div><div>✅ Análise de gastos inteligente</div>'
-    +'</div>'
-    +'<button onclick="assinarPlano(\'ultra\',this)" style="width:100%;padding:10px;background:'+(isUltra?'#e5e7eb':'#7c3aed')+';color:'+(isUltra?'#6b7280':'#fff')+';border:none;border-radius:8px;font-weight:600;cursor:'+(isUltra?'default':'pointer')+'">'+(isUltra?'✅ Plano Atual':'🚀 Assinar Ultra')+'</button>'
-    +'</div>'
     
     +'</div>'
-    +'<img src="assets/images/assistente-ia-preview.png" alt="Antes e Depois com IA FFinora" style="width:100%;max-width:100%;border-radius:12px;margin-top:24px;display:block"/>'
     +'<div id="planos-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:12px 16px;font-size:13px;margin-top:16px;width:100%;max-width:480px;margin-left:auto;margin-right:auto"></div>';
   
   document.getElementById('main-content').innerHTML=html;
@@ -3396,6 +3362,5 @@ function pAdminPainel(){pAdminVisaoGeral();}
 function pGestaoUsuarios(){pAdminUsuarios();}
 function pAnaliseUsuarios(){pAdminRelatorios();}
 </script>
-<script src="assets/js/fi_ultra.js"></script>
 </body>
 </html>
