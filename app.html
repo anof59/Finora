@@ -1557,10 +1557,10 @@ async function pMetas(){
   html += `</div>`;
 
   if(!metas.length){
-    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">
+    html+=`<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">
       <div style="font-size:56px;margin-bottom:16px">🎯</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhuma meta criada ainda.</div>
-      <div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie objetivos financeiros e acompanhe seu progresso real. Defina valores e prazos para se manter focado.</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Nenhuma meta criada ainda.</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie objetivos financeiros e acompanhe seu progresso real. Defina valores e prazos para se manter focado.</div>
       <button class="btn-primary" onclick="handleNewMetaBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">Criar minha primeira meta</button>
     </div>`;
   } else {
@@ -1951,7 +1951,7 @@ async function pInv(){
   </h2>`;
 
   if(!invs.length){
-    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px"><div style="font-size:32px;margin-bottom:10px">📈</div><div style="font-size:14px;font-weight:700;margin-bottom:16px">Nenhum investimento cadastrado.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
+    html+=`<div style="background:var(--white);border:1px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px;color:var(--text)"><div style="font-size:32px;margin-bottom:10px">📈</div><div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text)">Nenhum investimento cadastrado.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
   } else {
     html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:12px;margin-bottom:30px">`;
     invs.forEach((inv)=>{
@@ -2306,10 +2306,10 @@ async function pContasFixas(){
     + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="handleNewContaFixaBtn()">+ Nova Conta Fixa</button></div>';
   
   if (!contas.length) {
-    html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+    html += '<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">📑</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhuma conta fixa cadastrada.</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre suas contas recorrentes e não perca nenhum vencimento.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Nenhuma conta fixa cadastrada.</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre suas contas recorrentes e não perca nenhum vencimento.</div>'
       + '<button class="btn-primary" onclick="handleNewContaFixaBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeira Conta</button>'
       + '</div>';
   } else {
@@ -2497,10 +2497,10 @@ async function pDesafios(){
     + '<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn-primary" onclick="handleNewDesafioBtn()">+ Novo Desafio</button></div>';
 
   if (!challenges.length) {
-    html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+    html += '<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">🏆</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhum desafio criado.</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie desafios financeiros pessoais para economizar dinheiro, reduzir custos ou atingir metas rápidas.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Nenhum desafio criado.</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie desafios financeiros pessoais para economizar dinheiro, reduzir custos ou atingir metas rápidas.</div>'
       + '<button class="btn-primary" onclick="handleNewDesafioBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeiro Desafio</button>'
       + '</div>';
   } else {
@@ -2749,10 +2749,10 @@ async function pEvolucao(){
   if (!transactions.length) {
     var html = renderPremiumHeader('Evolução')
       + '<div class="premium-body">'
-      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">📈</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Evolução Financeira</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Adicione receitas e despesas para visualizar sua evolução financeira.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Evolução Financeira</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Adicione receitas e despesas para visualizar sua evolução financeira.</div>'
       + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Ir para Transações</button>'
       + '</div>'
       + '</div>';
@@ -3043,10 +3043,10 @@ async function pPlanejamento(){
   if (!all.length) {
     var html = renderPremiumHeader('Planejamento')
       + '<div class="premium-body">'
-      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">🎯</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Planejamento Financeiro</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre movimentações para iniciar seu planejamento.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Planejamento Financeiro</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre movimentações para iniciar seu planejamento.</div>'
       + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Ir para Transações</button>'
       + '</div>'
       + '</div>';
@@ -3125,10 +3125,10 @@ async function pMesAtual(){
   if (!mesAll.length) {
     var html = renderPremiumHeader('Mês Atual')
       + '<div class="premium-body">'
-      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="background:var(--white);border:1px dashed var(--border);border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">📅</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Mês Atual</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Sem dados suficientes para gerar projeções.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">Mês Atual</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Sem dados suficientes para gerar projeções.</div>'
       + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Adicionar Transação</button>'
       + '</div>'
       + '</div>';
