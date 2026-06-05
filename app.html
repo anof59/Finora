@@ -283,6 +283,12 @@ tr:last-child td{border-bottom:none}
   border-radius: 50%;
   border: 1.5px solid #ffffff;
 }
+@media(max-width:576px) {
+  .menu-toggle-btn, .notification-btn {
+    display: none !important;
+  }
+}
+
 
 .overlapping-cards-grid {
   display: grid;
@@ -883,7 +889,7 @@ function renderPremiumHeader(title) {
     + '<div class="premium-header-content">'
     + '<div class="premium-header-left">'
     + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
-    + '<button class="header-btn" onclick="toggleSidebar()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>'
+    + '<button class="header-btn menu-toggle-btn" onclick="toggleSidebar()"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>'
     + '<span style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">' + title + '</span>'
     + '</div>'
     + '<div style="display:flex;align-items:center;gap:6px;opacity:0.85;margin-bottom:12px">'
