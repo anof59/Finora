@@ -1559,7 +1559,7 @@ async function pMetas(){
   if(!metas.length){
     html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">
       <div style="font-size:56px;margin-bottom:16px">🎯</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhuma meta criada ainda</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhuma meta criada ainda.</div>
       <div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie objetivos financeiros e acompanhe seu progresso real. Defina valores e prazos para se manter focado.</div>
       <button class="btn-primary" onclick="handleNewMetaBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">Criar minha primeira meta</button>
     </div>`;
@@ -1792,6 +1792,8 @@ async function saveAddValorMeta(id){
 async function pInv(){
   var invs = [];
   var perfil = 'Moderado';
+  var allTx = [];
+  var goals = [];
   try {
     var r = await sb.from('investments').select('*').eq('user_id', currentUser.id);
     invs = r.data || [];
@@ -1800,6 +1802,12 @@ async function pInv(){
     if (rp.data && rp.data.investor_profile) {
       perfil = rp.data.investor_profile;
     }
+
+    var rTx = await sb.from('transactions').select('*').eq('user_id', currentUser.id);
+    allTx = rTx.data || [];
+
+    var rGoals = await sb.from('goals').select('*').eq('user_id', currentUser.id);
+    goals = rGoals.data || [];
   } catch(e) {
     console.error(e);
   }
@@ -1809,8 +1817,68 @@ async function pInv(){
   var patrimonyAtual = total + lucroPrej;
   var rentabilidade = total > 0 ? (lucroPrej / total) * 100 : 0;
   
-  var sobrou = 0;
-  try{var r=await sb.from('transactions').select('amount,type').eq('user_id',currentUser.id);var all=r.data||[];sobrou=Math.max(0,all.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0)-all.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount),0));}catch(e){}
+  var sobrou = Math.max(0, allTx.filter(t=>isIncome(t.type)).reduce((s,t)=>s+parseFloat(t.amount || 0),0) - allTx.filter(t=>isExpense(t.type)).reduce((s,t)=>s+parseFloat(t.amount || 0),0));
+
+  // Chaves e labels dos últimos 6 meses (fim com o mês atual)
+  var monthsLabels = [];
+  var monthsKeys = [];
+  var now = new Date();
+  for (var i = 5; i >= 0; i--) {
+    var temp = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var label = temp.toLocaleDateString('pt-BR', { month: 'short' });
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    monthsLabels.push(label);
+    
+    var year = temp.getFullYear();
+    var month = String(temp.getMonth() + 1).padStart(2, '0');
+    monthsKeys.push(year + '-' + month);
+  }
+
+  // Saldo cumulativo de transações por mês
+  var monthlyCumulativeBalance = Array(6).fill(0);
+  for (var m = 0; m < 6; m++) {
+    var keyLimit = monthsKeys[m];
+    var bal = 0;
+    allTx.forEach(function(t){
+      var tKey = String(t.date || '').substring(0, 7);
+      if (tKey <= keyLimit) {
+        if (isIncome(t.type)) bal += parseFloat(t.amount || 0);
+        else bal -= parseFloat(t.amount || 0);
+      }
+    });
+    monthlyCumulativeBalance[m] = bal;
+  }
+
+  // Investimentos e Metas acumulados por mês
+  var monthlyCumulativeInvested = Array(6).fill(0);
+  var monthlyCumulativeGoals = Array(6).fill(0);
+
+  for (var m = 0; m < 6; m++) {
+    var keyLimit = monthsKeys[m];
+    
+    var invVal = 0;
+    invs.forEach(function(i){
+      var iKey = String(i.created_at || '').substring(0, 7) || '0000-00';
+      if (iKey <= keyLimit) {
+        invVal += parseFloat(i.current_value || i.value || 0);
+      }
+    });
+    monthlyCumulativeInvested[m] = invVal;
+
+    var goalVal = 0;
+    goals.forEach(function(g){
+      var gKey = String(g.created_at || '').substring(0, 7) || '0000-00';
+      if (gKey <= keyLimit) {
+        goalVal += parseFloat(g.saved_amount || 0);
+      }
+    });
+    monthlyCumulativeGoals[m] = goalVal;
+  }
+
+  var monthlyNetWorth = Array(6).fill(0);
+  for (var m = 0; m < 6; m++) {
+    monthlyNetWorth[m] = monthlyCumulativeBalance[m] + monthlyCumulativeInvested[m] + monthlyCumulativeGoals[m];
+  }
 
   var cores={'Renda Fixa':'#16a34a','Ações':'#1a6fc4','Criptomoeda':'#d97706','FII':'#7c3aed','Outro':'#6b7280'};
   var icones={'Renda Fixa':'🏦','Ações':'📈','FII':'🏢','Criptomoeda':'₿','Outro':'💼'};
@@ -1883,7 +1951,7 @@ async function pInv(){
   </h2>`;
 
   if(!invs.length){
-    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px"><div style="font-size:32px;margin-bottom:10px">📈</div><div style="font-size:14px;font-weight:700;margin-bottom:16px">Você ainda não possui investimentos cadastrados.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
+    html+=`<div style="background:#fff;border:1px dashed #d1d5db;border-radius:12px;padding:40px 20px;text-align:center;margin-bottom:30px"><div style="font-size:32px;margin-bottom:10px">📈</div><div style="font-size:14px;font-weight:700;margin-bottom:16px">Nenhum investimento cadastrado.</div><button class="btn-primary" onclick="openInvModal()">Começar a Investir</button></div>`;
   } else {
     html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px, 1fr));gap:12px;margin-bottom:30px">`;
     invs.forEach((inv)=>{
@@ -1960,10 +2028,8 @@ async function pInv(){
     // Chart 1: Resumo Geral
     var ctxRes = document.getElementById('c-resumo');
     if(ctxRes){
-      var base = patrimonyAtual || 1000;
-      var dRes = [base*0.85, base*0.88, base*0.91, base*0.95, base*0.98, base];
-      allCharts.push(new Chart(ctxRes,{type:'line',data:{labels:['Mês -5','Mês -4','Mês -3','Mês -2','Mês -1','Hoje'],datasets:[
-        {label:'Evolução (Estimativa)',data:dRes,borderColor:'#1a6fc4',backgroundColor:'rgba(26, 111, 196, 0.15)',fill:true,tension:0.3,borderWidth:3,pointRadius:4,pointBackgroundColor:'#fff'}
+      allCharts.push(new Chart(ctxRes,{type:'line',data:{labels:monthsLabels,datasets:[
+        {label:'Patrimônio Líquido',data:monthlyNetWorth,borderColor:'#1a6fc4',backgroundColor:'rgba(26, 111, 196, 0.15)',fill:true,tension:0.3,borderWidth:3,pointRadius:4,pointBackgroundColor:'#fff'}
       ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f1f2f5'}}}}}));
     }
     calcSimulacaoV2();
@@ -2242,8 +2308,8 @@ async function pContasFixas(){
   if (!contas.length) {
     html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">📑</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Tudo organizado!</div>'
-      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Você ainda não possui contas fixas cadastradas. Cadastre suas contas recorrentes e não perca nenhum vencimento.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhuma conta fixa cadastrada.</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre suas contas recorrentes e não perca nenhum vencimento.</div>'
       + '<button class="btn-primary" onclick="handleNewContaFixaBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeira Conta</button>'
       + '</div>';
   } else {
@@ -2433,7 +2499,7 @@ async function pDesafios(){
   if (!challenges.length) {
     html += '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
       + '<div style="font-size:56px;margin-bottom:16px">🏆</div>'
-      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhum desafio criado ainda.</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Nenhum desafio criado.</div>'
       + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Crie desafios financeiros pessoais para economizar dinheiro, reduzir custos ou atingir metas rápidas.</div>'
       + '<button class="btn-primary" onclick="handleNewDesafioBtn()" style="padding:12px 24px;font-size:14px;border-radius:30px">+ Criar Primeiro Desafio</button>'
       + '</div>';
@@ -2974,6 +3040,20 @@ async function pPlanejamento(){
   var saldo=inc-exp;
   var d=planLoad();
 
+  if (!all.length) {
+    var html = renderPremiumHeader('Planejamento')
+      + '<div class="premium-body">'
+      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="font-size:56px;margin-bottom:16px">🎯</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Planejamento Financeiro</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Cadastre movimentações para iniciar seu planejamento.</div>'
+      + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Ir para Transações</button>'
+      + '</div>'
+      + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+    return;
+  }
+
   var regras={
     '50-30-20':{label:'50/30/20',desc:'50% necessidades · 30% desejos · 20% poupança',cor:'#1a6fc4',dist:[50,30,20]},
     '70-20-10':{label:'70/20/10',desc:'70% gastos · 20% poupança · 10% investimento',cor:'#16a34a',dist:[70,20,10]},
@@ -3041,6 +3121,20 @@ async function pMesAtual(){
   var now=new Date();
   var ym=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
   var mesAll=all.filter(function(t){return String(t.date||'').startsWith(ym);});
+
+  if (!mesAll.length) {
+    var html = renderPremiumHeader('Mês Atual')
+      + '<div class="premium-body">'
+      + '<div style="background:#fff;border:1px dashed #d1d5db;border-radius:16px;padding:48px 20px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);margin-bottom:24px">'
+      + '<div style="font-size:56px;margin-bottom:16px">📅</div>'
+      + '<div style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0d1b2e">Mês Atual</div>'
+      + '<div style="font-size:13px;color:#6b7280;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">Sem dados suficientes para gerar projeções.</div>'
+      + '<button class="btn-primary" onclick="navigate(\'transacoes\')" style="padding:12px 24px;font-size:14px;border-radius:30px">Adicionar Transação</button>'
+      + '</div>'
+      + '</div>';
+    document.getElementById('main-content').innerHTML = html;
+    return;
+  }
   var incMes=mesAll.filter(function(t){return isIncome(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
   var expMes=mesAll.filter(function(t){return isExpense(t.type);}).reduce(function(s,t){return s+parseFloat(t.amount);},0);
   var saldoMes=incMes-expMes;
