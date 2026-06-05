@@ -40,3 +40,12 @@ RedirectMatch 404 /_backup_predeploy
     # /obrigado -> obrigado.html
     RewriteRule ^obrigado/?$ /obrigado.html [L]
 </IfModule>
+
+# Desativar cache para arquivos HTML para evitar problemas de PWA desatualizado
+<FilesMatch "\.(html|htm)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </IfModule>
+</FilesMatch>
