@@ -763,16 +763,16 @@ body[data-admin="true"] .content {
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span>Painel</span>
       </button>
-      <button class="mobile-nav-item" onclick="navigate('transacoes', this)">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-        <span>Extrato</span>
+      <button class="mobile-nav-item" onclick="navigate('contas-fixas', this)">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9m-4 13a2 2 0 01-4 0"/></svg>
+        <span>Contas</span>
       </button>
       <button class="mobile-nav-btn-floating" onclick="openTxModal()" title="Nova Transação">
         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       </button>
-      <button class="mobile-nav-item" onclick="navigate('planejamento', this)">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>
-        <span>Planos</span>
+      <button class="mobile-nav-item" onclick="navigate('desafios', this)">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10M5 4h2v5a7 7 0 0014 0V4h2a2 2 0 012 2v1a5 5 0 01-5 5h-1.26a8 8 0 01-11.48 0H6a5 5 0 01-5-5V6a2 2 0 012-2z"/></svg>
+        <span>Desafios</span>
       </button>
       <button class="mobile-nav-item" onclick="toggleSidebar()">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -925,8 +925,8 @@ function updateMobileActiveNav(pageId) {
   });
   var mapping = {
     dashboard: 0,
-    transacoes: 1,
-    planejamento: 3
+    'contas-fixas': 1,
+    desafios: 2
   };
   var idx = mapping[pageId];
   if (idx !== undefined) {
